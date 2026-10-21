@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Garnuszek">
+  <rect width="512" height="512" rx="112" fill="#276b43" />
+  <!-- steam -->
+  <path
+    d="M196 150c-18 22 18 38 0 62M256 130c-18 22 18 38 0 62M316 150c-18 22 18 38 0 62"
+    fill="none"
+    stroke="#fbf7f0"
+    stroke-width="16"
+    stroke-linecap="round"
+    opacity=".85"
+  />
+  <!-- lid -->
+  <rect x="136" y="232" width="240" height="26" rx="13" fill="#fbf7f0" />
+  <!-- pot body -->
+  <path d="M152 270h208v70c0 52-38 92-92 92h-24c-54 0-92-40-92-92z" fill="#fbf7f0" />
+  <!-- handles -->
+  <path
+    d="M152 292h-34c-18 0-18 40 0 40h38M360 292h34c18 0 18 40 0 40h-38"
+    fill="none"
+    stroke="#fbf7f0"
+    stroke-width="18"
+    stroke-linecap="round"
+  />
+</svg>

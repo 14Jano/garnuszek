@@ -1,0 +1,83 @@
+/*
+ * Design tokens and global base styles. Component styles live next to their
+ * components and only use the custom properties defined here.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  --color-bg: #fbf7f0;
+  --color-surface: #ffffff;
+  --color-border: #e6dfd1;
+  --color-text: #23302a;
+  --color-text-muted: #5b675f;
+  --color-primary: #276b43;
+  --color-on-primary: #ffffff;
+  --color-accent-soft: #fbe6d6;
+  --color-accent-strong: #8a3f12;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #151a17;
+    --color-surface: #1e2521;
+    --color-border: #2d3731;
+    --color-text: #e8efe9;
+    --color-text-muted: #a3b0a7;
+    --color-primary: #6cc08a;
+    --color-on-primary: #10281a;
+    --color-accent-soft: #3a2616;
+    --color-accent-strong: #f0b48a;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1,
+h2 {
+  line-height: 1.2;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+h2 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
