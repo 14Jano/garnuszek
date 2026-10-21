@@ -26,11 +26,15 @@ describe('database upgrade', () => {
     const { listFavoriteIds } = await import('./favoriteRepository');
     const { listPlanEntries } = await import('./planRepository');
     const { listCheckedIngredients } = await import('./shoppingRepository');
+    const { listSnackOverrides } = await import('./snackRepository');
 
     expect((await listMembers()).map((member) => member.name)).toEqual(['Anna']);
+    // Saved before snacks existed, so it has none.
+    expect((await listMembers())[0]?.snackKcal).toBe(0);
     expect(await listCustomRecipes()).toEqual([]);
     expect(await listFavoriteIds()).toEqual(new Set());
     expect(await listPlanEntries('2000-01-01', '2100-12-31')).toEqual([]);
     expect(await listCheckedIngredients('2026-10-21')).toEqual(new Set());
+    expect(await listSnackOverrides('2000-01-01', '2100-12-31')).toEqual([]);
   });
 });

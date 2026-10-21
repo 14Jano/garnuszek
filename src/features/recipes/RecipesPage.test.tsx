@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { UserEvent } from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { App } from '../../app/App';
@@ -104,6 +105,75 @@ describe('recipe list', () => {
     await user.click(screen.getByLabelText('Tylko ulubione'));
 
     expect(screen.getByText(`Pokazano 1 z ${TOTAL} przepisów.`)).toBeVisible();
+  });
+});
+
+describe('what can I cook with what I have', () => {
+  async function openFridge(user: UserEvent) {
+    await screen.findByText(`Pokazano ${TOTAL} z ${TOTAL} przepisów.`);
+    await user.click(screen.getByText('Co ugotować z tego, co mam'));
+  }
+
+  it('keeps only recipes that contain every chosen ingredient', async () => {
+    const user = userEvent.setup();
+    renderAt('/przepisy');
+    await openFridge(user);
+
+    await user.selectOptions(screen.getByLabelText('Dodaj składnik'), 'Jajko');
+    const withEgg = BUILTIN_RECIPES.filter((recipe) =>
+      recipe.ingredients.some(({ ingredientId }) => ingredientId === 'egg'),
+    ).length;
+    expect(screen.getByText(`Pokazano ${withEgg} z ${TOTAL} przepisów.`)).toBeVisible();
+
+    await user.selectOptions(screen.getByLabelText('Dodaj składnik'), 'Szpinak');
+    expect(screen.getByText(`Pokazano 1 z ${TOTAL} przepisów.`)).toBeVisible();
+    expect(
+      screen.getByRole('heading', { name: 'Jajecznica ze szpinakiem i pomidorem' }),
+    ).toBeVisible();
+  });
+
+  it('shows the chosen ingredients and lets the user take one back', async () => {
+    const user = userEvent.setup();
+    renderAt('/przepisy');
+    await openFridge(user);
+    await user.selectOptions(screen.getByLabelText('Dodaj składnik'), 'Jajko');
+    await user.selectOptions(screen.getByLabelText('Dodaj składnik'), 'Szpinak');
+
+    await user.click(screen.getByRole('button', { name: 'Usuń z listy: Szpinak' }));
+
+    expect(screen.queryByRole('button', { name: 'Usuń z listy: Szpinak' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Usuń z listy: Jajko' })).toBeVisible();
+    expect(screen.queryByText(`Pokazano 1 z ${TOTAL} przepisów.`)).not.toBeInTheDocument();
+  });
+
+  it('does not offer an ingredient that is already chosen', async () => {
+    const user = userEvent.setup();
+    renderAt('/przepisy');
+    await openFridge(user);
+    const picker = screen.getByLabelText('Dodaj składnik');
+    expect(within(picker).getByRole('option', { name: 'Jajko' })).toBeInTheDocument();
+
+    await user.selectOptions(picker, 'Jajko');
+
+    expect(within(picker).queryByRole('option', { name: 'Jajko' })).not.toBeInTheDocument();
+  });
+
+  it('combines with the other filters and is cleared with them', async () => {
+    const user = userEvent.setup();
+    renderAt('/przepisy');
+    await openFridge(user);
+    await user.selectOptions(screen.getByLabelText('Dodaj składnik'), 'Jajko');
+    await user.selectOptions(screen.getByLabelText('Posiłek'), 'Kolacje');
+
+    // Only the omelette is a dinner with eggs.
+    expect(screen.getByText(`Pokazano 1 z ${TOTAL} przepisów.`)).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Omlet z pieczarkami i serem' })).toBeVisible();
+
+    await user.type(screen.getByLabelText('Szukaj przepisu lub składnika'), 'zzzz');
+    await user.click(screen.getByRole('button', { name: 'Wyczyść filtry' }));
+
+    expect(screen.getByText(`Pokazano ${TOTAL} z ${TOTAL} przepisów.`)).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Usuń z listy: Jajko' })).not.toBeInTheDocument();
   });
 });
 

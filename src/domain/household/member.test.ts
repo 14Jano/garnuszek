@@ -6,6 +6,7 @@ const validDraft: MemberDraft = {
   age: 30,
   heightCm: 165,
   weightKg: 60,
+  snackKcal: 0,
 };
 
 describe('allowedGoals', () => {
@@ -40,12 +41,19 @@ describe('validateMember', () => {
   });
 
   it('reports every missing number', () => {
-    const empty = { name: 'Anna', age: Number.NaN, heightCm: Number.NaN, weightKg: Number.NaN };
+    const empty = {
+      name: 'Anna',
+      age: Number.NaN,
+      heightCm: Number.NaN,
+      weightKg: Number.NaN,
+      snackKcal: Number.NaN,
+    };
 
     expect(validateMember(empty)).toEqual({
       age: 'required',
       heightCm: 'required',
       weightKg: 'required',
+      snackKcal: 'required',
     });
   });
 
@@ -58,13 +66,20 @@ describe('validateMember', () => {
     ['weightKg', { weightKg: 9 }],
     ['weightKg', { weightKg: 301 }],
     ['weightKg', { weightKg: Number.POSITIVE_INFINITY }],
+    ['snackKcal', { snackKcal: -1 }],
+    ['snackKcal', { snackKcal: 1001 }],
+    ['snackKcal', { snackKcal: 150.5 }],
   ] as const)('rejects an out-of-range %s', (field, override) => {
     expect(validateMember({ ...validDraft, ...override })).toEqual({ [field]: 'invalid' });
   });
 
   it('accepts values on the boundaries', () => {
-    expect(validateMember({ name: 'A', age: 1, heightCm: 50, weightKg: 10 })).toEqual({});
-    expect(validateMember({ name: 'A', age: 120, heightCm: 250, weightKg: 300 })).toEqual({});
+    expect(validateMember({ name: 'A', age: 1, heightCm: 50, weightKg: 10, snackKcal: 0 })).toEqual(
+      {},
+    );
+    expect(
+      validateMember({ name: 'A', age: 120, heightCm: 250, weightKg: 300, snackKcal: 1000 }),
+    ).toEqual({});
   });
 
   it('accepts a fractional weight', () => {

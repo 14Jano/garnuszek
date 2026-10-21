@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../app/App';
 import { db } from '../../data/db';
 import { addMember } from '../../data/memberRepository';
-import { assignRecipe } from '../../data/planRepository';
+import { assignRecipe, setBatchDays } from '../../data/planRepository';
 import { listCheckedIngredients } from '../../data/shoppingRepository';
 
 function renderAt(path: string) {
@@ -23,7 +23,7 @@ const WEDNESDAY = '2026-10-21';
  * Together that is 11 different ingredients; onion, red pepper and olive oil
  * are needed by both dishes.
  */
-async function seedWeek() {
+async function seedHousehold(annaSnackKcal = 0) {
   const anna = await addMember({
     name: 'Anna',
     sex: 'female',
@@ -32,6 +32,7 @@ async function seedWeek() {
     weightKg: 60,
     activity: 'light',
     goal: 'maintain',
+    snackKcal: annaSnackKcal,
   });
   const bartek = await addMember({
     name: 'Bartek',
@@ -41,7 +42,13 @@ async function seedWeek() {
     weightKg: 80,
     activity: 'sedentary',
     goal: 'maintain',
+    snackKcal: 0,
   });
+  return { anna, bartek };
+}
+
+async function seedWeek(annaSnackKcal = 0) {
+  const { anna, bartek } = await seedHousehold(annaSnackKcal);
   const eaters = [anna.id, bartek.id];
   await assignRecipe(WEDNESDAY, 'lunch', 'chili-sin-carne', eaters);
   await assignRecipe(WEDNESDAY, 'dinner', 'salatka-grecka', eaters);
@@ -57,6 +64,7 @@ beforeEach(async () => {
   await db.customRecipes.clear();
   await db.favorites.clear();
   await db.shoppingChecks.clear();
+  await db.snackOverrides.clear();
 });
 
 afterEach(() => {
@@ -81,6 +89,7 @@ describe('shopping list without anything to buy', () => {
       weightKg: 60,
       activity: 'light',
       goal: 'maintain',
+      snackKcal: 0,
     });
     renderAt(`/zakupy/${WEDNESDAY}`);
 
@@ -112,6 +121,16 @@ describe('the week list', () => {
       section('Rośliny strączkowe').getByRole('checkbox', {
         name: 'Fasola czerwona z puszki (odsączona) 435 g',
       }),
+    ).toBeVisible();
+  });
+
+  it('buys less when a person keeps calories for snacks', async () => {
+    // Anna now eats 1.65 servings of the chili and 1.7 of the salad instead of 2 and 2.05.
+    await seedWeek(300);
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    expect(
+      await screen.findByRole('checkbox', { name: 'Fasola czerwona z puszki (odsączona) 400 g' }),
     ).toBeVisible();
   });
 
@@ -185,6 +204,32 @@ describe('the week list', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Lista zakupów' })).toBeVisible();
     expect(await screen.findByText('Kupione: 0 z 11')).toBeVisible();
+  });
+});
+
+describe('dishes cooked for several days', () => {
+  /** Chili cooked on Sunday 25 October for two days, so Monday 26 is leftovers. */
+  async function seedSundayBatch() {
+    const { anna, bartek } = await seedHousehold();
+    await assignRecipe('2026-10-25', 'lunch', 'chili-sin-carne', [anna.id, bartek.id]);
+    await setBatchDays('2026-10-25', 'lunch', 2);
+  }
+
+  it('is bought in the week it is cooked, even when it is eaten in the next one', async () => {
+    await seedSundayBatch();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    // Two days of 4.35 servings: 400 g of beans shared by 4 servings, times 8.7
+    expect(
+      await screen.findByRole('checkbox', { name: 'Fasola czerwona z puszki (odsączona) 870 g' }),
+    ).toBeVisible();
+  });
+
+  it('is not bought again in the week of the leftovers', async () => {
+    await seedSundayBatch();
+    renderAt('/zakupy/2026-10-27');
+
+    expect(await screen.findByText(/nie zaplanowano jeszcze posiłków/)).toBeVisible();
   });
 });
 

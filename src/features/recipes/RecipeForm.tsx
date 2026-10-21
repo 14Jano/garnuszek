@@ -1,7 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { INGREDIENT_CATALOG } from '../../content/catalog';
-import { INGREDIENTS } from '../../content/ingredients';
 import {
   MEAL_TYPES,
   RECIPE_LIMITS,
@@ -11,8 +10,8 @@ import {
 } from '../../domain/recipes/recipe';
 import type { MealType, NewRecipe, Recipe, RecipeErrors } from '../../domain/recipes/recipe';
 import type { FieldProblem } from '../../domain/validation';
-import { CATEGORY_LABELS, MEAL_TYPE_LABELS } from '../../content/labels';
-import { INGREDIENT_CATEGORIES } from '../../domain/recipes/ingredient';
+import { IngredientOptions } from '../../components/IngredientOptions';
+import { MEAL_TYPE_LABELS } from '../../content/labels';
 import { NutritionSummary } from './NutritionSummary';
 import './RecipeForm.css';
 
@@ -57,14 +56,6 @@ const GRAMS_MESSAGES: Record<FieldProblem, string> = {
   required: 'Podaj ilość.',
   invalid: `Podaj ilość w gramach, od ${RECIPE_LIMITS.grams.min} do ${RECIPE_LIMITS.grams.max}.`,
 };
-
-/** Ingredients grouped by food group, each group sorted alphabetically for the picker. */
-const INGREDIENT_GROUPS = INGREDIENT_CATEGORIES.map((category) => ({
-  category,
-  ingredients: INGREDIENTS.filter((ingredient) => ingredient.category === category).sort((a, b) =>
-    a.name.localeCompare(b.name, 'pl'),
-  ),
-})).filter((group) => group.ingredients.length > 0);
 
 interface RecipeFormProps {
   /** Present when editing an existing recipe. */
@@ -242,15 +233,7 @@ export function RecipeForm({ initialValues, submitLabel, onSubmit, onCancel }: R
                   }
                 >
                   <option value="">Wybierz składnik…</option>
-                  {INGREDIENT_GROUPS.map(({ category, ingredients }) => (
-                    <optgroup key={category} label={CATEGORY_LABELS[category]}>
-                      {ingredients.map((ingredient) => (
-                        <option key={ingredient.id} value={ingredient.id}>
-                          {ingredient.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
+                  <IngredientOptions />
                 </select>
                 <FieldError
                   id={`${formId}-ingredient-${index}-error`}

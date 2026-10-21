@@ -6,11 +6,13 @@ import type { IngredientCatalog } from '../recipes/ingredient';
 import { nutritionPerServing } from '../recipes/recipe';
 import type { MealType, Recipe, RecipeIngredient } from '../recipes/recipe';
 import type { PlanEntry } from './planEntry';
+import { USUAL_SNACKS, mealBudgetKcal } from './snacks';
+import type { SnackAllowance } from './snacks';
 
 /**
  * Share of the day's calories that each meal should provide. They add up to
- * one; a later snack allowance is subtracted from the daily target before
- * these shares are applied.
+ * one and apply to what is left of the daily target after the person's snack
+ * allowance has been set aside.
  */
 export const MEAL_SHARES: Record<MealType, number> = {
   breakfast: 0.3,
@@ -76,18 +78,21 @@ export interface PlannedMeal {
 
 /**
  * Sizes the meal for each person who eats it. Members the entry lists but who
- * no longer live in the household are ignored.
+ * no longer live in the household are ignored. The snack allowance of the day
+ * is set aside first, so a day with snacks gets smaller meals.
  */
 export function planMeal(
   entry: PlanEntry,
   recipe: Recipe,
   household: readonly Member[],
   catalog: IngredientCatalog,
+  snacks: SnackAllowance = USUAL_SNACKS,
 ): PlannedMeal {
   const portions = household
     .filter((member) => entry.memberIds.includes(member.id))
     .map((member) => {
-      const targetKcal = mealCalorieTarget(dailyCalorieTarget(member), entry.mealType);
+      const budget = mealBudgetKcal(dailyCalorieTarget(member), snacks(entry.date, member));
+      const targetKcal = mealCalorieTarget(budget, entry.mealType);
       return { member, targetKcal, ...portionForTarget(recipe, targetKcal, catalog) };
     });
 
@@ -109,12 +114,13 @@ export function planMeals(
   recipes: readonly Recipe[],
   household: readonly Member[],
   catalog: IngredientCatalog,
+  snacks: SnackAllowance = USUAL_SNACKS,
 ): PlannedMeal[] {
   const recipeById = new Map(recipes.map((recipe) => [recipe.id, recipe]));
 
   return entries.flatMap((entry) => {
     const recipe = recipeById.get(entry.recipeId);
-    return recipe ? [planMeal(entry, recipe, household, catalog)] : [];
+    return recipe ? [planMeal(entry, recipe, household, catalog, snacks)] : [];
   });
 }
 
@@ -130,7 +136,8 @@ export function dayTotals(meals: readonly PlannedMeal[]): Map<string, Nutrients>
   return totals;
 }
 
-function mergeIngredients(lines: readonly RecipeIngredient[]): RecipeIngredient[] {
+/** Adds up the weights of ingredients that appear more than once. */
+export function mergeIngredients(lines: readonly RecipeIngredient[]): RecipeIngredient[] {
   const grams = new Map<string, number>();
   for (const { ingredientId, grams: amount } of lines) {
     grams.set(ingredientId, (grams.get(ingredientId) ?? 0) + amount);

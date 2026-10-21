@@ -1,0 +1,46 @@
+.snack-section {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+}
+
+.snack-section h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}
+
+.snack-section__hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.snack-section__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.snack-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.snack-row label {
+  min-width: 4.5rem;
+}
+
+.snack-row__input {
+  width: 6.5rem;
+}
+
+.snack-row__unit {
+  color: var(--color-text-muted);
+}

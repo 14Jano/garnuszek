@@ -6,6 +6,8 @@ import type { FieldProblem } from '../validation';
 export interface Member extends BodyProfile {
   id: string;
   name: string;
+  /** Calories per day the person keeps for snacks, so meals are sized for the rest. */
+  snackKcal: number;
 }
 
 /** What the user fills in; the id is assigned when the member is stored. */
@@ -18,6 +20,7 @@ export const MEMBER_LIMITS = {
   age: { min: 1, max: 120 },
   heightCm: { min: 50, max: 250 },
   weightKg: { min: 10, max: 300 },
+  snackKcal: { min: 0, max: 1000 },
 } as const;
 
 /**
@@ -30,7 +33,7 @@ export function allowedGoals(age: number): readonly Goal[] {
   return age < ADULT_AGE ? ['maintain'] : ['lose', 'maintain', 'gain'];
 }
 
-export type MemberField = 'name' | 'age' | 'heightCm' | 'weightKg';
+export type MemberField = 'name' | 'age' | 'heightCm' | 'weightKg' | 'snackKcal';
 
 export type MemberErrors = Partial<Record<MemberField, FieldProblem>>;
 
@@ -40,6 +43,7 @@ export interface MemberDraft {
   age: number;
   heightCm: number;
   weightKg: number;
+  snackKcal: number;
 }
 
 export function validateMember(draft: MemberDraft): MemberErrors {
@@ -60,6 +64,9 @@ export function validateMember(draft: MemberDraft): MemberErrors {
 
   const weightKg = checkNumber(draft.weightKg, MEMBER_LIMITS.weightKg);
   if (weightKg) errors.weightKg = weightKg;
+
+  const snackKcal = checkNumber(draft.snackKcal, MEMBER_LIMITS.snackKcal, { integer: true });
+  if (snackKcal) errors.snackKcal = snackKcal;
 
   return errors;
 }

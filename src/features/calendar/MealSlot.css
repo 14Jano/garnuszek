@@ -52,6 +52,31 @@
   cursor: pointer;
 }
 
+.meal-slot__leftover {
+  margin: 0 0 0.5rem;
+  color: var(--color-text-muted);
+}
+
+.meal-slot__batch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.meal-slot__batch .input {
+  width: auto;
+  min-width: 7rem;
+}
+
+.meal-slot__hint {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
 .meal-slot__actions {
   display: flex;
   flex-wrap: wrap;

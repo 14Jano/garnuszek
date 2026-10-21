@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ROUTES, shoppingPath } from '../../app/navigation';
-import { removePlanEntry, setEaters } from '../../data/planRepository';
-import { formatDayHeading, isDateKey, todayKey, weekDays } from '../../domain/plan/dates';
+import { removePlanEntry, setBatchDays, setEaters } from '../../data/planRepository';
+import { setSnackOverride } from '../../data/snackRepository';
+import { MAX_BATCH_DAYS } from '../../domain/plan/batches';
+import { addDays, formatDayHeading, isDateKey, todayKey, weekDays } from '../../domain/plan/dates';
 import type { MealType } from '../../domain/recipes/recipe';
 import { useMembers } from '../../hooks/useMembers';
 import { usePlanEntries } from '../../hooks/usePlanEntries';
 import { useRecipeEntries } from '../../hooks/useRecipeEntries';
+import { useSnackOverrides } from '../../hooks/useSnackOverrides';
 import { DayPlan } from './DayPlan';
 import { WeekNavigation } from './WeekNavigation';
 import './CalendarPage.css';
@@ -17,10 +20,15 @@ export function CalendarPage() {
   const selected = date ?? today;
   // The hooks below must run on every render, so fall back to today for a bad address.
   const days = weekDays(isDateKey(selected) ? selected : today);
+  const firstDay = days[0] ?? today;
+  const lastDay = days[6] ?? today;
+  // A dish cooked on the last day of the week can be eaten for a few days after it.
+  const horizon = addDays(lastDay, MAX_BATCH_DAYS - 1);
 
   const household = useMembers();
   const recipes = useRecipeEntries();
-  const weekEntries = usePlanEntries(days[0] ?? today, days[6] ?? today);
+  const weekEntries = usePlanEntries(firstDay, horizon);
+  const snackOverrides = useSnackOverrides(firstDay, horizon);
   const [actionFailed, setActionFailed] = useState(false);
 
   if (!isDateKey(selected)) {
@@ -38,7 +46,12 @@ export function CalendarPage() {
   }
 
   function renderDay() {
-    if (household === undefined || recipes === undefined || weekEntries === undefined) {
+    if (
+      household === undefined ||
+      recipes === undefined ||
+      weekEntries === undefined ||
+      snackOverrides === undefined
+    ) {
       return <p>Wczytywanie…</p>;
     }
 
@@ -56,11 +69,16 @@ export function CalendarPage() {
         date={selected}
         household={household}
         recipes={recipes}
-        entries={weekEntries.filter((entry) => entry.date === selected)}
+        entries={weekEntries}
+        snackOverrides={snackOverrides}
         onSetEaters={(mealType: MealType, memberIds: string[]) =>
           void run(() => setEaters(selected, mealType, memberIds))
         }
         onRemove={(mealType: MealType) => void run(() => removePlanEntry(selected, mealType))}
+        onSetBatchDays={(mealType: MealType, batchDays: number) =>
+          void run(() => setBatchDays(selected, mealType, batchDays))
+        }
+        onSetSnacks={(memberId, kcal) => void run(() => setSnackOverride(selected, memberId, kcal))}
       />
     );
   }
@@ -72,7 +90,9 @@ export function CalendarPage() {
       <WeekNavigation
         selected={selected}
         today={today}
-        plannedDays={new Set(weekEntries?.map((entry) => entry.date))}
+        plannedDays={
+          new Set(weekEntries?.filter((entry) => entry.date <= lastDay).map((entry) => entry.date))
+        }
       />
 
       <p className="calendar-shopping-link">

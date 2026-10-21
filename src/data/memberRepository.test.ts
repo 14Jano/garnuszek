@@ -12,6 +12,7 @@ function newMember(overrides: Partial<NewMember> = {}): NewMember {
     weightKg: 60,
     activity: 'light',
     goal: 'maintain',
+    snackKcal: 0,
     ...overrides,
   };
 }

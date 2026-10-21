@@ -6,6 +6,7 @@ import { NO_FILTER, filterRecipes } from '../../domain/recipes/filterRecipes';
 import type { RecipeFilter } from '../../domain/recipes/filterRecipes';
 import { DIETS, MEAL_TYPES } from '../../domain/recipes/recipe';
 import { DIET_LABELS, MEAL_TYPE_PLURAL_LABELS } from '../../content/labels';
+import { FridgeFilter } from './FridgeFilter';
 import { RecipeCard } from './RecipeCard';
 import { useRecipeEntries } from '../../hooks/useRecipeEntries';
 import './RecipesPage.css';
@@ -104,6 +105,11 @@ export function RecipesPage() {
           />
           Tylko ulubione
         </label>
+
+        <FridgeFilter
+          selected={filter.ingredientIds}
+          onChange={(ingredientIds) => setFilter({ ...filter, ingredientIds })}
+        />
       </form>
 
       {entries === undefined ? (

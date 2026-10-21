@@ -12,6 +12,7 @@ import {
   portionForTarget,
 } from './portions';
 import type { PlanEntry } from './planEntry';
+import { snackAllowance } from './snacks';
 
 const catalog = createCatalog([
   {
@@ -49,6 +50,7 @@ const adam: Member = {
   weightKg: 80,
   activity: 'sedentary',
   goal: 'maintain',
+  snackKcal: 0,
 };
 
 // Needs 1584 kcal a day, so 633.6 kcal for lunch.
@@ -61,6 +63,7 @@ const basia: Member = {
   weightKg: 60,
   activity: 'sedentary',
   goal: 'maintain',
+  snackKcal: 0,
 };
 
 const lunch: PlanEntry = {
@@ -159,6 +162,45 @@ describe('planMeal', () => {
     expect(meal.portions).toEqual([]);
     expect(meal.totalServings).toBe(0);
     expect(meal.ingredients).toEqual([]);
+  });
+});
+
+describe('planMeal with snacks', () => {
+  // Without snacks Adam gets 854.4 kcal for lunch, which is 1.7 servings.
+
+  it('sizes the meal for what is left after the snack allowance', () => {
+    // (2136 - 300) * 0.4 = 734.4 kcal, which is 1.4688 servings, rounded to 1.45
+    const meal = planMeal(lunch, recipe, [adam], catalog, () => 300);
+
+    expect(meal.portions[0]?.servings).toBe(1.45);
+    expect(meal.portions[0]?.targetKcal).toBeCloseTo(734.4);
+  });
+
+  it('uses the amount from the profile unless told otherwise', () => {
+    const snacker = { ...adam, snackKcal: 300 };
+
+    expect(planMeal(lunch, recipe, [snacker], catalog).portions[0]?.servings).toBe(1.45);
+  });
+
+  it('lets one day have its own amount', () => {
+    const allowance = snackAllowance([{ date: lunch.date, memberId: 'adam', kcal: 300 }]);
+    const otherDay: PlanEntry = { ...lunch, date: '2026-10-22' };
+
+    expect(planMeal(lunch, recipe, [adam], catalog, allowance).portions[0]?.servings).toBe(1.45);
+    expect(planMeal(otherDay, recipe, [adam], catalog, allowance).portions[0]?.servings).toBe(1.7);
+  });
+
+  it('never gives more than half of the day to snacks', () => {
+    // Only 1068 kcal are left for meals: 0.4 * 1068 = 427.2 kcal, which is 0.8544 servings
+    const meal = planMeal(lunch, recipe, [adam], catalog, () => 5000);
+
+    expect(meal.portions[0]?.servings).toBe(0.85);
+  });
+
+  it('passes the allowance on when sizing a whole plan', () => {
+    const meals = planMeals([lunch], [recipe], [adam], catalog, () => 300);
+
+    expect(meals[0]?.portions[0]?.servings).toBe(1.45);
   });
 });
 

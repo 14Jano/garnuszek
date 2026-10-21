@@ -3,10 +3,15 @@ import type { EntityTable } from 'dexie';
 import type { Member } from '../domain/household/member';
 import type { DateKey } from '../domain/plan/dates';
 import type { PlanEntry } from '../domain/plan/planEntry';
+import type { SnackOverride } from '../domain/plan/snacks';
 import type { Recipe } from '../domain/recipes/recipe';
 
-/** A stored member plus bookkeeping that the domain does not need to know about. */
-export interface MemberRecord extends Member {
+/**
+ * A stored member plus bookkeeping that the domain does not need to know about.
+ * Members saved before snacks existed have no snack amount.
+ */
+export interface MemberRecord extends Omit<Member, 'snackKcal'> {
+  snackKcal?: number;
   createdAt: number;
 }
 
@@ -34,6 +39,12 @@ export interface ShoppingCheckRecord {
   ingredientId: string;
 }
 
+/** The snack amount one person set for one particular day. */
+export interface SnackOverrideRecord extends SnackOverride {
+  /** `date_memberId`, so a person has at most one amount per day. */
+  key: string;
+}
+
 /**
  * The app's local database. Everything lives in the browser's IndexedDB; there
  * is no server. Change the schema by adding a new `version()` with an upgrade
@@ -46,6 +57,7 @@ class GarnuszekDatabase extends Dexie {
   favorites!: EntityTable<FavoriteRecord, 'recipeId'>;
   planEntries!: EntityTable<PlanEntryRecord, 'key'>;
   shoppingChecks!: EntityTable<ShoppingCheckRecord, 'key'>;
+  snackOverrides!: EntityTable<SnackOverrideRecord, 'key'>;
 
   constructor() {
     super('garnuszek');
@@ -76,6 +88,17 @@ class GarnuszekDatabase extends Dexie {
       favorites: 'recipeId',
       planEntries: 'key, date',
       shoppingChecks: 'key, weekStart',
+    });
+
+    // Adds snack amounts for single days, and an index that finds the meals of a
+    // dish cooked for several days.
+    this.version(5).stores({
+      members: 'id, createdAt',
+      customRecipes: 'id, createdAt',
+      favorites: 'recipeId',
+      planEntries: 'key, date, batchId',
+      shoppingChecks: 'key, weekStart',
+      snackOverrides: 'key, date',
     });
   }
 }

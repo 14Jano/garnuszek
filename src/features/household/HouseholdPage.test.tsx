@@ -15,6 +15,7 @@ const anna: NewMember = {
   weightKg: 60,
   activity: 'light',
   goal: 'maintain',
+  snackKcal: 0,
 };
 
 beforeEach(async () => {
@@ -80,6 +81,46 @@ describe('HouseholdPage', () => {
     expect(screen.queryByText('Wpisz imię lub pseudonim.')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Imię')).not.toHaveAttribute('aria-invalid');
     expect(screen.getByText('Podaj wiek.')).toBeVisible();
+  });
+
+  it('saves how many calories go to snacks and shows it on the card', async () => {
+    const user = userEvent.setup();
+    render(<HouseholdPage />);
+
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '60' });
+    const snacks = screen.getByLabelText('Przekąski (kcal dziennie)');
+    expect(snacks).toHaveValue(0);
+    await user.clear(snacks);
+    await user.type(snacks, '200');
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+
+    expect(await screen.findByText('Na przekąski: 200 kcal dziennie.')).toBeVisible();
+    expect((await listMembers())[0]?.snackKcal).toBe(200);
+  });
+
+  it('does not mention snacks on the card when there are none', async () => {
+    await addMember(anna);
+    render(<HouseholdPage />);
+
+    await screen.findByRole('heading', { name: 'Anna' });
+
+    expect(screen.queryByText(/Na przekąski/)).not.toBeInTheDocument();
+  });
+
+  it('asks for a sensible snack amount', async () => {
+    const user = userEvent.setup();
+    render(<HouseholdPage />);
+
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    const snacks = screen.getByLabelText('Przekąski (kcal dziennie)');
+    await user.clear(snacks);
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    expect(screen.getByText(/Podaj kalorie na przekąski/)).toBeVisible();
+
+    await user.type(snacks, '5000');
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    expect(screen.getByText('Podaj kalorie w pełnych liczbach, od 0 do 1000.')).toBeVisible();
   });
 
   it('locks the goal to keeping weight for children', async () => {

@@ -7,10 +7,11 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
-> **Status: wczesny etap (v0.5).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
-> domowników z dziennym zapotrzebowaniem kalorycznym, przepisy (32 dania, filtry, ulubione i własne
-> przepisy), kalendarz posiłków z porcjami liczonymi dla każdego domownika oraz lista zakupów
-> z odhaczaniem i udostępnianiem. Reszta jest jeszcze w budowie. Zobacz [plan prac](#plan-prac).
+> **Status: wczesny etap (v0.6).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
+> domowników z dziennym zapotrzebowaniem kalorycznym i budżetem na przekąski, przepisy (32 dania,
+> filtry, wyszukiwanie po składnikach z lodówki, ulubione i własne przepisy), kalendarz posiłków
+> z porcjami liczonymi dla każdego domownika i gotowaniem na zapas oraz lista zakupów z odhaczaniem
+> i udostępnianiem. Reszta jest jeszcze w budowie. Zobacz [plan prac](#plan-prac).
 
 ## Dlaczego Garnuszek
 
@@ -21,25 +22,25 @@ wszystkich.
 
 ## Funkcje
 
-| Funkcja                                                    | Status    |
-| ---------------------------------------------------------- | --------- |
-| Szkielet aplikacji, nawigacja, instalacja jako PWA         | Gotowe    |
-| Kalkulator dziennego zapotrzebowania kalorycznego (logika) | Gotowe    |
-| Domownicy: profil, cel, dzienne zapotrzebowanie            | Gotowe    |
-| Lokalny zapis danych w przeglądarce (IndexedDB)            | Gotowe    |
-| Przepisy: 32 dania z kaloriami i makroskładnikami          | Gotowe    |
-| Filtry po posiłku i diecie, wyszukiwanie, ulubione         | Gotowe    |
-| Własne przepisy z automatycznym liczeniem kalorii          | Gotowe    |
-| Kalendarz posiłków: widok tygodnia i dnia                  | Gotowe    |
-| Porcje liczone osobno dla każdego domownika                | Gotowe    |
-| Wymiana dania, wybór osób jedzących, podsumowanie dnia     | Gotowe    |
-| Lista zakupów na tydzień, zsumowana i podzielona na działy | Gotowe    |
-| Odhaczanie w sklepie, kopiowanie i wysyłka listy           | Gotowe    |
-| „Co ugotować z tego, co mam”                               | Planowane |
-| Gotowanie na zapas (jedno danie na kilka dni)              | Planowane |
-| Budżet kalorii na przekąski                                | Planowane |
-| Kopia zapasowa: eksport i import do pliku                  | Planowane |
-| Waga i pomiary z wykresem postępu                          | Planowane |
+| Funkcja                                                       | Status    |
+| ------------------------------------------------------------- | --------- |
+| Szkielet aplikacji, nawigacja, instalacja jako PWA            | Gotowe    |
+| Kalkulator dziennego zapotrzebowania kalorycznego (logika)    | Gotowe    |
+| Domownicy: profil, cel, dzienne zapotrzebowanie               | Gotowe    |
+| Lokalny zapis danych w przeglądarce (IndexedDB)               | Gotowe    |
+| Przepisy: 32 dania z kaloriami i makroskładnikami             | Gotowe    |
+| Filtry po posiłku i diecie, wyszukiwanie, ulubione            | Gotowe    |
+| Własne przepisy z automatycznym liczeniem kalorii             | Gotowe    |
+| Kalendarz posiłków: widok tygodnia i dnia                     | Gotowe    |
+| Porcje liczone osobno dla każdego domownika                   | Gotowe    |
+| Wymiana dania, wybór osób jedzących, podsumowanie dnia        | Gotowe    |
+| Lista zakupów na tydzień, zsumowana i podzielona na działy    | Gotowe    |
+| Odhaczanie w sklepie, kopiowanie i wysyłka listy              | Gotowe    |
+| „Co ugotować z tego, co mam”: dania ze wszystkimi składnikami | Gotowe    |
+| Gotowanie na zapas: jedno danie na 2–4 dni, z cofnięciem      | Gotowe    |
+| Budżet kalorii na przekąski, także zmieniany na jeden dzień   | Gotowe    |
+| Kopia zapasowa: eksport i import do pliku                     | Planowane |
+| Waga i pomiary z wykresem postępu                             | Planowane |
 
 ## Technologie
 
@@ -102,7 +103,8 @@ składników i przepisów oraz sposób ich dodawania [docs/DATA.md](docs/DATA.md
 ## Dane i prywatność
 
 Garnuszek nie wysyła nic na żaden serwer i nie wymaga konta. Domownicy, własne przepisy, ulubione
-i plan posiłków, a także to, co odhaczyłeś na liście zakupów (docelowo także pomiary), są
+i plan posiłków, a także budżet na przekąski i to, co odhaczyłeś na liście zakupów (docelowo także
+pomiary), są
 zapisywane w bazie IndexedDB w przeglądarce na Twoim urządzeniu. Lista zakupów wychodzi poza
 urządzenie tylko wtedy, gdy sam ją skopiujesz albo klikniesz „Udostępnij listę” lub
 „Wyślij przez WhatsApp”. Wbudowane przepisy są częścią aplikacji i nie są zapisywane osobno.
@@ -137,7 +139,7 @@ Repozytorium zawiera gotowy workflow `.github/workflows/deploy.yml`. Po wypchni�
 - [x] **0.3** Przepisy: baza dań, własne przepisy, kalorie i makroskładniki
 - [x] **0.4** Kalendarz posiłków, wymiana dań, przeliczanie porcji
 - [x] **0.5** Lista zakupów
-- [ ] **0.6** Wyszukiwanie po składnikach, gotowanie na zapas, budżet na przekąski
+- [x] **0.6** Wyszukiwanie po składnikach, gotowanie na zapas, budżet na przekąski
 - [ ] **0.7** Kopia zapasowa (eksport i import)
 - [ ] **0.8** Waga i pomiary
 - [ ] **1.0** Dostępność, dopracowanie i stabilizacja

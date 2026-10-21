@@ -84,12 +84,38 @@ describe('filterRecipes', () => {
     ]);
   });
 
+  it('finds recipes that contain an ingredient the user has', () => {
+    expect(filterRecipes(entries, { ...NO_FILTER, ingredientIds: ['salmon'] }, catalog)).toEqual([
+      baked,
+    ]);
+  });
+
+  it('needs every ingredient the user has, not just one of them', () => {
+    const both = filterRecipes(entries, { ...NO_FILTER, ingredientIds: ['oats', 'milk'] }, catalog);
+    const oneMissing = filterRecipes(
+      entries,
+      { ...NO_FILTER, ingredientIds: ['oats', 'salmon'] },
+      catalog,
+    );
+
+    expect(both).toEqual([porridge]);
+    expect(oneMissing).toEqual([]);
+  });
+
+  it('combines the ingredients with the other filters', () => {
+    const filter = { ...NO_FILTER, ingredientIds: ['chickpeas'], mealType: 'dinner' as const };
+
+    expect(filterRecipes(entries, filter, catalog)).toEqual([curry]);
+    expect(filterRecipes(entries, { ...filter, mealType: 'lunch' }, catalog)).toEqual([]);
+  });
+
   it('combines all conditions', () => {
     const filter = {
       query: 'mleko',
       mealType: 'breakfast' as const,
       diet: 'vegetarian' as const,
       favoritesOnly: true,
+      ingredientIds: ['milk'],
     };
 
     expect(filterRecipes(entries, filter, catalog)).toEqual([porridge]);

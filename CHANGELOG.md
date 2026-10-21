@@ -5,6 +5,32 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-21
+
+### Dodano
+
+- „Co ugotować z tego, co mam”: wybierasz składniki, które masz w domu, a lista przepisów
+  pokazuje dania zawierające wszystkie z nich. Filtr łączy się z wyszukiwaniem, posiłkiem, dietą
+  i ulubionymi.
+- Budżet kalorii na przekąski: pole w profilu domownika (0–1000 kcal dziennie) oraz możliwość
+  zmiany go na jeden dzień w kalendarzu, z przyciskiem „Przywróć domyślne”. Porcje posiłków
+  zmniejszają się o tyle, ile idzie na przekąski, a podsumowanie dnia je uwzględnia. Przekąski nie
+  zajmą więcej niż połowy dziennego celu.
+- Gotowanie na zapas: jedno danie na 2–4 dni (pole „Gotuj na”). Kolejne dni stają się resztkami,
+  z własną listą osób i porcji. Dania zaplanowane na te dni przesuwają się na później, a powrót do
+  jednego dnia przywraca plan sprzed wydłużenia.
+- Przy daniu ugotowanym na zapas kalendarz pokazuje, ile ugotować dla wszystkich dni razem, i do
+  kiedy starczy resztek. W dniach z resztkami jest odnośnik do dnia gotowania.
+- Lista zakupów kupuje składniki całego dania w tygodniu, w którym jest gotowane, także gdy resztki
+  wypadają w następnym tygodniu.
+- Wersja 5 schematu bazy (tabela `snackOverrides` i indeks `batchId`).
+
+### Zmieniono
+
+- Wybór składnika wydzielono do wspólnego komponentu `IngredientOptions`.
+- Wymiana dania i usunięcie dotyczą całego dania ugotowanego na kilka dni. Samych resztek nie
+  można wymienić ani usunąć, trzeba to zrobić w dniu gotowania.
+
 ## [0.5.0] - 2026-10-21
 
 ### Dodano

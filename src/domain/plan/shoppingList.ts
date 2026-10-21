@@ -1,6 +1,9 @@
 import { roundGrams } from '../recipes/amounts';
 import { INGREDIENT_CATEGORIES, requireIngredient } from '../recipes/ingredient';
 import type { IngredientCatalog, IngredientCategory } from '../recipes/ingredient';
+import type { DateKey } from './dates';
+import { isLeftover } from './planEntry';
+import type { PlanEntry } from './planEntry';
 import type { PlannedMeal } from './portions';
 
 export interface ShoppingItem {
@@ -14,6 +17,33 @@ export interface ShoppingItem {
 export interface ShoppingSection {
   category: IngredientCategory;
   items: ShoppingItem[];
+}
+
+/**
+ * The planned meals whose ingredients are bought for the week from `firstDay`
+ * to `lastDay`. That is every meal eaten in the week, except leftover days of a
+ * dish that was cooked (and bought) earlier, plus the leftover days after the
+ * week of a dish that is cooked within it, because it is bought all at once.
+ */
+export function entriesToBuyFor(
+  entries: readonly PlanEntry[],
+  firstDay: DateKey,
+  lastDay: DateKey,
+): PlanEntry[] {
+  const inWeek = (entry: PlanEntry) => entry.date >= firstDay && entry.date <= lastDay;
+
+  const cookedInWeek = new Set(
+    entries
+      .filter((entry) => !isLeftover(entry) && inWeek(entry))
+      .map((entry) => entry.batchId)
+      .filter((batchId): batchId is string => batchId !== undefined),
+  );
+
+  return entries.filter((entry) =>
+    isLeftover(entry)
+      ? entry.batchId !== undefined && cookedInWeek.has(entry.batchId)
+      : inWeek(entry),
+  );
 }
 
 /**

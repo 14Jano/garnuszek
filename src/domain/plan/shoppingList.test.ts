@@ -3,7 +3,8 @@ import { createCatalog } from '../recipes/ingredient';
 import type { Ingredient } from '../recipes/ingredient';
 import type { Recipe } from '../recipes/recipe';
 import type { PlannedMeal } from './portions';
-import { buildShoppingList } from './shoppingList';
+import type { PlanEntry } from './planEntry';
+import { buildShoppingList, entriesToBuyFor } from './shoppingList';
 
 function food(id: string, name: string, category: Ingredient['category']): Ingredient {
   return { id, name, category, per100g: { kcal: 100, proteinG: 1, fatG: 1, carbsG: 1 } };
@@ -39,6 +40,61 @@ function meal(...ingredients: [string, number][]): PlannedMeal {
     ingredients: ingredients.map(([ingredientId, grams]) => ({ ingredientId, grams })),
   };
 }
+
+describe('entriesToBuyFor', () => {
+  // The week is Monday 2026-10-19 to Sunday 2026-10-25.
+  const FIRST = '2026-10-19';
+  const LAST = '2026-10-25';
+
+  function entry(date: string, extra: Partial<PlanEntry> = {}): PlanEntry {
+    return { date, mealType: 'lunch', recipeId: 'r', memberIds: ['a'], ...extra };
+  }
+
+  it('keeps the meals of the week and drops the others', () => {
+    const entries = [
+      entry('2026-10-18'),
+      entry('2026-10-19'),
+      entry('2026-10-25'),
+      entry('2026-10-26'),
+    ];
+
+    expect(entriesToBuyFor(entries, FIRST, LAST).map((e) => e.date)).toEqual([
+      '2026-10-19',
+      '2026-10-25',
+    ]);
+  });
+
+  it('buys a whole batch in the week it is cooked, even when it ends in the next one', () => {
+    const entries = [
+      entry('2026-10-25', { batchId: 'b' }),
+      entry('2026-10-26', { batchId: 'b', cookedOn: '2026-10-25' }),
+      entry('2026-10-27', { batchId: 'b', cookedOn: '2026-10-25' }),
+    ];
+
+    expect(entriesToBuyFor(entries, FIRST, LAST)).toHaveLength(3);
+  });
+
+  it('does not buy leftovers again in the week after the one it was cooked in', () => {
+    const entries = [
+      entry('2026-10-25', { batchId: 'b' }),
+      entry('2026-10-26', { batchId: 'b', cookedOn: '2026-10-25' }),
+      entry('2026-10-27', { mealType: 'dinner' }),
+    ];
+
+    const nextWeek = entriesToBuyFor(entries, '2026-10-26', '2026-11-01');
+
+    expect(nextWeek.map((e) => `${e.date} ${e.mealType}`)).toEqual(['2026-10-27 dinner']);
+  });
+
+  it('counts the days of a batch inside the week once', () => {
+    const entries = [
+      entry('2026-10-20', { batchId: 'b' }),
+      entry('2026-10-21', { batchId: 'b', cookedOn: '2026-10-20' }),
+    ];
+
+    expect(entriesToBuyFor(entries, FIRST, LAST)).toHaveLength(2);
+  });
+});
 
 describe('buildShoppingList', () => {
   it('is empty when nothing is planned', () => {

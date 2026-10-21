@@ -2,13 +2,17 @@ import { useId } from 'react';
 import { Link } from 'react-router-dom';
 import { calendarPath, recipePath } from '../../app/navigation';
 import { INGREDIENT_CATALOG } from '../../content/catalog';
+import { MEAL_TYPE_LABELS } from '../../content/labels';
 import type { Member } from '../../domain/household/member';
+import { MAX_BATCH_DAYS } from '../../domain/plan/batches';
+import type { BatchSummary } from '../../domain/plan/batches';
+import { formatDayHeading } from '../../domain/plan/dates';
 import type { DateKey } from '../../domain/plan/dates';
+import { isLeftover } from '../../domain/plan/planEntry';
 import type { PlanEntry } from '../../domain/plan/planEntry';
 import type { PlannedMeal } from '../../domain/plan/portions';
 import { requireIngredient } from '../../domain/recipes/ingredient';
 import type { MealType } from '../../domain/recipes/recipe';
-import { MEAL_TYPE_LABELS } from '../../content/labels';
 import { formatGrams } from '../../format/amounts';
 import { formatServings } from './format';
 import './MealSlot.css';
@@ -21,8 +25,11 @@ interface MealSlotProps {
   entry: PlanEntry | undefined;
   /** The planned meal sized for each eater. Missing when the recipe can no longer be found. */
   meal: PlannedMeal | undefined;
+  /** What cooking the dish involves over all the days it is eaten. Not given for leftovers. */
+  batch: BatchSummary | undefined;
   onSetEaters: (memberIds: string[]) => void;
   onRemove: () => void;
+  onSetBatchDays: (days: number) => void;
 }
 
 export function MealSlot({
@@ -31,10 +38,13 @@ export function MealSlot({
   household,
   entry,
   meal,
+  batch,
   onSetEaters,
   onRemove,
+  onSetBatchDays,
 }: MealSlotProps) {
   const headingId = useId();
+  const batchSelectId = useId();
   const label = MEAL_TYPE_LABELS[mealType];
 
   return (
@@ -82,6 +92,13 @@ export function MealSlot({
             <Link to={recipePath.details(meal.recipe.id)}>{meal.recipe.name}</Link>
           </p>
 
+          {entry.cookedOn !== undefined && (
+            <p className="meal-slot__leftover">
+              Resztki z: {formatDayHeading(entry.cookedOn)}. Nic nie gotujesz.{' '}
+              <Link to={calendarPath.day(entry.cookedOn)}>Przejdź do ugotowanego dania</Link>
+            </p>
+          )}
+
           <fieldset className="meal-slot__eaters">
             <legend>Kto je</legend>
             {household.map((member) => (
@@ -109,21 +126,25 @@ export function MealSlot({
           {meal.portions.length === 0 ? (
             <p className="meal-slot__empty">Nikt nie je tego posiłku.</p>
           ) : (
+            <ul className="meal-slot__portions">
+              {meal.portions.map(({ member, servings, nutrition }) => (
+                <li key={member.id}>
+                  {member.name}: {formatServings(servings)}, {Math.round(nutrition.kcal)} kcal
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {batch && (
             <>
-              <ul className="meal-slot__portions">
-                {meal.portions.map(({ member, servings, nutrition }) => (
-                  <li key={member.id}>
-                    {member.name}: {formatServings(servings)}, {Math.round(nutrition.kcal)} kcal
-                  </li>
-                ))}
-              </ul>
               <p className="meal-slot__total">
-                Do ugotowania: {formatServings(meal.totalServings)}
+                Do ugotowania: {formatServings(batch.totalServings)}
+                {batch.days > 1 && ` (na ${batch.days} dni)`}
               </p>
               <details className="meal-slot__ingredients">
                 <summary>Składniki dla wszystkich</summary>
                 <ul>
-                  {meal.ingredients.map(({ ingredientId, grams }) => (
+                  {batch.ingredients.map(({ ingredientId, grams }) => (
                     <li key={ingredientId}>
                       {requireIngredient(ingredientId, INGREDIENT_CATALOG).name}:{' '}
                       {formatGrams(grams)}
@@ -131,26 +152,49 @@ export function MealSlot({
                   ))}
                 </ul>
               </details>
+
+              <div className="meal-slot__batch">
+                <label htmlFor={batchSelectId}>Gotuj na</label>
+                <select
+                  id={batchSelectId}
+                  className="input"
+                  value={batch.days}
+                  onChange={(event) => onSetBatchDays(Number(event.target.value))}
+                >
+                  {Array.from({ length: MAX_BATCH_DAYS }, (_, index) => index + 1).map((days) => (
+                    <option key={days} value={days}>
+                      {days === 1 ? '1 dzień' : `${days} dni`}
+                    </option>
+                  ))}
+                </select>
+                {batch.days > 1 && (
+                  <p className="meal-slot__hint">
+                    Resztki zjecie do: {formatDayHeading(batch.lastDay)}.
+                  </p>
+                )}
+              </div>
             </>
           )}
 
-          <div className="meal-slot__actions">
-            <Link
-              className="btn btn--small"
-              to={calendarPath.pickRecipe(date, mealType)}
-              aria-label={`Wymień: ${meal.recipe.name}`}
-            >
-              Wymień
-            </Link>
-            <button
-              type="button"
-              className="btn btn--small"
-              aria-label={`Usuń: ${label}`}
-              onClick={onRemove}
-            >
-              Usuń
-            </button>
-          </div>
+          {!isLeftover(entry) && (
+            <div className="meal-slot__actions">
+              <Link
+                className="btn btn--small"
+                to={calendarPath.pickRecipe(date, mealType)}
+                aria-label={`Wymień: ${meal.recipe.name}`}
+              >
+                Wymień
+              </Link>
+              <button
+                type="button"
+                className="btn btn--small"
+                aria-label={`Usuń: ${label}`}
+                onClick={onRemove}
+              >
+                Usuń
+              </button>
+            </div>
+          )}
         </>
       )}
     </section>

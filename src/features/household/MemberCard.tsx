@@ -24,6 +24,9 @@ export function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
       <p className="member-card__target">
         <strong>{dailyCalorieTarget(member)} kcal</strong> dziennie. Cel: {GOAL_LABELS[member.goal]}
       </p>
+      {member.snackKcal > 0 && (
+        <p className="member-card__details">Na przekąski: {member.snackKcal} kcal dziennie.</p>
+      )}
 
       {confirmingDelete ? (
         <div className="member-card__actions" role="group" aria-label={`Usuwanie: ${member.name}`}>

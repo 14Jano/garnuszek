@@ -1,5 +1,6 @@
+import { resizeBatch } from '../domain/plan/batches';
 import type { DateKey } from '../domain/plan/dates';
-import { planEntryKey } from '../domain/plan/planEntry';
+import { isLeftover, planEntryKey } from '../domain/plan/planEntry';
 import type { PlanEntry } from '../domain/plan/planEntry';
 import { MEAL_TYPES } from '../domain/recipes/recipe';
 import type { MealType } from '../domain/recipes/recipe';
@@ -22,6 +23,9 @@ export async function listPlanEntries(from: DateKey, to: DateKey): Promise<PlanE
  * Puts a recipe into a meal slot. A slot that already holds a meal keeps the
  * people who eat it, so swapping a dish does not change who is at the table.
  * An empty slot starts with `defaultMemberIds`.
+ *
+ * A dish cooked for several days is swapped on all of those days at once. Its
+ * leftover days cannot be swapped on their own.
  */
 export async function assignRecipe(
   date: DateKey,
@@ -33,6 +37,15 @@ export async function assignRecipe(
 
   await db.transaction('rw', db.planEntries, async () => {
     const existing = await db.planEntries.get(key);
+
+    if (existing && isLeftover(existing)) {
+      throw new Error(`${date} ${mealType} is a leftover; change the dish on the day it is cooked`);
+    }
+    if (existing?.batchId !== undefined) {
+      await db.planEntries.where('batchId').equals(existing.batchId).modify({ recipeId });
+      return;
+    }
+
     await db.planEntries.put({
       key,
       date,
@@ -57,8 +70,53 @@ export async function setEaters(
   }
 }
 
+/**
+ * Removes a meal. A dish cooked for several days is removed from all of them;
+ * its leftover days cannot be removed on their own.
+ */
 export async function removePlanEntry(date: DateKey, mealType: MealType): Promise<void> {
-  await db.planEntries.delete(planEntryKey(date, mealType));
+  await db.transaction('rw', db.planEntries, async () => {
+    const existing = await db.planEntries.get(planEntryKey(date, mealType));
+    if (!existing) return;
+
+    if (isLeftover(existing)) {
+      throw new Error(`${date} ${mealType} is a leftover; remove the dish on the day it is cooked`);
+    }
+    if (existing.batchId !== undefined) {
+      await db.planEntries.where('batchId').equals(existing.batchId).delete();
+    } else {
+      await db.planEntries.delete(existing.key);
+    }
+  });
+}
+
+/**
+ * Makes the dish cooked on `date` last for `days` days. Dishes planned for the
+ * extra days move later, and going back to fewer days brings them forward again.
+ */
+export async function setBatchDays(date: DateKey, mealType: MealType, days: number): Promise<void> {
+  await db.transaction('rw', db.planEntries, async () => {
+    const slot = await db.planEntries
+      .where('date')
+      .aboveOrEqual(date)
+      .filter((record) => record.mealType === mealType)
+      .toArray();
+
+    const change = resizeBatch(slot.map(toEntry), date, mealType, days, () => crypto.randomUUID());
+
+    for (const removed of change.remove) {
+      await db.planEntries.delete(planEntryKey(removed.date, removed.mealType));
+    }
+    await db.planEntries.bulkPut(change.put.map(toRecord));
+  });
+}
+
+function toRecord(entry: PlanEntry): PlanEntryRecord {
+  return {
+    ...entry,
+    memberIds: [...entry.memberIds],
+    key: planEntryKey(entry.date, entry.mealType),
+  };
 }
 
 // Copy the fields explicitly so storage-only data never leaks into the app.
@@ -68,5 +126,7 @@ function toEntry(record: PlanEntryRecord): PlanEntry {
     mealType: record.mealType,
     recipeId: record.recipeId,
     memberIds: [...record.memberIds],
+    ...(record.batchId === undefined ? {} : { batchId: record.batchId }),
+    ...(record.cookedOn === undefined ? {} : { cookedOn: record.cookedOn }),
   };
 }

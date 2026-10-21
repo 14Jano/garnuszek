@@ -40,8 +40,23 @@ export function RecipePickerPage() {
     return <p>Wczytywanie…</p>;
   }
 
-  const currentRecipeId = dayEntries.find((entry) => entry.mealType === mealType)?.recipeId;
+  const current = dayEntries.find((entry) => entry.mealType === mealType);
+  const currentRecipeId = current?.recipeId;
   const heading = currentRecipeId ? 'Wymień danie' : 'Wybierz danie';
+
+  // Leftovers belong to a dish cooked on another day, so the dish is changed there.
+  if (current?.cookedOn !== undefined) {
+    return (
+      <section>
+        <h1>To są resztki</h1>
+        <p>
+          Danie z tego dnia ugotowano wcześniej, więc tutaj nie da się go zmienić.{' '}
+          <Link to={calendarPath.day(current.cookedOn)}>Przejdź do dnia, w którym je gotujesz</Link>
+          .
+        </p>
+      </section>
+    );
+  }
 
   if (members.length === 0) {
     return (

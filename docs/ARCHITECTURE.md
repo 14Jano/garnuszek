@@ -100,12 +100,16 @@ Zasady:
 
 Wersje schematu:
 
-| Wersja | Zmiana                                                             |
-| ------ | ------------------------------------------------------------------ |
-| 1      | Tabela `members` (domownicy)                                       |
-| 2      | Tabele `customRecipes` (własne przepisy) i `favorites` (ulubione)  |
-| 3      | Tabela `planEntries` (plan posiłków), z indeksem po dacie          |
-| 4      | Tabela `shoppingChecks` (odhaczone zakupy), z indeksem po tygodniu |
+| Wersja | Zmiana                                                                            |
+| ------ | --------------------------------------------------------------------------------- |
+| 1      | Tabela `members` (domownicy)                                                      |
+| 2      | Tabele `customRecipes` (własne przepisy) i `favorites` (ulubione)                 |
+| 3      | Tabela `planEntries` (plan posiłków), z indeksem po dacie                         |
+| 4      | Tabela `shoppingChecks` (odhaczone zakupy), z indeksem po tygodniu                |
+| 5      | Tabela `snackOverrides` (przekąski na pojedyncze dni) i indeks `batchId` w planie |
+
+Członek zapisany przed wersją 5 nie ma pola `snackKcal`. Repozytorium traktuje brak jako 0, więc
+nie potrzeba migracji danych, a test migracji sprawdza to na bazie w wersji 1.
 
 Model domenowy:
 
@@ -134,6 +138,9 @@ Do bazy trafiają tylko rzeczy tworzone przez użytkownika.
   listy, a ulubione to osobna tabela z samymi identyfikatorami, która obejmuje oba rodzaje.
 - Filtrowanie i wyszukiwanie to czysta funkcja `filterRecipes`. Wyszukiwanie ignoruje wielkość
   liter i polskie znaki, więc „losos” znajduje „łosoś”.
+- „Co ugotować z tego, co mam” to filtr po składnikach (`ingredientIds` w `RecipeFilter`):
+  przepis musi zawierać wszystkie wybrane składniki, a łączy się go z pozostałymi filtrami. Wybór
+  składnika to wspólny komponent `IngredientOptions`, używany też w formularzu przepisu.
 - Formularz przepisu waliduje na żywo po pierwszej próbie zapisu, więc poprawione pole od razu
   przestaje zgłaszać błąd.
 
@@ -155,6 +162,36 @@ Skąd pochodzą dane i jak je dodawać, opisuje [DATA.md](DATA.md).
   dla wszystkich razem oraz podsumowanie dnia w porównaniu z dziennym celem.
 - Gdyby wpis w planie wskazywał na nieistniejący przepis, ekran pokazuje komunikat i pozwala
   wybrać inne danie albo usunąć wpis, zamiast się zawiesić.
+
+### Przekąski
+
+- Domownik ma domyślną ilość kalorii na przekąski (`snackKcal`). Na pojedynczy dzień można ją
+  zmienić (tabela `snackOverrides`). Funkcja `snackAllowance` zwraca ilość dla konkretnego dnia
+  i osoby, a `planMeal` odejmuje ją od dziennego celu przed podziałem na posiłki.
+- Przekąski nie mogą zająć więcej niż połowy dnia (`MAX_SNACK_SHARE`), bo posiłki przestałyby
+  być posiłkami. Nadmiar jest ignorowany.
+- Ilość równa domyślnej nie jest zapisywana jako osobny wpis, a „Przywróć domyślne” usuwa wpis.
+
+### Gotowanie na zapas
+
+- Danie ugotowane raz na kilka dni to kilka wpisów `PlanEntry` w kolejnych dniach tego samego
+  posiłku. Pierwszy (dzień gotowania) ma `batchId`, a następne (resztki) mają ten sam `batchId`
+  oraz `cookedOn`, czyli datę ugotowania. Każdy dzień ma własną listę osób i własne porcje.
+- Zmianę długości liczy czysta funkcja `resizeBatch`, a repozytorium (`setBatchDays`) tylko zapisuje
+  wynik w jednej transakcji: najpierw usuwa, potem zapisuje.
+- Wydłużenie dodaje resztki i przesuwa później dania zaplanowane na te dni. Przesuwa tylko te,
+  które przeszkadzają, jedno po drugim, i zatrzymuje się na pierwszym, które nie koliduje.
+  Przesunięty batch zostaje w całości, a jego resztki wskazują nowy dzień gotowania.
+- Skrócenie usuwa resztki i przesuwa wcześniej dania, które następowały bezpośrednio po batchu
+  (bez przerwy), bo właśnie one zostały wcześniej przesunięte. Dzięki temu skrócenie do jednego dnia
+  przywraca plan sprzed wydłużenia, co sprawdza test.
+- Wymiana dania i usunięcie dotyczą całego batcha. Samych resztek nie da się wymienić ani usunąć,
+  trzeba to zrobić w dniu gotowania. Można za to zmieniać, kto je resztki danego dnia.
+- Kalendarz pokazuje przy daniu „Do ugotowania” dla wszystkich dni razem (`summarizeBatch`),
+  a w dniach z resztkami informuje, że nic się nie gotuje.
+- Zakupy: składniki całego batcha kupuje się w tygodniu, w którym danie jest gotowane, także gdy
+  resztki wypadają w następnym (`entriesToBuyFor`). W tygodniu resztek tego samego dania nie
+  kupuje się drugi raz.
 
 ## Lista zakupów
 

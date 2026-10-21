@@ -84,8 +84,28 @@ Ilości składników skalują się proporcjonalnie do porcji.
 Przykład: Anna ma 1815 kcal dziennie, więc na obiad 726 kcal. Chili sin carne ma 363,5 kcal
 w porcji, więc Anna je 726 / 363,5 = 1,997, czyli po zaokrągleniu 2 porcje (727 kcal).
 
-Przekąski (osobny budżet kalorii) pojawią się w wersji 0.6 i zmniejszą dzienny cel przed
-podziałem na posiłki.
+### Przekąski
+
+Każdy domownik ma budżet kalorii na przekąski i słodycze (od 0 do 1000 kcal dziennie), który można
+zmienić na jeden konkretny dzień. Ta ilość jest odejmowana od dziennego celu **przed** podziałem
+na posiłki, więc cel posiłku to udział posiłku pomnożony przez to, co zostało:
+
+```text
+cel posiłku = udział × (dzienny cel − przekąski)
+```
+
+Przekąski nie mogą zająć więcej niż połowy dziennego celu. Przy większej wartości nadmiar jest
+ignorowany, żeby posiłki nadal były posiłkami. W podsumowaniu dnia przekąski są doliczone do
+zjedzonych kalorii.
+
+Przykład: Anna ma 1815 kcal dziennie i zostawia 300 kcal na przekąski. Na obiad ma więc
+0,4 × 1515 = 606 kcal, czyli 1,65 porcji chili sin carne (600 kcal), a podsumowanie dnia pokaże
+600 + 300 = 900 kcal.
+
+### Gotowanie na zapas
+
+Danie ugotowane raz na kilka dni jest zjadane w kolejnych dniach w porcjach liczonych osobno dla
+każdego dnia i każdej osoby. Ilość do ugotowania i składniki to suma wszystkich dni.
 
 ## Ograniczenia
 

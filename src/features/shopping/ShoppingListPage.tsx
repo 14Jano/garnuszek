@@ -5,15 +5,18 @@ import { WeekSwitcher } from '../../components/WeekSwitcher';
 import { INGREDIENT_CATALOG } from '../../content/catalog';
 import { CATEGORY_LABELS } from '../../content/labels';
 import { clearCheckedIngredients, setIngredientChecked } from '../../data/shoppingRepository';
-import { formatWeekRange, isDateKey, todayKey, weekDays } from '../../domain/plan/dates';
+import { MAX_BATCH_DAYS } from '../../domain/plan/batches';
+import { addDays, formatWeekRange, isDateKey, todayKey, weekDays } from '../../domain/plan/dates';
 import { planMeals } from '../../domain/plan/portions';
-import { buildShoppingList } from '../../domain/plan/shoppingList';
+import { buildShoppingList, entriesToBuyFor } from '../../domain/plan/shoppingList';
 import type { ShoppingSection } from '../../domain/plan/shoppingList';
+import { snackAllowance } from '../../domain/plan/snacks';
 import { formatGrams } from '../../format/amounts';
 import { useCheckedIngredients } from '../../hooks/useCheckedIngredients';
 import { useMembers } from '../../hooks/useMembers';
 import { usePlanEntries } from '../../hooks/usePlanEntries';
 import { useRecipeEntries } from '../../hooks/useRecipeEntries';
+import { useSnackOverrides } from '../../hooks/useSnackOverrides';
 import { ShareActions } from './ShareActions';
 import { formatShoppingText } from './shareText';
 import './ShoppingListPage.css';
@@ -26,11 +29,17 @@ export function ShoppingListPage() {
   // The hooks below must run on every render, so fall back to today for a bad address.
   const week = isDateKey(selected) ? selected : today;
   const days = weekDays(week);
+  const firstDay = days[0] ?? today;
+  const lastDay = days[6] ?? today;
+  // A dish cooked on the last day of the week can be eaten for a few days after it,
+  // and it is bought together with the rest of that week.
+  const horizon = addDays(lastDay, MAX_BATCH_DAYS - 1);
 
   const household = useMembers();
   const recipes = useRecipeEntries();
-  const entries = usePlanEntries(days[0] ?? today, days[6] ?? today);
+  const entries = usePlanEntries(firstDay, horizon);
   const checked = useCheckedIngredients(week);
+  const snackOverrides = useSnackOverrides(firstDay, horizon);
   const [actionFailed, setActionFailed] = useState(false);
 
   if (!isDateKey(selected)) {
@@ -52,7 +61,8 @@ export function ShoppingListPage() {
       household === undefined ||
       recipes === undefined ||
       entries === undefined ||
-      checked === undefined
+      checked === undefined ||
+      snackOverrides === undefined
     ) {
       return <p>Wczytywanie…</p>;
     }
@@ -67,10 +77,11 @@ export function ShoppingListPage() {
     }
 
     const meals = planMeals(
-      entries,
+      entriesToBuyFor(entries, firstDay, lastDay),
       recipes.map(({ recipe }) => recipe),
       household,
       INGREDIENT_CATALOG,
+      snackAllowance(snackOverrides),
     );
     const sections = buildShoppingList(meals, INGREDIENT_CATALOG);
 

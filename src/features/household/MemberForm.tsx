@@ -15,6 +15,7 @@ interface FormValues {
   weightKg: string;
   activity: ActivityLevel;
   goal: Goal;
+  snackKcal: string;
 }
 
 const EMPTY_VALUES: FormValues = {
@@ -25,9 +26,10 @@ const EMPTY_VALUES: FormValues = {
   weightKg: '',
   activity: 'light',
   goal: 'maintain',
+  snackKcal: '0',
 };
 
-const FIELD_ORDER: readonly MemberField[] = ['name', 'age', 'heightCm', 'weightKg'];
+const FIELD_ORDER: readonly MemberField[] = ['name', 'age', 'heightCm', 'weightKg', 'snackKcal'];
 
 const ERROR_MESSAGES: Record<MemberField, Record<FieldProblem, string>> = {
   name: {
@@ -45,6 +47,10 @@ const ERROR_MESSAGES: Record<MemberField, Record<FieldProblem, string>> = {
   weightKg: {
     required: 'Podaj wagę.',
     invalid: `Podaj wagę w kilogramach, od ${MEMBER_LIMITS.weightKg.min} do ${MEMBER_LIMITS.weightKg.max}.`,
+  },
+  snackKcal: {
+    required: 'Podaj kalorie na przekąski. Wpisz 0, jeśli ich nie planujesz.',
+    invalid: `Podaj kalorie w pełnych liczbach, od ${MEMBER_LIMITS.snackKcal.min} do ${MEMBER_LIMITS.snackKcal.max}.`,
   },
 };
 
@@ -93,6 +99,7 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
       age,
       heightCm: parseNumber(values.heightCm),
       weightKg: parseNumber(values.weightKg),
+      snackKcal: parseNumber(values.snackKcal),
     };
     const problems = validateMember(draft);
     setErrors(problems);
@@ -114,6 +121,7 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
         weightKg: draft.weightKg,
         activity: values.activity,
         goal,
+        snackKcal: draft.snackKcal,
       });
     } finally {
       setSubmitting(false);
@@ -253,6 +261,20 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
         )}
       </div>
 
+      <NumberField
+        id={`${formId}-snacks`}
+        name="snackKcal"
+        label="Przekąski (kcal dziennie)"
+        hint="Tyle kalorii zostawiasz na przekąski i słodycze. Porcje posiłków będą o tyle mniejsze."
+        inputMode="numeric"
+        step={1}
+        min={MEMBER_LIMITS.snackKcal.min}
+        max={MEMBER_LIMITS.snackKcal.max}
+        value={values.snackKcal}
+        onChange={(value) => setField('snackKcal', value)}
+        error={errorMessage('snackKcal')}
+      />
+
       <div className="member-form__actions">
         <button type="submit" className="btn btn--primary" disabled={submitting}>
           {submitLabel}
@@ -276,6 +298,7 @@ interface NumberFieldProps {
   value: string;
   onChange: (value: string) => void;
   error?: string;
+  hint?: string;
 }
 
 function NumberField({
@@ -289,14 +312,22 @@ function NumberField({
   value,
   onChange,
   error,
+  hint,
 }: NumberFieldProps) {
   const errorId = `${id}-error`;
+  const hintId = `${id}-hint`;
+  const describedBy = [hint && hintId, error && errorId].filter(Boolean).join(' ');
 
   return (
     <div className="field">
       <label className="field__label" htmlFor={id}>
         {label}
       </label>
+      {hint && (
+        <p id={hintId} className="field__hint">
+          {hint}
+        </p>
+      )}
       <input
         id={id}
         name={name}
@@ -309,7 +340,7 @@ function NumberField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={describedBy || undefined}
       />
       <FieldError id={errorId} message={error} />
     </div>
@@ -334,6 +365,7 @@ function toFormValues(member: NewMember): FormValues {
     weightKg: String(member.weightKg),
     activity: member.activity,
     goal: member.goal,
+    snackKcal: String(member.snackKcal),
   };
 }
 

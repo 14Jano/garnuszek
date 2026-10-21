@@ -26,10 +26,14 @@ export async function updateMember(member: Member): Promise<void> {
   }
 }
 
-/** Deletes the member and takes them off every planned meal they were eating. */
+/**
+ * Deletes the member, takes them off every planned meal they were eating and
+ * forgets their snack amounts for single days.
+ */
 export async function removeMember(id: string): Promise<void> {
-  await db.transaction('rw', db.members, db.planEntries, async () => {
+  await db.transaction('rw', db.members, db.planEntries, db.snackOverrides, async () => {
     await db.members.delete(id);
+    await db.snackOverrides.filter((override) => override.memberId === id).delete();
     await db.planEntries
       .filter((entry) => entry.memberIds.includes(id))
       .modify((entry) => {
@@ -49,5 +53,6 @@ function toMember(record: MemberRecord): Member {
     weightKg: record.weightKg,
     activity: record.activity,
     goal: record.goal,
+    snackKcal: record.snackKcal ?? 0,
   };
 }
