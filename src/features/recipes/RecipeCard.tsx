@@ -4,7 +4,7 @@ import { INGREDIENT_CATALOG } from '../../content/catalog';
 import { compatibleDiets, nutritionPerServing } from '../../domain/recipes/recipe';
 import { FavoriteButton } from './FavoriteButton';
 import { DIET_LABELS, MEAL_TYPE_LABELS } from './labels';
-import type { RecipeEntry } from './useRecipeEntries';
+import type { RecipeEntry } from '../../hooks/useRecipeEntries';
 import './RecipeCard.css';
 
 export function RecipeCard({ recipe, favorite, custom }: RecipeEntry) {

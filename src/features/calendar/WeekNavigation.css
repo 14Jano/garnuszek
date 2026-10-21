@@ -1,0 +1,70 @@
+.week-nav {
+  margin-bottom: 1rem;
+}
+
+.week-nav__header {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.week-nav__range {
+  flex: 1;
+  margin: 0;
+  font-weight: 600;
+  text-align: center;
+}
+
+.week-nav__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  color: var(--color-text);
+}
+
+.week-nav__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.week-nav__day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.375rem 0 0.625rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.625rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+.week-nav__number {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.week-nav__day[aria-current='date'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.week-nav__dot {
+  position: absolute;
+  bottom: 0.25rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: currentColor;
+}

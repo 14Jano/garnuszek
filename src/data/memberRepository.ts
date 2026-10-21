@@ -26,8 +26,16 @@ export async function updateMember(member: Member): Promise<void> {
   }
 }
 
+/** Deletes the member and takes them off every planned meal they were eating. */
 export async function removeMember(id: string): Promise<void> {
-  await db.members.delete(id);
+  await db.transaction('rw', db.members, db.planEntries, async () => {
+    await db.members.delete(id);
+    await db.planEntries
+      .filter((entry) => entry.memberIds.includes(id))
+      .modify((entry) => {
+        entry.memberIds = entry.memberIds.filter((memberId) => memberId !== id);
+      });
+  });
 }
 
 // Copy the fields explicitly so storage-only data never leaks into the app.

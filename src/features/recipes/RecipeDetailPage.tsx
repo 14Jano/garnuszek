@@ -8,7 +8,7 @@ import { compatibleDiets, nutritionPerServing } from '../../domain/recipes/recip
 import { FavoriteButton } from './FavoriteButton';
 import { DIET_LABELS, MEAL_TYPE_LABELS } from './labels';
 import { NutritionSummary } from './NutritionSummary';
-import { useRecipeEntries } from './useRecipeEntries';
+import { useRecipeEntries } from '../../hooks/useRecipeEntries';
 import './RecipeDetailPage.css';
 
 export function RecipeDetailPage() {

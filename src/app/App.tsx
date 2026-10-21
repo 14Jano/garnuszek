@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CalendarPage } from '../features/calendar/CalendarPage';
+import { RecipePickerPage } from '../features/calendar/RecipePickerPage';
 import { HouseholdPage } from '../features/household/HouseholdPage';
 import { RecipeDetailPage } from '../features/recipes/RecipeDetailPage';
 import { RecipeFormPage } from '../features/recipes/RecipeFormPage';
@@ -20,6 +21,8 @@ export function App() {
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to={ROUTES.calendar} replace />} />
         <Route path={ROUTES.calendar} element={<CalendarPage />} />
+        <Route path={`${ROUTES.calendar}/:date`} element={<CalendarPage />} />
+        <Route path={`${ROUTES.calendar}/:date/:mealType/wybierz`} element={<RecipePickerPage />} />
         <Route path={ROUTES.shopping} element={<ShoppingListPage />} />
         <Route path={ROUTES.recipes} element={<RecipesPage />} />
         <Route path={recipePath.create} element={<RecipeFormPage />} />

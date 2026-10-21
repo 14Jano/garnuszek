@@ -1,9 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useMemo } from 'react';
-import { BUILTIN_RECIPES } from '../../content/recipes';
-import { listFavoriteIds } from '../../data/favoriteRepository';
-import { listCustomRecipes } from '../../data/recipeRepository';
-import type { Recipe } from '../../domain/recipes/recipe';
+import { BUILTIN_RECIPES } from '../content/recipes';
+import { listFavoriteIds } from '../data/favoriteRepository';
+import { listCustomRecipes } from '../data/recipeRepository';
+import type { Recipe } from '../domain/recipes/recipe';
 
 export interface RecipeEntry {
   recipe: Recipe;

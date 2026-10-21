@@ -59,6 +59,34 @@ Osoby poniżej 18. roku życia nadal rosną, więc odchudzanie i przybieranie na
 w ich przypadku sensu. Aplikacja dopuszcza dla nich wyłącznie cel `maintain` (funkcja
 `allowedGoals` w `src/domain/household/member.ts`). Pole celu w formularzu jest wtedy zablokowane.
 
+## 6. Porcje w planie posiłków
+
+Dzienne zapotrzebowanie dzielimy na posiłki (`MEAL_SHARES` w `src/domain/plan/portions.ts`):
+
+| Posiłek   | Udział w dniu |
+| --------- | ------------- |
+| Śniadanie | 30%           |
+| Obiad     | 40%           |
+| Kolacja   | 30%           |
+
+Cel kaloryczny posiłku to udział pomnożony przez dzienny cel osoby. Porcja osoby to liczba porcji
+przepisu równa celowi posiłku podzielonemu przez kalorie jednej porcji przepisu, czyli:
+
+```text
+porcja = cel posiłku [kcal] / kcal jednej porcji przepisu
+```
+
+Wynik zaokrąglamy do 0,05 porcji, żeby ilości dało się ugotować, i ograniczamy do przedziału
+od 0,25 do 3 porcji. Granice chronią przed absurdalnymi ilościami przy bardzo lekkim lub bardzo
+sycącym daniu, ale przy skrajnych przepisach posiłek może wtedy nie trafić dokładnie w cel.
+Ilości składników skalują się proporcjonalnie do porcji.
+
+Przykład: Anna ma 1815 kcal dziennie, więc na obiad 726 kcal. Chili sin carne ma 363,5 kcal
+w porcji, więc Anna je 726 / 363,5 = 1,997, czyli po zaokrągleniu 2 porcje (727 kcal).
+
+Przekąski (osobny budżet kalorii) pojawią się w wersji 0.6 i zmniejszą dzienny cel przed
+podziałem na posiłki.
+
 ## Ograniczenia
 
 - Równanie powstało na podstawie badań dorosłych. Dla dzieci daje tylko przybliżenie, dlatego

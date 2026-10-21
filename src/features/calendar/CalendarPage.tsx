@@ -1,16 +1,89 @@
-import { PagePlaceholder } from '../../components/PagePlaceholder';
+import { useState } from 'react';
+import { Link, Navigate, useParams } from 'react-router-dom';
+import { ROUTES } from '../../app/navigation';
+import { removePlanEntry, setEaters } from '../../data/planRepository';
+import { formatDayHeading, isDateKey, todayKey, weekDays } from '../../domain/plan/dates';
+import type { MealType } from '../../domain/recipes/recipe';
+import { useMembers } from '../../hooks/useMembers';
+import { usePlanEntries } from '../../hooks/usePlanEntries';
+import { useRecipeEntries } from '../../hooks/useRecipeEntries';
+import { DayPlan } from './DayPlan';
+import { WeekNavigation } from './WeekNavigation';
+import './CalendarPage.css';
 
 export function CalendarPage() {
+  const { date } = useParams();
+  const today = todayKey();
+  const selected = date ?? today;
+  // The hooks below must run on every render, so fall back to today for a bad address.
+  const days = weekDays(isDateKey(selected) ? selected : today);
+
+  const household = useMembers();
+  const recipes = useRecipeEntries();
+  const weekEntries = usePlanEntries(days[0] ?? today, days[6] ?? today);
+  const [actionFailed, setActionFailed] = useState(false);
+
+  if (!isDateKey(selected)) {
+    return <Navigate to={`${ROUTES.calendar}/${today}`} replace />;
+  }
+
+  async function run(action: () => Promise<void>) {
+    setActionFailed(false);
+    try {
+      await action();
+    } catch (error) {
+      console.error('Could not update the meal plan', error);
+      setActionFailed(true);
+    }
+  }
+
+  function renderDay() {
+    if (household === undefined || recipes === undefined || weekEntries === undefined) {
+      return <p>Wczytywanie…</p>;
+    }
+
+    if (household.length === 0) {
+      return (
+        <p className="calendar-empty">
+          Żeby zaplanować posiłki, najpierw dodaj domowników, bo na ich podstawie liczymy porcje.{' '}
+          <Link to={ROUTES.household}>Przejdź do domowników</Link>.
+        </p>
+      );
+    }
+
+    return (
+      <DayPlan
+        date={selected}
+        household={household}
+        recipes={recipes}
+        entries={weekEntries.filter((entry) => entry.date === selected)}
+        onSetEaters={(mealType: MealType, memberIds: string[]) =>
+          void run(() => setEaters(selected, mealType, memberIds))
+        }
+        onRemove={(mealType: MealType) => void run(() => removePlanEntry(selected, mealType))}
+      />
+    );
+  }
+
   return (
-    <PagePlaceholder
-      title="Kalendarz posiłków"
-      lead="Tutaj ułożysz śniadania, obiady i kolacje na cały tydzień, a nawet na miesiąc."
-      planned={[
-        'Plan na każdy dzień z osobną porcją dla każdego domownika',
-        'Wymiana dania jednym kliknięciem',
-        'Gotowanie na zapas: jedno danie na 2–4 dni',
-        'Odznaczanie osób, które nie jedzą danego posiłku',
-      ]}
-    />
+    <section>
+      <h1>Kalendarz posiłków</h1>
+
+      <WeekNavigation
+        selected={selected}
+        today={today}
+        plannedDays={new Set(weekEntries?.map((entry) => entry.date))}
+      />
+
+      <h2>{formatDayHeading(selected)}</h2>
+
+      {actionFailed && (
+        <p className="form-error" role="alert">
+          Nie udało się zapisać zmiany. Spróbuj ponownie.
+        </p>
+      )}
+
+      {renderDay()}
+    </section>
   );
 }

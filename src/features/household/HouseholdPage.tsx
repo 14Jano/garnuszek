@@ -5,7 +5,7 @@ import { addMember, removeMember, updateMember } from '../../data/memberReposito
 import type { Member, NewMember } from '../../domain/household/member';
 import { MemberCard } from './MemberCard';
 import { MemberForm } from './MemberForm';
-import { useMembers } from './useMembers';
+import { useMembers } from '../../hooks/useMembers';
 import './HouseholdPage.css';
 
 type View = { kind: 'list' } | { kind: 'add' } | { kind: 'edit'; member: Member };

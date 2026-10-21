@@ -5,6 +5,28 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-21
+
+### Dodano
+
+- Kalendarz posiłków: widok tygodnia z wyborem dnia, nawigacją po tygodniach i przyciskiem „Dziś”.
+- Planowanie śniadania, obiadu i kolacji na każdy dzień. Dni z zaplanowanymi posiłkami są
+  oznaczone.
+- Porcje liczone osobno dla każdego domownika według jego dziennego celu, wraz z łączną ilością do
+  ugotowania i listą składników dla wszystkich.
+- Wymiana dania jednym kliknięciem (zachowuje osoby jedzące) oraz usuwanie dania z planu.
+- Odznaczanie osób, które nie jedzą danego posiłku.
+- Podsumowanie dnia: kalorie każdej osoby w porównaniu z jej dziennym celem.
+- Wersja 3 schematu bazy (tabela `planEntries`). Usunięcie domownika albo własnego przepisu czyści
+  plan w jednej transakcji.
+- Operacje na dniach kalendarzowych (`src/domain/plan/dates.ts`) z testami, także na dzień zmiany
+  czasu.
+
+### Zmieniono
+
+- Hooki `useMembers` i `useRecipeEntries` przeniesiono do `src/hooks`, żeby ekrany nie importowały
+  się nawzajem.
+
 ## [0.3.0] - 2026-10-21
 
 ### Dodano

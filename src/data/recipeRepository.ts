@@ -26,11 +26,12 @@ export async function updateCustomRecipe(recipe: Recipe): Promise<void> {
   }
 }
 
-/** Deletes the recipe and forgets that it was a favorite. */
+/** Deletes the recipe, forgets that it was a favorite and clears it from the meal plan. */
 export async function removeCustomRecipe(id: string): Promise<void> {
-  await db.transaction('rw', db.customRecipes, db.favorites, async () => {
+  await db.transaction('rw', db.customRecipes, db.favorites, db.planEntries, async () => {
     await db.customRecipes.delete(id);
     await db.favorites.delete(id);
+    await db.planEntries.filter((entry) => entry.recipeId === id).delete();
   });
 }
 

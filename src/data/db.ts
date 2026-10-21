@@ -1,6 +1,7 @@
 import Dexie from 'dexie';
 import type { EntityTable } from 'dexie';
 import type { Member } from '../domain/household/member';
+import type { PlanEntry } from '../domain/plan/planEntry';
 import type { Recipe } from '../domain/recipes/recipe';
 
 /** A stored member plus bookkeeping that the domain does not need to know about. */
@@ -18,6 +19,11 @@ export interface FavoriteRecord {
   recipeId: string;
 }
 
+/** A planned meal. The key (`date_mealType`) allows one meal per slot of a day. */
+export interface PlanEntryRecord extends PlanEntry {
+  key: string;
+}
+
 /**
  * The app's local database. Everything lives in the browser's IndexedDB; there
  * is no server. Change the schema by adding a new `version()` with an upgrade
@@ -28,6 +34,7 @@ class GarnuszekDatabase extends Dexie {
   members!: EntityTable<MemberRecord, 'id'>;
   customRecipes!: EntityTable<RecipeRecord, 'id'>;
   favorites!: EntityTable<FavoriteRecord, 'recipeId'>;
+  planEntries!: EntityTable<PlanEntryRecord, 'key'>;
 
   constructor() {
     super('garnuszek');
@@ -41,6 +48,14 @@ class GarnuszekDatabase extends Dexie {
       members: 'id, createdAt',
       customRecipes: 'id, createdAt',
       favorites: 'recipeId',
+    });
+
+    // Adds the meal plan. The date index serves "everything in this week".
+    this.version(3).stores({
+      members: 'id, createdAt',
+      customRecipes: 'id, createdAt',
+      favorites: 'recipeId',
+      planEntries: 'key, date',
     });
   }
 }

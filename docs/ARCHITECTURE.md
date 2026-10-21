@@ -24,12 +24,15 @@ Aktualizujemy go razem z kodem.
 | `src/domain`     | Czysta logika biznesowa i typy domenowe                                               |
 | `src/data`       | Baza IndexedDB (Dexie) i repozytoria. Jedyne miejsce, które zna bibliotekę bazy       |
 | `src/content`    | Wbudowane dane: katalog składników i przepisy (zwykłe moduły TypeScript)              |
+| `src/hooks`      | Hooki Reacta, które łączą bazę (`data`) i dane wbudowane (`content`) z ekranami       |
 | `src/styles`     | Zmienne projektowe (kolory, czcionki) i style globalne                                |
 | `src/test`       | Wspólna konfiguracja testów                                                           |
 
-Zasady zależności: `features` mogą korzystać z `components`, `content`, `data` i `domain`.
-`data` i `content` znają tylko `domain`, a `domain` nie zależy od niczego poza standardową
-biblioteką. `app` składa całość w jedną aplikację.
+Zasady zależności: `features` mogą korzystać z `components`, `content`, `data`, `domain`
+i `hooks`. `hooks` łączą `data` i `content` z Reactem, a `data` i `content` znają tylko `domain`.
+`domain` nie zależy od niczego poza standardową biblioteką. `app` składa całość w jedną
+aplikację. Ekrany nie importują się nawzajem: to, czego potrzebuje kilka z nich (np. lista
+domowników albo przepisów), trafia do `hooks` albo `components`.
 
 ## Routing
 
@@ -43,6 +46,10 @@ w `main.tsx` i `MemoryRouter` w testach.
 Ekran przepisów ma podstrony: `/przepisy` (lista), `/przepisy/nowy` (formularz), `/przepisy/:id`
 (szczegóły) i `/przepisy/:id/edytuj` (edycja własnego przepisu). Adresy buduje obiekt
 `recipePath` z `src/app/navigation.ts`, żeby nie powtarzać ich w komponentach.
+
+Kalendarz ma adresy `/kalendarz` (dziś), `/kalendarz/:data` (wybrany dzień, np. `2026-10-21`)
+i `/kalendarz/:data/:posiłek/wybierz` (wybór lub wymiana dania). Adresy buduje `calendarPath`.
+Błędna data w adresie jest zastępowana dzisiejszą.
 
 ## PWA
 
@@ -60,7 +67,7 @@ potrzebna, a aplikacja działa spod `/`.
 
 ## Warstwa danych
 
-Dane użytkownika (domownicy, własne przepisy, ulubione, a później plan posiłków i pomiary)
+Dane użytkownika (domownicy, własne przepisy, ulubione, plan posiłków, a później pomiary)
 trafiają do IndexedDB, bo `localStorage` ma mały limit i nie nadaje się do danych strukturalnych.
 IndexedDB opakowuje [Dexie](https://dexie.org). Daje typowane tabele, transakcje, wersjonowanie
 schematu oraz `useLiveQuery`, dzięki któremu ekrany odświeżają się same po zmianie danych.
@@ -68,7 +75,11 @@ schematu oraz `useLiveQuery`, dzięki któremu ekrany odświeżają się same po
 Zasady:
 
 - Baza (`src/data/db.ts`) i repozytoria (np. `memberRepository.ts`) są jedynym miejscem, które
-  zna Dexie. Reszta aplikacji woła funkcje repozytorium albo hooki, np. `useMembers`.
+  zna Dexie. Reszta aplikacji woła funkcje repozytorium albo hooki z `src/hooks`
+  (`useMembers`, `useRecipeEntries`, `usePlanEntries`).
+- Operacje obejmujące kilka tabel są jedną transakcją. Usunięcie domownika zdejmuje go z planu,
+  a usunięcie własnego przepisu usuwa go z ulubionych i z planu, więc nie zostają wpisy
+  wskazujące na nieistniejące rzeczy.
 - Rekord w bazie może mieć pola techniczne (np. `createdAt`), których nie ma w modelu domenowym.
   Repozytorium kopiuje pola jawnie, żeby takie dane nie wyciekały do aplikacji.
 - Schemat zmieniamy wyłącznie przez dodanie nowego `version(n)` z funkcją migracji, nigdy przez
@@ -87,6 +98,7 @@ Wersje schematu:
 | ------ | ----------------------------------------------------------------- |
 | 1      | Tabela `members` (domownicy)                                      |
 | 2      | Tabele `customRecipes` (własne przepisy) i `favorites` (ulubione) |
+| 3      | Tabela `planEntries` (plan posiłków), z indeksem po dacie         |
 
 Model domenowy:
 
@@ -95,7 +107,7 @@ Model domenowy:
 | `Member`     | Gotowe      | Domownik: imię, płeć, wiek, wzrost, waga, aktywność, cel          |
 | `Ingredient` | Gotowe      | Składnik z wartościami odżywczymi na 100 g i grupą żywności       |
 | `Recipe`     | Gotowe      | Przepis: nazwa, posiłek, porcje, czas, składniki w gramach, kroki |
-| `PlanEntry`  | Zaplanowane | Wpis w kalendarzu: data, rodzaj posiłku, przepis, kto je posiłek  |
+| `PlanEntry`  | Gotowe      | Wpis w kalendarzu: data, rodzaj posiłku, przepis, kto je posiłek  |
 | `Measure`    | Zaplanowane | Pomiar wagi lub obwodu w danym dniu                               |
 
 ## Przepisy i składniki
@@ -119,6 +131,23 @@ Do bazy trafiają tylko rzeczy tworzone przez użytkownika.
   przestaje zgłaszać błąd.
 
 Skąd pochodzą dane i jak je dodawać, opisuje [DATA.md](DATA.md).
+
+## Plan posiłków i porcje
+
+- Plan to lista wpisów `PlanEntry`: dzień, rodzaj posiłku, przepis i lista osób, które jedzą.
+  W jednym dniu jest najwyżej jeden wpis na rodzaj posiłku, więc kluczem w bazie jest
+  `data_posiłek`. Wymiana dania to nadpisanie wpisu z zachowaniem osób (`assignRecipe`).
+- Dni to ciągi `RRRR-MM-DD` (`DateKey`) w czasie lokalnym użytkownika, a nie obiekty `Date`.
+  Dzięki temu strefy czasowe i zmiana czasu nie wpływają na zapisane dane. Działania na dniach
+  (`src/domain/plan/dates.ts`) liczą w dniach kalendarzowych i mają testy na dzień zmiany czasu.
+  Tydzień trwa od poniedziałku do niedzieli.
+- Porcje liczy czysta funkcja z `src/domain/plan/portions.ts`. Każdy posiłek ma udział w dziennym
+  zapotrzebowaniu osoby (`MEAL_SHARES`). Porcja to liczba porcji przepisu, która najlepiej trafia
+  w cel kaloryczny posiłku. Zasady opisuje [NUTRITION.md](NUTRITION.md).
+- Kalendarz pokazuje dla każdej osoby jej porcję i kalorie, łączną ilość do ugotowania, składniki
+  dla wszystkich razem oraz podsumowanie dnia w porównaniu z dziennym celem.
+- Gdyby wpis w planie wskazywał na nieistniejący przepis, ekran pokazuje komunikat i pozwala
+  wybrać inne danie albo usunąć wpis, zamiast się zawiesić.
 
 ## Testy
 

@@ -5,7 +5,7 @@ import { requestPersistentStorage } from '../../data/persistence';
 import { addCustomRecipe, updateCustomRecipe } from '../../data/recipeRepository';
 import type { NewRecipe } from '../../domain/recipes/recipe';
 import { RecipeForm } from './RecipeForm';
-import { useRecipeEntries } from './useRecipeEntries';
+import { useRecipeEntries } from '../../hooks/useRecipeEntries';
 
 /** Creates a new recipe, or edits one of the user's own when the address has a recipe id. */
 export function RecipeFormPage() {

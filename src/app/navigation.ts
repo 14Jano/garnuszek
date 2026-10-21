@@ -15,6 +15,11 @@ export const recipePath = {
   create: `${ROUTES.recipes}/nowy`,
 } as const;
 
+export const calendarPath = {
+  day: (date: string) => `${ROUTES.calendar}/${date}`,
+  pickRecipe: (date: string, mealType: string) => `${ROUTES.calendar}/${date}/${mealType}/wybierz`,
+} as const;
+
 interface NavItem {
   path: string;
   label: string;
