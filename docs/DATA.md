@@ -29,7 +29,7 @@ a plan skonsultować ze specjalistą. Zobacz też zastrzeżenie w [README](../RE
    Wartości podajemy na 100 g produktu w takiej postaci, w jakiej jest ważony w przepisie.
    Identyfikator zapisujemy małymi literami, słowami rozdzielonymi myślnikiem, po angielsku.
 
-2. Wybierz grupę żywności (`category`). Od niej zależy, do jakich diet składnik pasuje:
+2. Wybierz grupę żywności (`category`). Od niej zależy, do jakich diet składnik pasuje i w którym dziale listy zakupów się pojawi:
 
    | Grupa           | Wykluczona z diet                             |
    | --------------- | --------------------------------------------- |

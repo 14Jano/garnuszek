@@ -3,6 +3,10 @@
   color: var(--color-text-muted);
 }
 
+.calendar-shopping-link {
+  margin: 0 0 1rem;
+}
+
 .day-summary {
   margin-top: 1.5rem;
   padding: 0.75rem 1rem;

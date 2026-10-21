@@ -25,11 +25,13 @@ Aktualizujemy go razem z kodem.
 | `src/data`       | Baza IndexedDB (Dexie) i repozytoria. Jedyne miejsce, które zna bibliotekę bazy       |
 | `src/content`    | Wbudowane dane: katalog składników i przepisy (zwykłe moduły TypeScript)              |
 | `src/hooks`      | Hooki Reacta, które łączą bazę (`data`) i dane wbudowane (`content`) z ekranami       |
+| `src/format`     | Zapis liczb i ilości w interfejsie (np. gramy jako „1,2 kg”)                          |
 | `src/styles`     | Zmienne projektowe (kolory, czcionki) i style globalne                                |
 | `src/test`       | Wspólna konfiguracja testów                                                           |
 
-Zasady zależności: `features` mogą korzystać z `components`, `content`, `data`, `domain`
-i `hooks`. `hooks` łączą `data` i `content` z Reactem, a `data` i `content` znają tylko `domain`.
+Zasady zależności: `features` mogą korzystać z `components`, `content`, `data`, `domain`,
+`format` i `hooks`. `hooks` łączą `data` i `content` z Reactem, a `data`, `content` i `format`
+znają tylko `domain`.
 `domain` nie zależy od niczego poza standardową biblioteką. `app` składa całość w jedną
 aplikację. Ekrany nie importują się nawzajem: to, czego potrzebuje kilka z nich (np. lista
 domowników albo przepisów), trafia do `hooks` albo `components`.
@@ -50,6 +52,10 @@ Ekran przepisów ma podstrony: `/przepisy` (lista), `/przepisy/nowy` (formularz)
 Kalendarz ma adresy `/kalendarz` (dziś), `/kalendarz/:data` (wybrany dzień, np. `2026-10-21`)
 i `/kalendarz/:data/:posiłek/wybierz` (wybór lub wymiana dania). Adresy buduje `calendarPath`.
 Błędna data w adresie jest zastępowana dzisiejszą.
+
+Lista zakupów ma adresy `/zakupy` (ten tydzień) i `/zakupy/:data` (tydzień zawierający dzień),
+budowane przez `shoppingPath`. Selektor tygodnia (`WeekSwitcher`) jest wspólnym komponentem
+kalendarza i listy zakupów, a każdy z nich przekazuje własną funkcję budującą adresy.
 
 ## PWA
 
@@ -94,11 +100,12 @@ Zasady:
 
 Wersje schematu:
 
-| Wersja | Zmiana                                                            |
-| ------ | ----------------------------------------------------------------- |
-| 1      | Tabela `members` (domownicy)                                      |
-| 2      | Tabele `customRecipes` (własne przepisy) i `favorites` (ulubione) |
-| 3      | Tabela `planEntries` (plan posiłków), z indeksem po dacie         |
+| Wersja | Zmiana                                                             |
+| ------ | ------------------------------------------------------------------ |
+| 1      | Tabela `members` (domownicy)                                       |
+| 2      | Tabele `customRecipes` (własne przepisy) i `favorites` (ulubione)  |
+| 3      | Tabela `planEntries` (plan posiłków), z indeksem po dacie          |
+| 4      | Tabela `shoppingChecks` (odhaczone zakupy), z indeksem po tygodniu |
 
 Model domenowy:
 
@@ -148,6 +155,21 @@ Skąd pochodzą dane i jak je dodawać, opisuje [DATA.md](DATA.md).
   dla wszystkich razem oraz podsumowanie dnia w porównaniu z dziennym celem.
 - Gdyby wpis w planie wskazywał na nieistniejący przepis, ekran pokazuje komunikat i pozwala
   wybrać inne danie albo usunąć wpis, zamiast się zawiesić.
+
+## Lista zakupów
+
+- Lista nie jest zapisywana. Za każdym razem powstaje od nowa z planu tygodnia, więc zawsze
+  zgadza się z kalendarzem. `planMeals` liczy porcje wszystkich zaplanowanych posiłków, a
+  `buildShoppingList` sumuje ich składniki.
+- Sumowanie i zaokrąglanie: ilości dodajemy dokładnie i dopiero potem zaokrąglamy do 5 g
+  (`roundGrams`), żeby błędy zaokrągleń nie nakładały się z posiłku na posiłek.
+- Działy to grupy żywności składników (`INGREDIENT_CATEGORIES`) w kolejności przechodzenia przez
+  sklep, a produkty w dziale są posortowane alfabetycznie po polsku.
+- Zapisujemy tylko to, co użytkownik odhaczył: tabela `shoppingChecks` z kluczem
+  `poniedziałek_składnik`. Odhaczenia są osobne dla każdego tygodnia i przetrwają zmianę planu.
+- Udostępnianie zależy od przeglądarki: arkusz udostępniania (`navigator.share`) tylko tam,
+  gdzie istnieje, kopiowanie do schowka oraz link `wa.me`. Tekst zawiera wyłącznie to, co zostało do
+  kupienia. Aplikacja nic nie wysyła sama, dane opuszczają urządzenie dopiero po kliknięciu.
 
 ## Testy
 

@@ -1,0 +1,246 @@
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { App } from '../../app/App';
+import { db } from '../../data/db';
+import { addMember } from '../../data/memberRepository';
+import { assignRecipe } from '../../data/planRepository';
+import { listCheckedIngredients } from '../../data/shoppingRepository';
+
+function renderAt(path: string) {
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <App />
+    </MemoryRouter>,
+  );
+}
+
+const WEDNESDAY = '2026-10-21';
+
+/**
+ * Anna and Bartek eat chili sin carne for lunch and a Greek salad for dinner.
+ * Together that is 11 different ingredients; onion, red pepper and olive oil
+ * are needed by both dishes.
+ */
+async function seedWeek() {
+  const anna = await addMember({
+    name: 'Anna',
+    sex: 'female',
+    age: 30,
+    heightCm: 165,
+    weightKg: 60,
+    activity: 'light',
+    goal: 'maintain',
+  });
+  const bartek = await addMember({
+    name: 'Bartek',
+    sex: 'male',
+    age: 30,
+    heightCm: 180,
+    weightKg: 80,
+    activity: 'sedentary',
+    goal: 'maintain',
+  });
+  const eaters = [anna.id, bartek.id];
+  await assignRecipe(WEDNESDAY, 'lunch', 'chili-sin-carne', eaters);
+  await assignRecipe(WEDNESDAY, 'dinner', 'salatka-grecka', eaters);
+}
+
+function section(name: string) {
+  return within(screen.getByRole('region', { name }));
+}
+
+beforeEach(async () => {
+  await db.planEntries.clear();
+  await db.members.clear();
+  await db.customRecipes.clear();
+  await db.favorites.clear();
+  await db.shoppingChecks.clear();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+  Reflect.deleteProperty(navigator, 'share');
+});
+
+describe('shopping list without anything to buy', () => {
+  it('asks for household members first', async () => {
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    expect(await screen.findByText(/najpierw dodaj domowników/)).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Przejdź do domowników' })).toBeVisible();
+  });
+
+  it('points to the calendar when no meals are planned', async () => {
+    await addMember({
+      name: 'Anna',
+      sex: 'female',
+      age: 30,
+      heightCm: 165,
+      weightKg: 60,
+      activity: 'light',
+      goal: 'maintain',
+    });
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    expect(await screen.findByText(/nie zaplanowano jeszcze posiłków/)).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Przejdź do kalendarza' })).toHaveAttribute(
+      'href',
+      `/kalendarz/${WEDNESDAY}`,
+    );
+  });
+});
+
+describe('the week list', () => {
+  it('adds up the planned meals and groups the items by food group', async () => {
+    await seedWeek();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'Warzywa' })).toBeVisible();
+    expect(screen.getByText('19–25 października')).toBeVisible();
+
+    // Shared by the chili (163 g) and the salad (222.5 g)
+    expect(
+      section('Warzywa').getByRole('checkbox', { name: 'Papryka czerwona 385 g' }),
+    ).toBeVisible();
+    expect(section('Warzywa').getByRole('checkbox', { name: 'Cebula 200 g' })).toBeVisible();
+    expect(
+      section('Tłuszcze').getByRole('checkbox', { name: 'Oliwa z oliwek 50 g' }),
+    ).toBeVisible();
+    expect(
+      section('Rośliny strączkowe').getByRole('checkbox', {
+        name: 'Fasola czerwona z puszki (odsączona) 435 g',
+      }),
+    ).toBeVisible();
+  });
+
+  it('starts with nothing bought', async () => {
+    await seedWeek();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    expect(await screen.findByText('Kupione: 0 z 11')).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Odznacz wszystko' })).not.toBeInTheDocument();
+  });
+
+  it('ticks items off, counts them and remembers them', async () => {
+    const user = userEvent.setup();
+    await seedWeek();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    await user.click(await screen.findByRole('checkbox', { name: 'Cebula 200 g' }));
+
+    expect(await screen.findByText('Kupione: 1 z 11')).toBeVisible();
+    expect(screen.getByRole('checkbox', { name: 'Cebula 200 g' })).toBeChecked();
+    expect(await listCheckedIngredients(WEDNESDAY)).toEqual(new Set(['onion']));
+  });
+
+  it('unticks everything at once', async () => {
+    const user = userEvent.setup();
+    await seedWeek();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    await user.click(await screen.findByRole('checkbox', { name: 'Cebula 200 g' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Oliwa z oliwek 50 g' }));
+    await user.click(await screen.findByRole('button', { name: 'Odznacz wszystko' }));
+
+    expect(await screen.findByText('Kupione: 0 z 11')).toBeVisible();
+    expect(await listCheckedIngredients(WEDNESDAY)).toEqual(new Set());
+  });
+
+  it('keeps each week separate and moves between weeks', async () => {
+    const user = userEvent.setup();
+    await seedWeek();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+    await user.click(await screen.findByRole('checkbox', { name: 'Cebula 200 g' }));
+
+    await user.click(screen.getByRole('link', { name: 'Następny tydzień' }));
+
+    expect(await screen.findByText('26 października – 1 listopada')).toBeVisible();
+    expect(screen.getByText(/nie zaplanowano jeszcze posiłków/)).toBeVisible();
+  });
+
+  it('opens this week when the address has no day', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 21, 12, 0));
+    renderAt('/zakupy');
+
+    expect(await screen.findByText('19–25 października')).toBeVisible();
+  });
+
+  it('replaces an invalid day in the address with today', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 21, 12, 0));
+    renderAt('/zakupy/2026-02-31');
+
+    expect(await screen.findByText('19–25 października')).toBeVisible();
+  });
+
+  it('is reachable from the calendar', async () => {
+    const user = userEvent.setup();
+    await seedWeek();
+    renderAt(`/kalendarz/${WEDNESDAY}`);
+
+    await user.click(await screen.findByRole('link', { name: 'Lista zakupów na ten tydzień' }));
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Lista zakupów' })).toBeVisible();
+    expect(await screen.findByText('Kupione: 0 z 11')).toBeVisible();
+  });
+});
+
+describe('passing the list on', () => {
+  it('copies what is still to be bought', async () => {
+    const user = userEvent.setup();
+    await seedWeek();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    await user.click(await screen.findByRole('checkbox', { name: 'Cebula 200 g' }));
+    await user.click(screen.getByRole('button', { name: 'Kopiuj listę' }));
+
+    expect(await screen.findByText('Skopiowano listę do schowka.')).toBeVisible();
+    const copied = await navigator.clipboard.readText();
+    expect(copied).toContain('Lista zakupów, 19–25 października');
+    expect(copied).toContain('- Papryka czerwona: 385 g');
+    expect(copied).not.toContain('Cebula');
+  });
+
+  it('offers a WhatsApp link with the list as the message', async () => {
+    await seedWeek();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    const link = await screen.findByRole('link', { name: 'Wyślij przez WhatsApp' });
+    const url = new URL(link.getAttribute('href') ?? '');
+
+    expect(url.origin + url.pathname).toBe('https://wa.me/');
+    expect(url.searchParams.get('text')).toContain('- Cebula: 200 g');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+  });
+
+  it('hides the share button where the browser cannot share', async () => {
+    await seedWeek();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    await screen.findByRole('button', { name: 'Kopiuj listę' });
+
+    expect(screen.queryByRole('button', { name: 'Udostępnij listę' })).not.toBeInTheDocument();
+  });
+
+  it('uses the share sheet where the browser has one', async () => {
+    const user = userEvent.setup();
+    const share = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'share', { configurable: true, value: share });
+    await seedWeek();
+    renderAt(`/zakupy/${WEDNESDAY}`);
+
+    await user.click(await screen.findByRole('button', { name: 'Udostępnij listę' }));
+
+    expect(share).toHaveBeenCalledOnce();
+    expect(share).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Lista zakupów',
+        text: expect.stringContaining('Lista zakupów, 19–25 października'),
+      }),
+    );
+  });
+});

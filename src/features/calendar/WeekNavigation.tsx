@@ -1,13 +1,7 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { calendarPath } from '../../app/navigation';
-import {
-  addDays,
-  dayOfMonth,
-  formatWeekRange,
-  weekDays,
-  weekdayShortName,
-} from '../../domain/plan/dates';
+import { WeekSwitcher } from '../../components/WeekSwitcher';
+import { dayOfMonth, weekDays, weekdayShortName } from '../../domain/plan/dates';
 import type { DateKey } from '../../domain/plan/dates';
 import './WeekNavigation.css';
 
@@ -21,26 +15,7 @@ interface WeekNavigationProps {
 export function WeekNavigation({ selected, today, plannedDays }: WeekNavigationProps) {
   return (
     <nav className="week-nav" aria-label="Wybór dnia">
-      <div className="week-nav__header">
-        <Link
-          className="week-nav__step"
-          to={calendarPath.day(addDays(selected, -7))}
-          aria-label="Poprzedni tydzień"
-        >
-          <ChevronLeft aria-hidden="true" size={22} />
-        </Link>
-        <p className="week-nav__range">{formatWeekRange(selected)}</p>
-        <Link
-          className="week-nav__step"
-          to={calendarPath.day(addDays(selected, 7))}
-          aria-label="Następny tydzień"
-        >
-          <ChevronRight aria-hidden="true" size={22} />
-        </Link>
-        <Link className="btn btn--small" to={calendarPath.day(today)}>
-          Dziś
-        </Link>
-      </div>
+      <WeekSwitcher selected={selected} today={today} pathFor={calendarPath.day} />
 
       <ul className="week-nav__days">
         {weekDays(selected).map((day) => (

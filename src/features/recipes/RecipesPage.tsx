@@ -5,7 +5,7 @@ import { INGREDIENT_CATALOG } from '../../content/catalog';
 import { NO_FILTER, filterRecipes } from '../../domain/recipes/filterRecipes';
 import type { RecipeFilter } from '../../domain/recipes/filterRecipes';
 import { DIETS, MEAL_TYPES } from '../../domain/recipes/recipe';
-import { DIET_LABELS, MEAL_TYPE_PLURAL_LABELS } from './labels';
+import { DIET_LABELS, MEAL_TYPE_PLURAL_LABELS } from '../../content/labels';
 import { RecipeCard } from './RecipeCard';
 import { useRecipeEntries } from '../../hooks/useRecipeEntries';
 import './RecipesPage.css';

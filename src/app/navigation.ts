@@ -20,6 +20,10 @@ export const calendarPath = {
   pickRecipe: (date: string, mealType: string) => `${ROUTES.calendar}/${date}/${mealType}/wybierz`,
 } as const;
 
+export const shoppingPath = {
+  week: (date: string) => `${ROUTES.shopping}/${date}`,
+} as const;
+
 interface NavItem {
   path: string;
   label: string;

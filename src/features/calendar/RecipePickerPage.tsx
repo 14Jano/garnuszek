@@ -9,7 +9,7 @@ import { MEAL_TYPES, nutritionPerServing } from '../../domain/recipes/recipe';
 import { useMembers } from '../../hooks/useMembers';
 import { usePlanEntries } from '../../hooks/usePlanEntries';
 import { useRecipeEntries } from '../../hooks/useRecipeEntries';
-import { MEAL_TYPE_LABELS } from '../recipes/labels';
+import { MEAL_TYPE_LABELS } from '../../content/labels';
 import './RecipePickerPage.css';
 
 /** Lets the user choose a dish for a meal slot, or swap the one that is already there. */

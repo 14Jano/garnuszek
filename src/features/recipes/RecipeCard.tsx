@@ -3,7 +3,7 @@ import { recipePath } from '../../app/navigation';
 import { INGREDIENT_CATALOG } from '../../content/catalog';
 import { compatibleDiets, nutritionPerServing } from '../../domain/recipes/recipe';
 import { FavoriteButton } from './FavoriteButton';
-import { DIET_LABELS, MEAL_TYPE_LABELS } from './labels';
+import { DIET_LABELS, MEAL_TYPE_LABELS } from '../../content/labels';
 import type { RecipeEntry } from '../../hooks/useRecipeEntries';
 import './RecipeCard.css';
 

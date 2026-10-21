@@ -8,8 +8,9 @@ import type { PlanEntry } from '../../domain/plan/planEntry';
 import type { PlannedMeal } from '../../domain/plan/portions';
 import { requireIngredient } from '../../domain/recipes/ingredient';
 import type { MealType } from '../../domain/recipes/recipe';
-import { MEAL_TYPE_LABELS } from '../recipes/labels';
-import { formatServings, roundGrams } from './format';
+import { MEAL_TYPE_LABELS } from '../../content/labels';
+import { formatGrams } from '../../format/amounts';
+import { formatServings } from './format';
 import './MealSlot.css';
 
 interface MealSlotProps {
@@ -125,7 +126,7 @@ export function MealSlot({
                   {meal.ingredients.map(({ ingredientId, grams }) => (
                     <li key={ingredientId}>
                       {requireIngredient(ingredientId, INGREDIENT_CATALOG).name}:{' '}
-                      {roundGrams(grams)} g
+                      {formatGrams(grams)}
                     </li>
                   ))}
                 </ul>

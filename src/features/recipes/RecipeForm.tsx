@@ -11,7 +11,8 @@ import {
 } from '../../domain/recipes/recipe';
 import type { MealType, NewRecipe, Recipe, RecipeErrors } from '../../domain/recipes/recipe';
 import type { FieldProblem } from '../../domain/validation';
-import { CATEGORY_LABELS, CATEGORY_ORDER, MEAL_TYPE_LABELS } from './labels';
+import { CATEGORY_LABELS, MEAL_TYPE_LABELS } from '../../content/labels';
+import { INGREDIENT_CATEGORIES } from '../../domain/recipes/ingredient';
 import { NutritionSummary } from './NutritionSummary';
 import './RecipeForm.css';
 
@@ -58,7 +59,7 @@ const GRAMS_MESSAGES: Record<FieldProblem, string> = {
 };
 
 /** Ingredients grouped by food group, each group sorted alphabetically for the picker. */
-const INGREDIENT_GROUPS = CATEGORY_ORDER.map((category) => ({
+const INGREDIENT_GROUPS = INGREDIENT_CATEGORIES.map((category) => ({
   category,
   ingredients: INGREDIENTS.filter((ingredient) => ingredient.category === category).sort((a, b) =>
     a.name.localeCompare(b.name, 'pl'),

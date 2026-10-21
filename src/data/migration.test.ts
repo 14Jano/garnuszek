@@ -25,10 +25,12 @@ describe('database upgrade', () => {
     const { listCustomRecipes } = await import('./recipeRepository');
     const { listFavoriteIds } = await import('./favoriteRepository');
     const { listPlanEntries } = await import('./planRepository');
+    const { listCheckedIngredients } = await import('./shoppingRepository');
 
     expect((await listMembers()).map((member) => member.name)).toEqual(['Anna']);
     expect(await listCustomRecipes()).toEqual([]);
     expect(await listFavoriteIds()).toEqual(new Set());
     expect(await listPlanEntries('2000-01-01', '2100-12-31')).toEqual([]);
+    expect(await listCheckedIngredients('2026-10-21')).toEqual(new Set());
   });
 });

@@ -1,5 +1,5 @@
-import type { IngredientCategory } from '../../domain/recipes/ingredient';
-import type { Diet, MealType } from '../../domain/recipes/recipe';
+import type { IngredientCategory } from '../domain/recipes/ingredient';
+import type { Diet, MealType } from '../domain/recipes/recipe';
 
 export const MEAL_TYPE_LABELS: Record<MealType, string> = {
   breakfast: 'Śniadanie',
@@ -33,18 +33,3 @@ export const CATEGORY_LABELS: Record<IngredientCategory, string> = {
   fats: 'Tłuszcze',
   other: 'Inne',
 };
-
-/** Order in which food groups are listed in pickers. */
-export const CATEGORY_ORDER: readonly IngredientCategory[] = [
-  'vegetables',
-  'fruit',
-  'meat',
-  'fish',
-  'dairy',
-  'eggs',
-  'grains',
-  'legumes',
-  'nuts',
-  'fats',
-  'other',
-];

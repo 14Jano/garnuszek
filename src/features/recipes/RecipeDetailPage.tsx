@@ -6,7 +6,7 @@ import { removeCustomRecipe } from '../../data/recipeRepository';
 import { requireIngredient } from '../../domain/recipes/ingredient';
 import { compatibleDiets, nutritionPerServing } from '../../domain/recipes/recipe';
 import { FavoriteButton } from './FavoriteButton';
-import { DIET_LABELS, MEAL_TYPE_LABELS } from './labels';
+import { DIET_LABELS, MEAL_TYPE_LABELS } from '../../content/labels';
 import { NutritionSummary } from './NutritionSummary';
 import { useRecipeEntries } from '../../hooks/useRecipeEntries';
 import './RecipeDetailPage.css';

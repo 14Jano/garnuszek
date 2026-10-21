@@ -9,8 +9,3 @@ export function formatServings(servings: number): string {
   const isFew = lastDigit >= 2 && lastDigit <= 4 && !(lastTwoDigits >= 12 && lastTwoDigits <= 14);
   return `${text} ${isFew ? 'porcje' : 'porcji'}`;
 }
-
-/** Kitchen-friendly weight: the nearest 5 g, and never less than 5 g. */
-export function roundGrams(grams: number): number {
-  return Math.max(5, Math.round(grams / 5) * 5);
-}

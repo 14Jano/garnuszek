@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { ROUTES } from '../../app/navigation';
+import { ROUTES, shoppingPath } from '../../app/navigation';
 import { removePlanEntry, setEaters } from '../../data/planRepository';
 import { formatDayHeading, isDateKey, todayKey, weekDays } from '../../domain/plan/dates';
 import type { MealType } from '../../domain/recipes/recipe';
@@ -74,6 +74,10 @@ export function CalendarPage() {
         today={today}
         plannedDays={new Set(weekEntries?.map((entry) => entry.date))}
       />
+
+      <p className="calendar-shopping-link">
+        <Link to={shoppingPath.week(selected)}>Lista zakupów na ten tydzień</Link>
+      </p>
 
       <h2>{formatDayHeading(selected)}</h2>
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatServings, roundGrams } from './format';
+import { formatServings } from './format';
 
 describe('formatServings', () => {
   it.each([
@@ -18,18 +18,5 @@ describe('formatServings', () => {
 
   it('ignores floating-point noise', () => {
     expect(formatServings(0.1 + 0.2)).toBe('0,3 porcji');
-  });
-});
-
-describe('roundGrams', () => {
-  it.each([
-    [850, 850],
-    [852, 850],
-    [853, 855],
-    [12, 10],
-    [3, 5],
-    [0.4, 5],
-  ])('rounds %f g to %i g', (grams, expected) => {
-    expect(roundGrams(grams)).toBe(expected);
   });
 });

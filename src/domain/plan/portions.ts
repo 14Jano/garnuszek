@@ -100,6 +100,24 @@ export function planMeal(
   };
 }
 
+/**
+ * Sizes every planned meal whose recipe is known. An entry whose recipe has
+ * disappeared is skipped, so one stale entry cannot break a whole day or week.
+ */
+export function planMeals(
+  entries: readonly PlanEntry[],
+  recipes: readonly Recipe[],
+  household: readonly Member[],
+  catalog: IngredientCatalog,
+): PlannedMeal[] {
+  const recipeById = new Map(recipes.map((recipe) => [recipe.id, recipe]));
+
+  return entries.flatMap((entry) => {
+    const recipe = recipeById.get(entry.recipeId);
+    return recipe ? [planMeal(entry, recipe, household, catalog)] : [];
+  });
+}
+
 /** What each person eats over the day, keyed by member id. */
 export function dayTotals(meals: readonly PlannedMeal[]): Map<string, Nutrients> {
   const totals = new Map<string, Nutrients>();

@@ -5,6 +5,29 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-21
+
+### Dodano
+
+- Lista zakupów na tydzień: składniki wszystkich zaplanowanych posiłków, zsumowane z uwzględnieniem
+  porcji każdego domownika, z wagami zaokrąglonymi do 5 g (od 1 kg w kilogramach).
+- Podział na działy według grup żywności, w kolejności przechodzenia przez sklep, z produktami
+  posortowanymi po polsku.
+- Odhaczanie produktów w sklepie z licznikiem „Kupione: x z y”. Odhaczenia są zapisywane osobno
+  dla każdego tygodnia, a przycisk „Odznacz wszystko” czyści listę.
+- Udostępnianie listy: arkusz udostępniania (tam, gdzie przeglądarka go ma), kopiowanie do
+  schowka i wysyłka przez WhatsApp. Tekst zawiera tylko to, co zostało do kupienia.
+- Nawigacja po tygodniach na liście zakupów oraz link z kalendarza do listy tego tygodnia.
+- Wersja 4 schematu bazy (tabela `shoppingChecks`).
+
+### Zmieniono
+
+- Selektor tygodnia wydzielono do wspólnego komponentu `WeekSwitcher`. Przycisk „Dziś” nie jest
+  już podkreślony.
+- Etykiety (posiłki, diety, grupy żywności) przeniesiono do `src/content/labels.ts`, a zapis ilości
+  do `src/format`, żeby ekrany nie importowały się nawzajem.
+- Kolejność grup żywności (`INGREDIENT_CATEGORIES`) jest teraz częścią warstwy domenowej.
+
 ## [0.4.0] - 2026-10-21
 
 ### Dodano

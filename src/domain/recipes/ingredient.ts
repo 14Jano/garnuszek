@@ -17,6 +17,21 @@ export type IngredientCategory =
   | 'fats'
   | 'other';
 
+/** The food groups in the order they are walked through in a shop. */
+export const INGREDIENT_CATEGORIES: readonly IngredientCategory[] = [
+  'vegetables',
+  'fruit',
+  'meat',
+  'fish',
+  'dairy',
+  'eggs',
+  'grains',
+  'legumes',
+  'nuts',
+  'fats',
+  'other',
+];
+
 export interface Ingredient {
   id: string;
   name: string;

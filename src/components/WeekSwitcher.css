@@ -1,0 +1,30 @@
+.week-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.week-switcher__range {
+  flex: 1;
+  margin: 0;
+  font-weight: 600;
+  text-align: center;
+}
+
+.week-switcher__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  color: var(--color-text);
+}
+
+.week-switcher .btn {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text);
+  text-decoration: none;
+}

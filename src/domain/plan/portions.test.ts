@@ -8,6 +8,7 @@ import {
   dayTotals,
   mealCalorieTarget,
   planMeal,
+  planMeals,
   portionForTarget,
 } from './portions';
 import type { PlanEntry } from './planEntry';
@@ -158,6 +159,29 @@ describe('planMeal', () => {
     expect(meal.portions).toEqual([]);
     expect(meal.totalServings).toBe(0);
     expect(meal.ingredients).toEqual([]);
+  });
+});
+
+describe('planMeals', () => {
+  it('sizes every entry whose recipe is known', () => {
+    const dinner: PlanEntry = { ...lunch, mealType: 'dinner' };
+
+    const meals = planMeals([lunch, dinner], [recipe], [adam, basia], catalog);
+
+    expect(meals.map((meal) => meal.entry.mealType)).toEqual(['lunch', 'dinner']);
+    expect(meals[0]?.portions).toHaveLength(2);
+  });
+
+  it('skips an entry whose recipe has disappeared', () => {
+    const stale: PlanEntry = { ...lunch, mealType: 'dinner', recipeId: 'gone' };
+
+    const meals = planMeals([lunch, stale], [recipe], [adam, basia], catalog);
+
+    expect(meals.map((meal) => meal.entry.mealType)).toEqual(['lunch']);
+  });
+
+  it('plans nothing for an empty plan', () => {
+    expect(planMeals([], [recipe], [adam], catalog)).toEqual([]);
   });
 });
 

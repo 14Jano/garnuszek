@@ -7,10 +7,10 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
-> **Status: wczesny etap (v0.4).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
+> **Status: wczesny etap (v0.5).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
 > domowników z dziennym zapotrzebowaniem kalorycznym, przepisy (32 dania, filtry, ulubione i własne
-> przepisy) oraz kalendarz posiłków z porcjami liczonymi dla każdego domownika. Lista zakupów
-> i reszta są jeszcze w budowie. Zobacz [plan prac](#plan-prac).
+> przepisy), kalendarz posiłków z porcjami liczonymi dla każdego domownika oraz lista zakupów
+> z odhaczaniem i udostępnianiem. Reszta jest jeszcze w budowie. Zobacz [plan prac](#plan-prac).
 
 ## Dlaczego Garnuszek
 
@@ -33,7 +33,8 @@ wszystkich.
 | Kalendarz posiłków: widok tygodnia i dnia                  | Gotowe    |
 | Porcje liczone osobno dla każdego domownika                | Gotowe    |
 | Wymiana dania, wybór osób jedzących, podsumowanie dnia     | Gotowe    |
-| Lista zakupów podzielona na działy                         | Planowane |
+| Lista zakupów na tydzień, zsumowana i podzielona na działy | Gotowe    |
+| Odhaczanie w sklepie, kopiowanie i wysyłka listy           | Gotowe    |
 | „Co ugotować z tego, co mam”                               | Planowane |
 | Gotowanie na zapas (jedno danie na kilka dni)              | Planowane |
 | Budżet kalorii na przekąski                                | Planowane |
@@ -87,6 +88,7 @@ src/
   data/         Baza IndexedDB i repozytoria, jedyne miejsce, które zna Dexie
   content/      Wbudowane dane: katalog składników i przepisy
   hooks/        Hooki Reacta łączące bazę i dane wbudowane z ekranami
+  format/       Zapis liczb i ilości dla interfejsu (np. „1,2 kg”)
   styles/       Zmienne projektowe i style globalne
   test/         Konfiguracja testów
 docs/           Dokumentacja techniczna
@@ -100,8 +102,10 @@ składników i przepisów oraz sposób ich dodawania [docs/DATA.md](docs/DATA.md
 ## Dane i prywatność
 
 Garnuszek nie wysyła nic na żaden serwer i nie wymaga konta. Domownicy, własne przepisy, ulubione
-i plan posiłków (a docelowo także pomiary) są zapisywani w bazie IndexedDB w przeglądarce na Twoim
-urządzeniu. Wbudowane przepisy są częścią aplikacji i nie są zapisywane osobno.
+i plan posiłków, a także to, co odhaczyłeś na liście zakupów (docelowo także pomiary), są
+zapisywane w bazie IndexedDB w przeglądarce na Twoim urządzeniu. Lista zakupów wychodzi poza
+urządzenie tylko wtedy, gdy sam ją skopiujesz albo klikniesz „Udostępnij listę” lub
+„Wyślij przez WhatsApp”. Wbudowane przepisy są częścią aplikacji i nie są zapisywane osobno.
 
 Wada tego podejścia jest taka, że wyczyszczenie danych przeglądarki albo zmiana telefonu oznacza
 utratę danych. Safari na iPhonie może dodatkowo usuwać dane stron, z którymi nie było kontaktu przez
@@ -132,7 +136,7 @@ Repozytorium zawiera gotowy workflow `.github/workflows/deploy.yml`. Po wypchni�
 - [x] **0.2** Domownicy: formularz profilu i lokalny zapis danych
 - [x] **0.3** Przepisy: baza dań, własne przepisy, kalorie i makroskładniki
 - [x] **0.4** Kalendarz posiłków, wymiana dań, przeliczanie porcji
-- [ ] **0.5** Lista zakupów
+- [x] **0.5** Lista zakupów
 - [ ] **0.6** Wyszukiwanie po składnikach, gotowanie na zapas, budżet na przekąski
 - [ ] **0.7** Kopia zapasowa (eksport i import)
 - [ ] **0.8** Waga i pomiary

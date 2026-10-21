@@ -24,6 +24,7 @@ export function App() {
         <Route path={`${ROUTES.calendar}/:date`} element={<CalendarPage />} />
         <Route path={`${ROUTES.calendar}/:date/:mealType/wybierz`} element={<RecipePickerPage />} />
         <Route path={ROUTES.shopping} element={<ShoppingListPage />} />
+        <Route path={`${ROUTES.shopping}/:date`} element={<ShoppingListPage />} />
         <Route path={ROUTES.recipes} element={<RecipesPage />} />
         <Route path={recipePath.create} element={<RecipeFormPage />} />
         <Route path={`${ROUTES.recipes}/:recipeId`} element={<RecipeDetailPage />} />
