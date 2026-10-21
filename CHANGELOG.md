@@ -5,6 +5,28 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-21
+
+### Dodano
+
+- Kopia zapasowa w Ustawieniach: pobranie wszystkich danych (domownicy, własne przepisy, ulubione,
+  plan, odhaczone zakupy, przekąski) jako pliku JSON oraz wczytanie takiego pliku, także na innym
+  urządzeniu. Wczytanie pokazuje, co jest w pliku, i pyta o potwierdzenie, bo zastępuje dane.
+- Ścisła walidacja wczytywanego pliku tymi samymi regułami co formularze. Uszkodzony plik jest
+  odrzucany z informacją, gdzie jest problem, a odwołania do rzeczy, których aplikacja już nie zna,
+  są pomijane i policzone.
+- Wczytanie kopii odbywa się w jednej transakcji: przy błędzie dane na urządzeniu zostają
+  nietknięte.
+- Usuwanie wszystkich danych z urządzenia, z potwierdzeniem.
+- Informacje o aplikacji: wersja (z `package.json`), licencja, odnośnik do kodu i zastrzeżenie
+  zdrowotne.
+- Dokument [docs/BACKUP.md](docs/BACKUP.md) z opisem formatu pliku.
+
+### Zmieniono
+
+- Listy płci, poziomów aktywności i celów przeniesiono do warstwy domenowej, bo korzysta z nich
+  walidacja kopii.
+
 ## [0.6.0] - 2026-10-21
 
 ### Dodano

@@ -3,8 +3,9 @@ import type { FormEvent } from 'react';
 import { MEMBER_LIMITS, allowedGoals, validateMember } from '../../domain/household/member';
 import type { MemberErrors, MemberField, NewMember } from '../../domain/household/member';
 import type { FieldProblem } from '../../domain/validation';
+import { ACTIVITY_LEVELS, SEXES } from '../../domain/nutrition/calorieTarget';
 import type { ActivityLevel, Goal, Sex } from '../../domain/nutrition/calorieTarget';
-import { ACTIVITY_LABELS, ACTIVITY_LEVELS, GOAL_LABELS, SEXES, SEX_LABELS } from './labels';
+import { ACTIVITY_LABELS, GOAL_LABELS, SEX_LABELS } from './labels';
 import './MemberForm.css';
 
 interface FormValues {

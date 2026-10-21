@@ -35,6 +35,9 @@ Do formatowania użyj `npm run format`.
 - **Dostępność:** semantyczny HTML, widoczny fokus, kontrast zgodny z WCAG AA.
 - **Dane użytkownika** zostają na jego urządzeniu. Nie dodajemy analityki, śledzenia ani
   zewnętrznych zapytań bez wcześniejszej dyskusji.
+- **Nowe dane użytkownika** (nowa tabela, nowe pole) trzeba dopisać do kopii zapasowej: do
+  `exportBackup`, `importBackup`, `parseBackup` i do [docs/BACKUP.md](docs/BACKUP.md). Jeśli nowa
+  wersja pliku nie jest czytelna dla starszej wersji aplikacji, podnieś `BACKUP_VERSION`.
 
 Zasady dotyczące architektury opisuje [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

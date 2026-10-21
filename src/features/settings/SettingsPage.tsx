@@ -1,16 +1,16 @@
-import { PagePlaceholder } from '../../components/PagePlaceholder';
+import { AboutSection } from './AboutSection';
+import { BackupSection } from './BackupSection';
+import { DeleteDataSection } from './DeleteDataSection';
 
 export function SettingsPage() {
   return (
-    <PagePlaceholder
-      title="Ustawienia"
-      lead="Opcje aplikacji i kopia zapasowa Twoich danych."
-      planned={[
-        'Eksport i import danych do pliku',
-        'Usunięcie wszystkich danych z urządzenia',
-        'Informacje o aplikacji i licencji',
-      ]}
-      note="Garnuszek nie ma kont ani serwera. Wszystko, co wpiszesz, zostaje na tym urządzeniu."
-    />
+    <section>
+      <h1>Ustawienia</h1>
+      <p className="lead">Kopia zapasowa Twoich danych i informacje o aplikacji.</p>
+
+      <BackupSection />
+      <DeleteDataSection />
+      <AboutSection />
+    </section>
   );
 }

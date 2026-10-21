@@ -1,13 +1,5 @@
 import type { ActivityLevel, Goal, Sex } from '../../domain/nutrition/calorieTarget';
 
-export const SEXES: readonly Sex[] = ['female', 'male'];
-export const ACTIVITY_LEVELS: readonly ActivityLevel[] = [
-  'sedentary',
-  'light',
-  'moderate',
-  'active',
-];
-
 export const SEX_LABELS: Record<Sex, string> = {
   female: 'Kobieta',
   male: 'Mężczyzna',

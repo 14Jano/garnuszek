@@ -1,0 +1,30 @@
+.backup__action {
+  margin: 1rem 0;
+}
+
+.backup__review {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-danger);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+}
+
+.backup__review p:first-child {
+  margin-top: 0;
+}
+
+.backup__dropped {
+  color: var(--color-text-muted);
+}
+
+.backup__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.backup__done {
+  font-weight: 600;
+  color: var(--color-primary);
+}

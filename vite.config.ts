@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
@@ -6,8 +7,14 @@ import { defineConfig } from 'vitest/config';
 // passes the base path in. Locally the app lives at the root.
 const base = process.env.VITE_BASE_PATH ?? '/';
 
+// Shown on the settings screen, so the version cannot drift from package.json.
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+
 export default defineConfig({
   base,
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+  },
   plugins: [
     react(),
     VitePWA({

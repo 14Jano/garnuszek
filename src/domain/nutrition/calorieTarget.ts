@@ -11,6 +11,15 @@ export type Sex = 'female' | 'male';
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active';
 export type Goal = 'lose' | 'maintain' | 'gain';
 
+export const SEXES: readonly Sex[] = ['female', 'male'];
+export const ACTIVITY_LEVELS: readonly ActivityLevel[] = [
+  'sedentary',
+  'light',
+  'moderate',
+  'active',
+];
+export const GOALS: readonly Goal[] = ['lose', 'maintain', 'gain'];
+
 export interface BodyProfile {
   sex: Sex;
   /** Age in full years. */

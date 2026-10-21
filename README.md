@@ -7,11 +7,12 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
-> **Status: wczesny etap (v0.6).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
+> **Status: wczesny etap (v0.7).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
 > domowników z dziennym zapotrzebowaniem kalorycznym i budżetem na przekąski, przepisy (32 dania,
 > filtry, wyszukiwanie po składnikach z lodówki, ulubione i własne przepisy), kalendarz posiłków
-> z porcjami liczonymi dla każdego domownika i gotowaniem na zapas oraz lista zakupów z odhaczaniem
-> i udostępnianiem. Reszta jest jeszcze w budowie. Zobacz [plan prac](#plan-prac).
+> z porcjami liczonymi dla każdego domownika i gotowaniem na zapas, lista zakupów z odhaczaniem
+> i udostępnianiem oraz kopia zapasowa danych. Zostały waga i pomiary. Zobacz
+> [plan prac](#plan-prac).
 
 ## Dlaczego Garnuszek
 
@@ -39,7 +40,8 @@ wszystkich.
 | „Co ugotować z tego, co mam”: dania ze wszystkimi składnikami | Gotowe    |
 | Gotowanie na zapas: jedno danie na 2–4 dni, z cofnięciem      | Gotowe    |
 | Budżet kalorii na przekąski, także zmieniany na jeden dzień   | Gotowe    |
-| Kopia zapasowa: eksport i import do pliku                     | Planowane |
+| Kopia zapasowa: eksport i import do pliku                     | Gotowe    |
+| Usuwanie wszystkich danych, informacje o aplikacji            | Gotowe    |
 | Waga i pomiary z wykresem postępu                             | Planowane |
 
 ## Technologie
@@ -98,7 +100,8 @@ public/         Ikony i pliki statyczne
 
 Szczegóły i uzasadnienie decyzji znajdziesz w [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 Wzory użyte do obliczania kalorii opisuje [docs/NUTRITION.md](docs/NUTRITION.md), a pochodzenie
-składników i przepisów oraz sposób ich dodawania [docs/DATA.md](docs/DATA.md).
+składników i przepisów oraz sposób ich dodawania [docs/DATA.md](docs/DATA.md). Format pliku kopii
+zapasowej opisuje [docs/BACKUP.md](docs/BACKUP.md).
 
 ## Dane i prywatność
 
@@ -112,7 +115,11 @@ urządzenie tylko wtedy, gdy sam ją skopiujesz albo klikniesz „Udostępnij li
 Wada tego podejścia jest taka, że wyczyszczenie danych przeglądarki albo zmiana telefonu oznacza
 utratę danych. Safari na iPhonie może dodatkowo usuwać dane stron, z którymi nie było kontaktu przez
 7 dni. Dotyczy to zwykłych kart przeglądarki, a nie aplikacji dodanych do ekranu głównego, więc na
-iPhonie warto zainstalować Garnuszka. W planach jest eksport i import kopii zapasowej do pliku.
+iPhonie warto zainstalować Garnuszka.
+
+Dlatego w **Ustawieniach** możesz pobrać kopię zapasową (plik JSON z wszystkimi Twoimi danymi) i
+wczytać ją później, także na innym urządzeniu. Plik powstaje lokalnie i nigdzie nie jest wysyłany.
+Wczytanie kopii zastępuje dane na urządzeniu, więc aplikacja pyta o potwierdzenie.
 
 ## Zastrzeżenie zdrowotne
 
@@ -140,7 +147,7 @@ Repozytorium zawiera gotowy workflow `.github/workflows/deploy.yml`. Po wypchni�
 - [x] **0.4** Kalendarz posiłków, wymiana dań, przeliczanie porcji
 - [x] **0.5** Lista zakupów
 - [x] **0.6** Wyszukiwanie po składnikach, gotowanie na zapas, budżet na przekąski
-- [ ] **0.7** Kopia zapasowa (eksport i import)
+- [x] **0.7** Kopia zapasowa (eksport i import)
 - [ ] **0.8** Waga i pomiary
 - [ ] **1.0** Dostępność, dopracowanie i stabilizacja
 

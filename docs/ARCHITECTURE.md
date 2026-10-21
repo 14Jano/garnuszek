@@ -208,6 +208,23 @@ Skąd pochodzą dane i jak je dodawać, opisuje [DATA.md](DATA.md).
   gdzie istnieje, kopiowanie do schowka oraz link `wa.me`. Tekst zawiera wyłącznie to, co zostało do
   kupienia. Aplikacja nic nie wysyła sama, dane opuszczają urządzenie dopiero po kliknięciu.
 
+## Kopia zapasowa
+
+Szczegóły pliku opisuje [BACKUP.md](BACKUP.md). Od strony architektury:
+
+- Format pliku (`src/domain/backup`) jest niezależny od schematu bazy. Zapisujemy obiekty
+  domenowe (domownik, przepis, wpis planu), a nie rekordy z kluczami i znacznikami czasu, więc
+  zmiany w bazie nie zmieniają formatu. Format ma własny numer wersji (`BACKUP_VERSION`).
+- Plik z zewnątrz jest niezaufany, bo użytkownik mógł go edytować albo wybrać zły plik. Dlatego
+  `parseBackup` sprawdza go ściśle tymi samymi regułami co formularze (`validateMember`,
+  `validateRecipe`, `allowedGoals`), a pierwszy uszkodzony element odrzuca cały plik i podaje, gdzie
+  jest problem. Odwołania do rzeczy, których aplikacja już nie zna (np. usunięty wbudowany przepis),
+  są pomijane i policzone, bo to zwykły skutek aktualizacji aplikacji, a nie uszkodzenie pliku.
+- Import (`importBackup`) czyści wszystkie tabele i wczytuje dane w jednej transakcji, więc przy
+  błędzie nic się nie zmienia. Test sprawdza to na pliku, który baza odrzuca w połowie.
+- Wersja aplikacji na ekranie ustawień pochodzi z `package.json` przez `define` w
+  `vite.config.ts` (deklaracja `__APP_VERSION__` w `src/env.d.ts`), więc nie rozjedzie się z wydaniem.
+
 ## Testy
 
 - **Logika domenowa:** testy jednostkowe obok kodu (`*.test.ts`). Obliczenia mają testy
