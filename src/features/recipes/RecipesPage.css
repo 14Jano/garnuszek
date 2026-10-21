@@ -1,0 +1,29 @@
+.recipes-add {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.recipe-filters {
+  margin-bottom: 0.5rem;
+}
+
+.recipe-filters__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 0.75rem;
+}
+
+.recipes-count {
+  margin: 0.5rem 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+.recipe-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

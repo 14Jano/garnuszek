@@ -23,12 +23,13 @@ Aktualizujemy go razem z kodem.
 | `src/components` | Komponenty współdzielone przez kilka funkcji                                          |
 | `src/domain`     | Czysta logika biznesowa i typy domenowe                                               |
 | `src/data`       | Baza IndexedDB (Dexie) i repozytoria. Jedyne miejsce, które zna bibliotekę bazy       |
+| `src/content`    | Wbudowane dane: katalog składników i przepisy (zwykłe moduły TypeScript)              |
 | `src/styles`     | Zmienne projektowe (kolory, czcionki) i style globalne                                |
 | `src/test`       | Wspólna konfiguracja testów                                                           |
 
-Zasady zależności: `features` mogą korzystać z `components`, `data` i `domain`. `data` zna
-tylko `domain`, a `domain` nie zależy od niczego poza standardową biblioteką. `app` składa
-całość w jedną aplikację.
+Zasady zależności: `features` mogą korzystać z `components`, `content`, `data` i `domain`.
+`data` i `content` znają tylko `domain`, a `domain` nie zależy od niczego poza standardową
+biblioteką. `app` składa całość w jedną aplikację.
 
 ## Routing
 
@@ -38,6 +39,10 @@ odświeżenie strony kończyłoby się błędem 404.
 
 Komponent `App` zawiera wyłącznie tabelę tras. Router dostarcza wywołujący: `HashRouter`
 w `main.tsx` i `MemoryRouter` w testach.
+
+Ekran przepisów ma podstrony: `/przepisy` (lista), `/przepisy/nowy` (formularz), `/przepisy/:id`
+(szczegóły) i `/przepisy/:id/edytuj` (edycja własnego przepisu). Adresy buduje obiekt
+`recipePath` z `src/app/navigation.ts`, żeby nie powtarzać ich w komponentach.
 
 ## PWA
 
@@ -55,8 +60,8 @@ potrzebna, a aplikacja działa spod `/`.
 
 ## Warstwa danych
 
-Dane użytkownika (domownicy, a później własne przepisy, plan posiłków i pomiary) trafiają do
-IndexedDB, bo `localStorage` ma mały limit i nie nadaje się do danych strukturalnych.
+Dane użytkownika (domownicy, własne przepisy, ulubione, a później plan posiłków i pomiary)
+trafiają do IndexedDB, bo `localStorage` ma mały limit i nie nadaje się do danych strukturalnych.
 IndexedDB opakowuje [Dexie](https://dexie.org). Daje typowane tabele, transakcje, wersjonowanie
 schematu oraz `useLiveQuery`, dzięki któremu ekrany odświeżają się same po zmianie danych.
 
@@ -72,16 +77,48 @@ Zasady:
   i imporcie kopii zapasowej.
 - Po pierwszym zapisie prosimy przeglądarkę o trwały magazyn (`navigator.storage.persist()`),
   żeby nie kasowała danych przy braku miejsca. Przeglądarka może odmówić i to nie jest błąd.
-- Testy używają `fake-indexeddb`, instalowanego globalnie w `src/test/setup.ts`.
+- Testy używają `fake-indexeddb`, instalowanego globalnie w `src/test/setup.ts`. Test migracji
+  (`migration.test.ts`) tworzy bazę w starej wersji schematu i sprawdza, że dane przetrwają
+  przejście na obecną.
 
-Model domenowy (na razie zaimplementowany jest tylko `Member`, w `src/domain/household`):
+Wersje schematu:
 
-| Encja       | Opis                                                               |
-| ----------- | ------------------------------------------------------------------ |
-| `Member`    | Domownik: imię, płeć, wiek, wzrost, waga, aktywność, cel           |
-| `Recipe`    | Przepis: nazwa, rodzaj posiłku, składniki, kalorie, makroskładniki |
-| `PlanEntry` | Wpis w kalendarzu: data, rodzaj posiłku, przepis, kto je posiłek   |
-| `Measure`   | Pomiar wagi lub obwodu w danym dniu                                |
+| Wersja | Zmiana                                                            |
+| ------ | ----------------------------------------------------------------- |
+| 1      | Tabela `members` (domownicy)                                      |
+| 2      | Tabele `customRecipes` (własne przepisy) i `favorites` (ulubione) |
+
+Model domenowy:
+
+| Encja        | Status      | Opis                                                              |
+| ------------ | ----------- | ----------------------------------------------------------------- |
+| `Member`     | Gotowe      | Domownik: imię, płeć, wiek, wzrost, waga, aktywność, cel          |
+| `Ingredient` | Gotowe      | Składnik z wartościami odżywczymi na 100 g i grupą żywności       |
+| `Recipe`     | Gotowe      | Przepis: nazwa, posiłek, porcje, czas, składniki w gramach, kroki |
+| `PlanEntry`  | Zaplanowane | Wpis w kalendarzu: data, rodzaj posiłku, przepis, kto je posiłek  |
+| `Measure`    | Zaplanowane | Pomiar wagi lub obwodu w danym dniu                               |
+
+## Przepisy i składniki
+
+Wbudowane składniki i przepisy to zwykłe moduły TypeScript w `src/content`. Dzięki temu są
+sprawdzane przez kompilator i testy, nie wymagają bazy ani zapytań sieciowych i działają offline.
+Do bazy trafiają tylko rzeczy tworzone przez użytkownika.
+
+- Przepis przechowuje listę par (id składnika, gramy). Kalorie i makroskładniki nigdy nie są
+  zapisywane, tylko liczone z katalogu (`recipeNutrition`). Poprawka wartości składnika
+  poprawia więc wszystkie przepisy naraz.
+- Diety (wegetariańska, wegańska, peskatariańska) są wyliczane z grup żywności składników
+  (`compatibleDiets`), a nie wpisywane ręcznie, więc nie mogą się rozjechać z listą składników.
+- Własne przepisy korzystają z tego samego katalogu składników. Ich identyfikatory to UUID,
+  a wbudowanych to czytelne nazwy, więc kolizje są wykluczone.
+- Ekran przepisów łączy oba źródła w hooku `useRecipeEntries`: własne przepisy wchodzą na początek
+  listy, a ulubione to osobna tabela z samymi identyfikatorami, która obejmuje oba rodzaje.
+- Filtrowanie i wyszukiwanie to czysta funkcja `filterRecipes`. Wyszukiwanie ignoruje wielkość
+  liter i polskie znaki, więc „losos” znajduje „łosoś”.
+- Formularz przepisu waliduje na żywo po pierwszej próbie zapisu, więc poprawione pole od razu
+  przestaje zgłaszać błąd.
+
+Skąd pochodzą dane i jak je dodawać, opisuje [DATA.md](DATA.md).
 
 ## Testy
 

@@ -1,5 +1,5 @@
 import type { Member, NewMember } from '../domain/household/member';
-import { db } from './db';
+import { db, nextCreatedAt } from './db';
 import type { MemberRecord } from './db';
 
 /** All members, oldest first. */
@@ -12,10 +12,7 @@ export async function addMember(input: NewMember): Promise<Member> {
   const member: Member = { ...input, id: crypto.randomUUID() };
 
   await db.transaction('rw', db.members, async () => {
-    // Two members saved within the same millisecond would otherwise have no
-    // stable order, so always go at least one past the newest one.
-    const newest = await db.members.orderBy('createdAt').last();
-    const createdAt = Math.max(Date.now(), (newest?.createdAt ?? 0) + 1);
+    const createdAt = nextCreatedAt(await db.members.orderBy('createdAt').last());
     await db.members.add({ ...member, createdAt });
   });
 

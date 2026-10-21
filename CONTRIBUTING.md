@@ -58,3 +58,7 @@ oraz dopisz wpis do sekcji `Unreleased` w [CHANGELOG.md](CHANGELOG.md).
 Przepisy w bazie muszą być autorskie albo pochodzić ze źródeł o zgodnej licencji. Nie kopiuj
 przepisów, zdjęć ani opisów z innych aplikacji i stron. Wartości odżywcze składników pochodzą
 z otwartych baz (np. USDA FoodData Central, Open Food Facts), a źródło trzeba podać.
+
+Jak dodać składnik albo przepis, opisuje [docs/DATA.md](docs/DATA.md). Testy w `src/content`
+sprawdzają spójność danych (znane składniki, kalorie zgodne z makroskładnikami, realistyczne
+porcje), więc literówkę w liczbie wychwycą jeszcze przed wysłaniem zmian.

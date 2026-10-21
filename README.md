@@ -7,9 +7,10 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
-> **Status: wczesny etap (v0.2).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA oraz
-> ekran domowników z lokalnym zapisem danych i wyliczaniem dziennego zapotrzebowania kalorycznego.
-> Pozostałe ekrany są jeszcze w budowie. Zobacz [plan prac](#plan-prac).
+> **Status: wczesny etap (v0.3).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
+> domowników z dziennym zapotrzebowaniem kalorycznym oraz przepisy (32 dania, filtry, ulubione
+> i własne przepisy). Kalendarz, lista zakupów i reszta są jeszcze w budowie. Zobacz
+> [plan prac](#plan-prac).
 
 ## Dlaczego Garnuszek
 
@@ -20,21 +21,23 @@ wszystkich.
 
 ## Funkcje
 
-| Funkcja                                                       | Status    |
-| ------------------------------------------------------------- | --------- |
-| Szkielet aplikacji, nawigacja, instalacja jako PWA            | Gotowe    |
-| Kalkulator dziennego zapotrzebowania kalorycznego (logika)    | Gotowe    |
-| Domownicy: profil, cel, dzienne zapotrzebowanie               | Gotowe    |
-| Lokalny zapis danych w przeglądarce (IndexedDB)               | Gotowe    |
-| Przepisy: baza dań, własne przepisy, kalorie i makroskładniki | Planowane |
-| Kalendarz posiłków z przeliczaniem porcji                     | Planowane |
-| Wymiana dania jednym kliknięciem                              | Planowane |
-| Lista zakupów podzielona na działy                            | Planowane |
-| „Co ugotować z tego, co mam”                                  | Planowane |
-| Gotowanie na zapas (jedno danie na kilka dni)                 | Planowane |
-| Budżet kalorii na przekąski                                   | Planowane |
-| Kopia zapasowa: eksport i import do pliku                     | Planowane |
-| Waga i pomiary z wykresem postępu                             | Planowane |
+| Funkcja                                                    | Status    |
+| ---------------------------------------------------------- | --------- |
+| Szkielet aplikacji, nawigacja, instalacja jako PWA         | Gotowe    |
+| Kalkulator dziennego zapotrzebowania kalorycznego (logika) | Gotowe    |
+| Domownicy: profil, cel, dzienne zapotrzebowanie            | Gotowe    |
+| Lokalny zapis danych w przeglądarce (IndexedDB)            | Gotowe    |
+| Przepisy: 32 dania z kaloriami i makroskładnikami          | Gotowe    |
+| Filtry po posiłku i diecie, wyszukiwanie, ulubione         | Gotowe    |
+| Własne przepisy z automatycznym liczeniem kalorii          | Gotowe    |
+| Kalendarz posiłków z przeliczaniem porcji                  | Planowane |
+| Wymiana dania jednym kliknięciem                           | Planowane |
+| Lista zakupów podzielona na działy                         | Planowane |
+| „Co ugotować z tego, co mam”                               | Planowane |
+| Gotowanie na zapas (jedno danie na kilka dni)              | Planowane |
+| Budżet kalorii na przekąski                                | Planowane |
+| Kopia zapasowa: eksport i import do pliku                  | Planowane |
+| Waga i pomiary z wykresem postępu                          | Planowane |
 
 ## Technologie
 
@@ -81,6 +84,7 @@ src/
   features/     Ekrany podzielone tematycznie (kalendarz, zakupy, przepisy...)
   domain/       Czysta logika biznesowa bez Reacta (np. obliczenia kalorii)
   data/         Baza IndexedDB i repozytoria, jedyne miejsce, które zna Dexie
+  content/      Wbudowane dane: katalog składników i przepisy
   styles/       Zmienne projektowe i style globalne
   test/         Konfiguracja testów
 docs/           Dokumentacja techniczna
@@ -88,12 +92,14 @@ public/         Ikony i pliki statyczne
 ```
 
 Szczegóły i uzasadnienie decyzji znajdziesz w [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-Wzory użyte do obliczania kalorii opisuje [docs/NUTRITION.md](docs/NUTRITION.md).
+Wzory użyte do obliczania kalorii opisuje [docs/NUTRITION.md](docs/NUTRITION.md), a pochodzenie
+składników i przepisów oraz sposób ich dodawania [docs/DATA.md](docs/DATA.md).
 
 ## Dane i prywatność
 
-Garnuszek nie wysyła nic na żaden serwer i nie wymaga konta. Domownicy (a docelowo także przepisy,
-plan posiłków i pomiary) są zapisywani w bazie IndexedDB w przeglądarce na Twoim urządzeniu.
+Garnuszek nie wysyła nic na żaden serwer i nie wymaga konta. Domownicy, własne przepisy i ulubione
+(a docelowo także plan posiłków i pomiary) są zapisywani w bazie IndexedDB w przeglądarce na Twoim
+urządzeniu. Wbudowane przepisy są częścią aplikacji i nie są zapisywane osobno.
 
 Wada tego podejścia jest taka, że wyczyszczenie danych przeglądarki albo zmiana telefonu oznacza
 utratę danych. Safari na iPhonie może dodatkowo usuwać dane stron, z którymi nie było kontaktu przez
@@ -122,7 +128,7 @@ Repozytorium zawiera gotowy workflow `.github/workflows/deploy.yml`. Po wypchni�
 
 - [x] **0.1** Szkielet projektu, nawigacja, PWA, kalkulator kalorii
 - [x] **0.2** Domownicy: formularz profilu i lokalny zapis danych
-- [ ] **0.3** Przepisy: baza dań, własne przepisy, kalorie i makroskładniki
+- [x] **0.3** Przepisy: baza dań, własne przepisy, kalorie i makroskładniki
 - [ ] **0.4** Kalendarz posiłków, wymiana dań, przeliczanie porcji
 - [ ] **0.5** Lista zakupów
 - [ ] **0.6** Wyszukiwanie po składnikach, gotowanie na zapas, budżet na przekąski

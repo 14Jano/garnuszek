@@ -1,6 +1,6 @@
 {
   "name": "garnuszek",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Darmowy planer posiłków dla całej rodziny. Działa w przeglądarce, bez konta, a dane zostają na Twoim urządzeniu.",
   "private": true,
   "license": "MIT",

@@ -1,0 +1,33 @@
+.recipe-form__pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 0.75rem;
+}
+
+.recipe-form__ingredients {
+  gap: 0.75rem;
+}
+
+.ingredient-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6.5rem auto;
+  gap: 0.5rem;
+  align-items: start;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ingredient-row .field {
+  margin: 0;
+}
+
+.ingredient-row__remove {
+  align-self: end;
+}
+
+.recipe-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}

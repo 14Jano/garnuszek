@@ -5,6 +5,24 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-21
+
+### Dodano
+
+- Ekran „Przepisy”: lista 32 wbudowanych dań z kaloriami na porcję, wyszukiwanie po nazwie
+  i składnikach (bez względu na polskie znaki), filtry po posiłku i diecie oraz ulubione.
+- Widok przepisu z wartościami odżywczymi na porcję, składnikami i krokami przygotowania.
+- Własne przepisy: dodawanie, edycja i usuwanie, z kaloriami liczonymi na żywo.
+- Katalog 72 składników z wartościami odżywczymi na 100 g (`src/content`).
+- Wyliczanie diet (wegetariańska, wegańska, peskatariańska) z grup żywności składników.
+- Wersja 2 schematu bazy (tabele `customRecipes` i `favorites`) wraz z testem migracji.
+- Testy spójności danych: znane składniki, kalorie zgodne z makroskładnikami, realistyczne porcje.
+- Dokument [docs/DATA.md](docs/DATA.md) o pochodzeniu danych i dodawaniu składników i przepisów.
+
+### Zmieniono
+
+- Wspólne sprawdzanie zakresu liczb wydzielono do `src/domain/validation.ts`.
+
 ## [0.2.0] - 2026-10-21
 
 ### Dodano

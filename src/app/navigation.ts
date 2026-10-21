@@ -9,6 +9,12 @@ export const ROUTES = {
   settings: '/ustawienia',
 } as const;
 
+export const recipePath = {
+  details: (id: string) => `${ROUTES.recipes}/${encodeURIComponent(id)}`,
+  edit: (id: string) => `${ROUTES.recipes}/${encodeURIComponent(id)}/edytuj`,
+  create: `${ROUTES.recipes}/nowy`,
+} as const;
+
 interface NavItem {
   path: string;
   label: string;
