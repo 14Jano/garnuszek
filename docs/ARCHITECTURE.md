@@ -22,11 +22,13 @@ Aktualizujemy go razem z kodem.
 | `src/features`   | Jeden podkatalog na obszar funkcjonalny. Tu trafiają ekrany i ich komponenty          |
 | `src/components` | Komponenty współdzielone przez kilka funkcji                                          |
 | `src/domain`     | Czysta logika biznesowa i typy domenowe                                               |
+| `src/data`       | Baza IndexedDB (Dexie) i repozytoria. Jedyne miejsce, które zna bibliotekę bazy       |
 | `src/styles`     | Zmienne projektowe (kolory, czcionki) i style globalne                                |
 | `src/test`       | Wspólna konfiguracja testów                                                           |
 
-Zasady zależności: `features` mogą korzystać z `components` i `domain`, `domain` nie zależy
-od niczego poza standardową biblioteką, a `app` składa całość w jedną aplikację.
+Zasady zależności: `features` mogą korzystać z `components`, `data` i `domain`. `data` zna
+tylko `domain`, a `domain` nie zależy od niczego poza standardową biblioteką. `app` składa
+całość w jedną aplikację.
 
 ## Routing
 
@@ -51,13 +53,28 @@ GitHub Pages serwuje projekt spod `/<nazwa-repozytorium>/`. Ścieżkę bazową p
 środowiskowa `VITE_BASE_PATH`, ustawiana w workflow wdrożenia. Lokalnie zmienna nie jest
 potrzebna, a aplikacja działa spod `/`.
 
-## Warstwa danych (planowana)
+## Warstwa danych
 
-Dane użytkownika (domownicy, własne przepisy, plan posiłków, pomiary) trafią do IndexedDB,
-bo `localStorage` ma mały limit i nie nadaje się do danych strukturalnych. Wybór biblioteki
-opakowującej IndexedDB zapadnie przy implementacji i zostanie opisany w tym dokumencie.
+Dane użytkownika (domownicy, a później własne przepisy, plan posiłków i pomiary) trafiają do
+IndexedDB, bo `localStorage` ma mały limit i nie nadaje się do danych strukturalnych.
+IndexedDB opakowuje [Dexie](https://dexie.org). Daje typowane tabele, transakcje, wersjonowanie
+schematu oraz `useLiveQuery`, dzięki któremu ekrany odświeżają się same po zmianie danych.
 
-Wstępny model domenowy:
+Zasady:
+
+- Baza (`src/data/db.ts`) i repozytoria (np. `memberRepository.ts`) są jedynym miejscem, które
+  zna Dexie. Reszta aplikacji woła funkcje repozytorium albo hooki, np. `useMembers`.
+- Rekord w bazie może mieć pola techniczne (np. `createdAt`), których nie ma w modelu domenowym.
+  Repozytorium kopiuje pola jawnie, żeby takie dane nie wyciekały do aplikacji.
+- Schemat zmieniamy wyłącznie przez dodanie nowego `version(n)` z funkcją migracji, nigdy przez
+  edycję istniejącej wersji, bo dane użytkowników już leżą na ich urządzeniach.
+- Identyfikatory to `crypto.randomUUID()`. Są stabilne, więc przydadzą się przy eksporcie
+  i imporcie kopii zapasowej.
+- Po pierwszym zapisie prosimy przeglądarkę o trwały magazyn (`navigator.storage.persist()`),
+  żeby nie kasowała danych przy braku miejsca. Przeglądarka może odmówić i to nie jest błąd.
+- Testy używają `fake-indexeddb`, instalowanego globalnie w `src/test/setup.ts`.
+
+Model domenowy (na razie zaimplementowany jest tylko `Member`, w `src/domain/household`):
 
 | Encja       | Opis                                                               |
 | ----------- | ------------------------------------------------------------------ |
@@ -83,5 +100,8 @@ Wstępny model domenowy:
   ze zmiennych w `src/styles/index.css`. Jest obsługa trybu ciemnego i `prefers-reduced-motion`.
 - **Dostępność:** semantyczny HTML, widoczny fokus, link „Przejdź do treści”, etykiety ARIA tam,
   gdzie sama treść nie wystarcza.
+- **Formularze:** kontrolowane pola, a walidacja to czysta funkcja w `domain` zwracająca kody
+  problemów (`required`, `invalid`). Komunikaty po polsku mapuje dopiero interfejs. Przy błędzie
+  fokus trafia do pierwszego błędnego pola, a pole ma `aria-invalid` i opis błędu.
 - **Zewnętrzne zasoby:** brak. Używamy czcionek systemowych, więc przeglądarka niczego
   nie pobiera z zewnętrznych serwerów.

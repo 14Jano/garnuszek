@@ -5,6 +5,22 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-21
+
+### Dodano
+
+- Ekran „Domownicy”: dodawanie, edycja i usuwanie osób, z dziennym zapotrzebowaniem kalorycznym.
+- Walidacja danych domownika w warstwie domenowej (`src/domain/household`).
+- Dla osób poniżej 18. roku życia dostępny jest wyłącznie cel „utrzymać wagę”.
+- Lokalny zapis danych w IndexedDB przez Dexie (`src/data`), z prośbą o trwały magazyn.
+- Wspólne style przycisków i pól formularza oraz komponenty `Callout` i `HealthDisclaimer`.
+
+### Zmieniono
+
+- Komunikat o orientacyjnym charakterze wyliczeń jest teraz komponentem wielokrotnego użytku.
+
+## [0.1.0] - 2026-10-21
+
 ### Dodano
 
 - Szkielet aplikacji: React 19, TypeScript, Vite, React Router (`HashRouter`).

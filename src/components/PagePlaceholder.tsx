@@ -1,3 +1,4 @@
+import { Callout } from './Callout';
 import './PagePlaceholder.css';
 
 interface PagePlaceholderProps {
@@ -12,7 +13,7 @@ export function PagePlaceholder({ title, lead, planned, note }: PagePlaceholderP
   return (
     <section className="page-placeholder">
       <h1>{title}</h1>
-      <p className="page-placeholder__lead">{lead}</p>
+      <p className="lead">{lead}</p>
       <p className="page-placeholder__badge">W budowie</p>
 
       <h2>Co tu się pojawi</h2>
@@ -22,7 +23,7 @@ export function PagePlaceholder({ title, lead, planned, note }: PagePlaceholderP
         ))}
       </ul>
 
-      {note && <p className="page-placeholder__note">{note}</p>}
+      {note && <Callout>{note}</Callout>}
     </section>
   );
 }

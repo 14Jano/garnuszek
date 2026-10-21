@@ -1,4 +1,6 @@
 import '@testing-library/jest-dom/vitest';
+// jsdom has no IndexedDB; this installs an in-memory implementation globally.
+import 'fake-indexeddb/auto';
 import { cleanup } from '@testing-library/react';
 import { afterEach } from 'vitest';
 
