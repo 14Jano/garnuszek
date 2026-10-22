@@ -58,6 +58,13 @@ Najczęstsze typy: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 Pull request powinien być mały i skupiony na jednej sprawie. Opisz, co i dlaczego zmieniasz,
 oraz dopisz wpis do sekcji `Unreleased` w [CHANGELOG.md](CHANGELOG.md).
 
+## Zrzuty ekranu
+
+Zrzuty w README (`docs/screenshots`) pokazują dane przykładowe: rodzinę z trojgiem domowników
+(w tym dzieckiem), zaplanowany tydzień, kilka odhaczonych zakupów i osiem tygodni pomiarów wagi.
+Robimy je w jasnym motywie, w widoku telefonu 375 × 812 px. Gdy zmienia się wygląd ekranu, odśwież
+odpowiedni zrzut tak samo, żeby README nie pokazywało nieaktualnej aplikacji.
+
 ## Treści (przepisy)
 
 Przepisy w bazie muszą być autorskie albo pochodzić ze źródeł o zgodnej licencji. Nie kopiuj

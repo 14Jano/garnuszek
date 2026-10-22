@@ -14,6 +14,19 @@ wszystkich.
 > z wykresem postępu oraz kopia zapasowa danych. Aplikacja jest dopracowana pod kątem dostępności
 > ([szczegóły i ograniczenia](docs/ACCESSIBILITY.md)). Zobacz [plan prac](#plan-prac).
 
+## Jak to wygląda
+
+<p align="center">
+  <img src="docs/screenshots/kalendarz.jpg" alt="Kalendarz posiłków: pasek dni tygodnia i śniadanie z porcjami dla trzech osób" width="170">
+  <img src="docs/screenshots/zakupy.jpg" alt="Lista zakupów podzielona na działy, część pozycji odhaczona" width="170">
+  <img src="docs/screenshots/przepisy.jpg" alt="Lista przepisów z kaloriami na porcję i oznaczeniami diety" width="170">
+  <img src="docs/screenshots/pomiary.jpg" alt="Wykres wagi z linią celu i prognozą jego osiągnięcia" width="170">
+  <img src="docs/screenshots/domownicy.jpg" alt="Karty domowników z dziennym zapotrzebowaniem kalorycznym" width="170">
+</p>
+
+Zrzuty pokazują dane przykładowe. Aplikacja ma też ciemny motyw, który włącza się razem z ustawieniem
+systemu.
+
 ## Dlaczego Garnuszek
 
 - **Za darmo, na zawsze.** Bez subskrypcji, limitów dań, limitów osób i limitów własnych przepisów.

@@ -5,6 +5,16 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+### Dodano
+
+- Zrzuty ekranu w README (w `docs/screenshots`).
+- Tagi wersji `v0.1.0` do `v1.0.0` na odpowiednich commitach.
+
+### Naprawiono
+
+- Na ekranie pomiarów brakowało kropki po „Cel: 62 kg”, więc zdanie o tym, ile zostało do celu,
+  zlewało się z poprzednim.
+
 ## [1.0.0] - 2026-10-22
 
 Pierwsza stabilna wersja. Wszystkie funkcje z planu są gotowe, a ta wersja je dopracowuje: dostępność
