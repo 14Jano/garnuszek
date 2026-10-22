@@ -5,6 +5,35 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-21
+
+### Dodano
+
+- Ekran pomiarów domownika (`/domownicy/:id/pomiary`), do którego prowadzi przycisk „Pomiary
+  i postępy” na karcie domownika. Zapisujesz wagę, talię, biodra i obwód klatki piersiowej z datą.
+  Kolejny pomiar z tego samego dnia zastępuje poprzedni, a formularz uprzedza o tym.
+- Wykres postępu narysowany jako SVG, z opisem słownym dla czytników ekranu, oraz podsumowanie:
+  pierwszy i ostatni pomiar, zmiana. Lista pomiarów z usuwaniem po potwierdzeniu.
+- Docelowa waga w profilu domownika (pole pojawia się przy celu „schudnąć” i „przytyć”). Ekran
+  pomiarów pokazuje przerywaną linię celu, ile zostało do celu i pasek postępu.
+- Prognoza osiągnięcia celu na podstawie tempa z ostatnich ośmiu tygodni. Gdy daty nie da się
+  rzetelnie podać (za mało danych, waga stoi w miejscu lub oddala się od celu, cel za dwa lata),
+  aplikacja mówi dlaczego.
+- Waga domownika jest zawsze wagą z jego ostatniego ważenia, więc dzienne zapotrzebowanie i porcje
+  liczą się od aktualnej wagi.
+- Kopia zapasowa w wersji 2 zawiera pomiary i docelową wagę. Pliki w wersji 1 nadal się wczytują.
+  Ekran wczytywania pokazuje liczbę pomiarów.
+- Wersja 6 schematu bazy (tabela `measurements`). Usunięcie domownika usuwa jego pomiary.
+- Opis prognozy w [docs/NUTRITION.md](docs/NUTRITION.md), sekcja o pomiarach w
+  [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) i opis wersji 2 pliku w [docs/BACKUP.md](docs/BACKUP.md).
+
+### Zmieniono
+
+- Zapis liczb z przecinkiem (`formatDecimal`, `formatChange`) i dłuższe formaty dat trafiły do
+  wspólnych funkcji w `src/format` i `src/domain/plan/dates.ts`.
+- Waga na karcie domownika jest zapisywana z przecinkiem (68,5 kg), bo ważenia dają wartości
+  ułamkowe.
+
 ## [0.7.0] - 2026-10-21
 
 ### Dodano

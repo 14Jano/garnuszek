@@ -84,6 +84,7 @@ describe('exportBackup', () => {
           planEntries: [],
           shoppingChecks: [],
           snackOverrides: [],
+          measurements: [],
         },
         NOW,
       ),
@@ -175,6 +176,7 @@ describe('importBackup', () => {
       planEntries: [],
       shoppingChecks: [],
       snackOverrides: [],
+      measurements: [],
     };
 
     await importBackup(createBackup(data, NOW));
@@ -208,6 +210,7 @@ describe('importBackup', () => {
         planEntries: [],
         shoppingChecks: [],
         snackOverrides: [],
+        measurements: [],
       },
       NOW,
     );
@@ -234,6 +237,7 @@ describe('importBackup', () => {
         planEntries: [],
         shoppingChecks: [],
         snackOverrides: [],
+        measurements: [],
       },
       NOW,
     );

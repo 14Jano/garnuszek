@@ -57,6 +57,10 @@ Lista zakupów ma adresy `/zakupy` (ten tydzień) i `/zakupy/:data` (tydzień za
 budowane przez `shoppingPath`. Selektor tygodnia (`WeekSwitcher`) jest wspólnym komponentem
 kalendarza i listy zakupów, a każdy z nich przekazuje własną funkcję budującą adresy.
 
+Pomiary domownika mają adres `/domownicy/:id/pomiary`, budowany przez `householdPath`. Prowadzi do
+niego przycisk na karcie domownika. Nieznany identyfikator pokazuje komunikat z odnośnikiem do
+listy domowników.
+
 ## PWA
 
 Manifest i service worker generuje `vite-plugin-pwa` (konfiguracja w `vite.config.ts`).
@@ -73,7 +77,7 @@ potrzebna, a aplikacja działa spod `/`.
 
 ## Warstwa danych
 
-Dane użytkownika (domownicy, własne przepisy, ulubione, plan posiłków, a później pomiary)
+Dane użytkownika (domownicy, własne przepisy, ulubione, plan posiłków i pomiary)
 trafiają do IndexedDB, bo `localStorage` ma mały limit i nie nadaje się do danych strukturalnych.
 IndexedDB opakowuje [Dexie](https://dexie.org). Daje typowane tabele, transakcje, wersjonowanie
 schematu oraz `useLiveQuery`, dzięki któremu ekrany odświeżają się same po zmianie danych.
@@ -107,19 +111,21 @@ Wersje schematu:
 | 3      | Tabela `planEntries` (plan posiłków), z indeksem po dacie                         |
 | 4      | Tabela `shoppingChecks` (odhaczone zakupy), z indeksem po tygodniu                |
 | 5      | Tabela `snackOverrides` (przekąski na pojedyncze dni) i indeks `batchId` w planie |
+| 6      | Tabela `measurements` (pomiary wagi i obwodów), z indeksem po domowniku           |
 
 Członek zapisany przed wersją 5 nie ma pola `snackKcal`. Repozytorium traktuje brak jako 0, więc
-nie potrzeba migracji danych, a test migracji sprawdza to na bazie w wersji 1.
+nie potrzeba migracji danych, a test migracji sprawdza to na bazie w wersji 1. Podobnie brak
+`targetWeightKg` (dodane w wersji 6 jako pole opcjonalne) oznacza, że domownik nie ma celu wagi.
 
 Model domenowy:
 
-| Encja        | Status      | Opis                                                              |
-| ------------ | ----------- | ----------------------------------------------------------------- |
-| `Member`     | Gotowe      | Domownik: imię, płeć, wiek, wzrost, waga, aktywność, cel          |
-| `Ingredient` | Gotowe      | Składnik z wartościami odżywczymi na 100 g i grupą żywności       |
-| `Recipe`     | Gotowe      | Przepis: nazwa, posiłek, porcje, czas, składniki w gramach, kroki |
-| `PlanEntry`  | Gotowe      | Wpis w kalendarzu: data, rodzaj posiłku, przepis, kto je posiłek  |
-| `Measure`    | Zaplanowane | Pomiar wagi lub obwodu w danym dniu                               |
+| Encja         | Opis                                                                        |
+| ------------- | --------------------------------------------------------------------------- |
+| `Member`      | Domownik: imię, płeć, wiek, wzrost, waga, aktywność, cel, docelowa waga     |
+| `Ingredient`  | Składnik z wartościami odżywczymi na 100 g i grupą żywności                 |
+| `Recipe`      | Przepis: nazwa, posiłek, porcje, czas, składniki w gramach, kroki           |
+| `PlanEntry`   | Wpis w kalendarzu: data, rodzaj posiłku, przepis, kto je posiłek            |
+| `Measurement` | Pomiar wagi lub obwodu jednej osoby w danym dniu (najwyżej jeden na rodzaj) |
 
 ## Przepisy i składniki
 
@@ -208,13 +214,45 @@ Skąd pochodzą dane i jak je dodawać, opisuje [DATA.md](DATA.md).
   gdzie istnieje, kopiowanie do schowka oraz link `wa.me`. Tekst zawiera wyłącznie to, co zostało do
   kupienia. Aplikacja nic nie wysyła sama, dane opuszczają urządzenie dopiero po kliknięciu.
 
+## Pomiary i postępy
+
+- Pomiar (`Measurement`) to jedna wartość jednego rodzaju (`weight`, `waist`, `hips`, `chest`)
+  jednej osoby w jednym dniu. Kluczem w bazie jest `domownik_rodzaj_dzień` (`measurementKey`),
+  więc kolejny pomiar z tego samego dnia zastępuje poprzedni. `validateMeasurement` pilnuje zakresu
+  (każdy rodzaj ma własny) i tego, że pomiar nie jest z przyszłości.
+- Waga domownika to jego ostatnie ważenie. `saveMeasurement` i `removeMeasurement` w tej samej
+  transakcji ustawiają `Member.weightKg` na wartość z najnowszego ważenia, niezależnie od kolejności
+  wpisywania, bo od niej liczy się dzienne zapotrzebowanie. Gdy nie zostanie żadne ważenie, waga
+  pozostaje taka, jaka była. Usunięcie domownika usuwa też jego pomiary.
+- Docelowa waga (`targetWeightKg`) jest opcjonalna i ma sens tylko przy celu „schudnąć” albo
+  „przytyć”. Formularz wymaga, żeby leżała po właściwej stronie obecnej wagi. Ważenia zmieniają
+  jednak wagę, więc osoba, która osiągnęła cel, nadal go ma. Dlatego kopia zapasowa sprawdza tylko,
+  czy to możliwa waga, a nie po której stronie leży.
+- Logika postępów to czyste funkcje z `src/domain/progress`: `summarizeSeries` (pierwszy i ostatni
+  pomiar oraz zmiana), `targetProgress` (ile już zrobiono i ile zostało, a kierunek wynika z
+  punktu startu, więc ruch w złą stronę to brak postępu, a nie postęp ujemny) i `forecastTarget`.
+- Prognoza opiera się na prostej dopasowanej metodą najmniejszych kwadratów do pomiarów z ostatnich
+  ośmiu tygodni, więc jeden nietypowy dzień nie zmienia wyniku, a stare pomiary nie zaniżają tempa.
+  Potrzeba co najmniej dwóch pomiarów w odstępie tygodnia. Daty nie podajemy, gdy trend stoi w
+  miejscu (poniżej 0,05 kg na tydzień), oddala się od celu albo cel byłby dalej niż za dwa lata.
+  Wynik to jeden z pięciu statusów (`reached`, `projected`, `too-far`, `not-approaching`,
+  `not-enough-data`), a zdanie z niego składa `forecastText`. To przedłużenie dotychczasowego
+  tempa, a nie obietnica, i tak jest sformułowane.
+- Wykres (`ProgressChart`) to ręcznie narysowane SVG bez biblioteki wykresów: jedna linia, punkty
+  i przerywana linia celu. Obliczenia osi (`valueAxis`, `timeFraction`) są w `chart.ts` i mają
+  osobne testy. Oś pokazuje zawsze co najmniej dwie jednostki zakresu, żeby drobne wahania nie
+  wyglądały jak skok. Wykres ma `role="img"` z opisem słownym, a wszystkie wartości są na liście
+  pod nim, więc nic nie jest dostępne tylko wizualnie.
+
 ## Kopia zapasowa
 
 Szczegóły pliku opisuje [BACKUP.md](BACKUP.md). Od strony architektury:
 
 - Format pliku (`src/domain/backup`) jest niezależny od schematu bazy. Zapisujemy obiekty
   domenowe (domownik, przepis, wpis planu), a nie rekordy z kluczami i znacznikami czasu, więc
-  zmiany w bazie nie zmieniają formatu. Format ma własny numer wersji (`BACKUP_VERSION`).
+  zmiany w bazie nie zmieniają formatu. Format ma własny numer wersji (`BACKUP_VERSION`). Nowsza
+  aplikacja czyta też starsze wersje pliku: kopia w wersji 1 nie ma pomiarów, więc wczytuje się
+  z pustą listą.
 - Plik z zewnątrz jest niezaufany, bo użytkownik mógł go edytować albo wybrać zły plik. Dlatego
   `parseBackup` sprawdza go ściśle tymi samymi regułami co formularze (`validateMember`,
   `validateRecipe`, `allowedGoals`), a pierwszy uszkodzony element odrzuca cały plik i podaje, gdzie

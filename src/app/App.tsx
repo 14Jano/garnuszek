@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { CalendarPage } from '../features/calendar/CalendarPage';
 import { RecipePickerPage } from '../features/calendar/RecipePickerPage';
 import { HouseholdPage } from '../features/household/HouseholdPage';
+import { MeasurementsPage } from '../features/progress/MeasurementsPage';
 import { RecipeDetailPage } from '../features/recipes/RecipeDetailPage';
 import { RecipeFormPage } from '../features/recipes/RecipeFormPage';
 import { RecipesPage } from '../features/recipes/RecipesPage';
@@ -30,6 +31,7 @@ export function App() {
         <Route path={`${ROUTES.recipes}/:recipeId`} element={<RecipeDetailPage />} />
         <Route path={`${ROUTES.recipes}/:recipeId/edytuj`} element={<RecipeFormPage />} />
         <Route path={ROUTES.household} element={<HouseholdPage />} />
+        <Route path={`${ROUTES.household}/:memberId/pomiary`} element={<MeasurementsPage />} />
         <Route path={ROUTES.settings} element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

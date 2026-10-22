@@ -16,6 +16,7 @@ interface FormValues {
   weightKg: string;
   activity: ActivityLevel;
   goal: Goal;
+  targetWeightKg: string;
   snackKcal: string;
 }
 
@@ -27,10 +28,18 @@ const EMPTY_VALUES: FormValues = {
   weightKg: '',
   activity: 'light',
   goal: 'maintain',
+  targetWeightKg: '',
   snackKcal: '0',
 };
 
-const FIELD_ORDER: readonly MemberField[] = ['name', 'age', 'heightCm', 'weightKg', 'snackKcal'];
+const FIELD_ORDER: readonly MemberField[] = [
+  'name',
+  'age',
+  'heightCm',
+  'weightKg',
+  'targetWeightKg',
+  'snackKcal',
+];
 
 const ERROR_MESSAGES: Record<MemberField, Record<FieldProblem, string>> = {
   name: {
@@ -48,6 +57,11 @@ const ERROR_MESSAGES: Record<MemberField, Record<FieldProblem, string>> = {
   weightKg: {
     required: 'Podaj wagę.',
     invalid: `Podaj wagę w kilogramach, od ${MEMBER_LIMITS.weightKg.min} do ${MEMBER_LIMITS.weightKg.max}.`,
+  },
+  targetWeightKg: {
+    required: 'Podaj docelową wagę.',
+    invalid:
+      'Podaj docelową wagę w kilogramach: mniejszą od obecnej, jeśli chcesz schudnąć, i większą, jeśli chcesz przytyć.',
   },
   snackKcal: {
     required: 'Podaj kalorie na przekąski. Wpisz 0, jeśli ich nie planujesz.',
@@ -75,6 +89,8 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
   const goals = allowedGoals(age);
   const goal = goals.includes(values.goal) ? values.goal : 'maintain';
   const goalIsLocked = goals.length === 1;
+  // A target weight only makes sense when losing or gaining weight.
+  const wantsTargetWeight = goal !== 'maintain';
 
   function setField<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -101,6 +117,11 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
       heightCm: parseNumber(values.heightCm),
       weightKg: parseNumber(values.weightKg),
       snackKcal: parseNumber(values.snackKcal),
+      goal,
+      // An empty field means no target, which is fine.
+      ...(wantsTargetWeight && values.targetWeightKg.trim() !== ''
+        ? { targetWeightKg: parseNumber(values.targetWeightKg) }
+        : {}),
     };
     const problems = validateMember(draft);
     setErrors(problems);
@@ -123,6 +144,7 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
         activity: values.activity,
         goal,
         snackKcal: draft.snackKcal,
+        ...(draft.targetWeightKg === undefined ? {} : { targetWeightKg: draft.targetWeightKg }),
       });
     } finally {
       setSubmitting(false);
@@ -262,6 +284,22 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
         )}
       </div>
 
+      {wantsTargetWeight && (
+        <NumberField
+          id={`${formId}-target-weight`}
+          name="targetWeightKg"
+          label="Docelowa waga (kg)"
+          hint="Zostaw puste, jeśli nie masz celu wagi. Na ekranie pomiarów pokażemy postęp i prognozę."
+          inputMode="decimal"
+          step="any"
+          min={MEMBER_LIMITS.weightKg.min}
+          max={MEMBER_LIMITS.weightKg.max}
+          value={values.targetWeightKg}
+          onChange={(value) => setField('targetWeightKg', value)}
+          error={errorMessage('targetWeightKg')}
+        />
+      )}
+
       <NumberField
         id={`${formId}-snacks`}
         name="snackKcal"
@@ -366,6 +404,7 @@ function toFormValues(member: NewMember): FormValues {
     weightKg: String(member.weightKg),
     activity: member.activity,
     goal: member.goal,
+    targetWeightKg: member.targetWeightKg === undefined ? '' : String(member.targetWeightKg),
     snackKcal: String(member.snackKcal),
   };
 }

@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   addDays,
   dayOfMonth,
+  daysBetween,
   formatDayHeading,
+  formatFullDate,
+  formatLongDate,
+  formatShortDate,
   formatWeekRange,
   isDateKey,
   parseDateKey,
@@ -99,6 +103,37 @@ describe('weeks', () => {
   it('can span two months or two years', () => {
     expect(weekDays('2026-10-28')[6]).toBe('2026-11-01');
     expect(weekDays('2026-12-30')).toContain('2027-01-03');
+  });
+});
+
+describe('daysBetween', () => {
+  it('counts calendar days in both directions', () => {
+    expect(daysBetween('2026-10-21', '2026-10-21')).toBe(0);
+    expect(daysBetween('2026-10-21', '2026-10-28')).toBe(7);
+    expect(daysBetween('2026-10-28', '2026-10-21')).toBe(-7);
+  });
+
+  it('is not thrown off by a clock change or a month boundary', () => {
+    expect(daysBetween('2026-10-24', '2026-10-26')).toBe(2);
+    expect(daysBetween('2026-03-28', '2026-03-30')).toBe(2);
+    expect(daysBetween('2026-10-31', '2026-11-01')).toBe(1);
+    expect(daysBetween('2026-01-01', '2027-01-01')).toBe(365);
+  });
+});
+
+describe('numeric dates', () => {
+  it('writes a short day and month', () => {
+    expect(formatShortDate('2026-10-21')).toBe('21.10');
+    expect(formatShortDate('2026-03-05')).toBe('5.03');
+  });
+
+  it('writes the full date', () => {
+    expect(formatFullDate('2026-10-21')).toBe('21.10.2026');
+  });
+
+  it('writes the date with the month name', () => {
+    expect(formatLongDate('2026-10-21')).toBe('21 października 2026');
+    expect(formatLongDate('2027-01-05')).toBe('5 stycznia 2027');
   });
 });
 

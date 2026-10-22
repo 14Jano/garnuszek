@@ -28,18 +28,26 @@ export async function updateMember(member: Member): Promise<void> {
 
 /**
  * Deletes the member, takes them off every planned meal they were eating and
- * forgets their snack amounts for single days.
+ * forgets their snack amounts for single days and their measurements.
  */
 export async function removeMember(id: string): Promise<void> {
-  await db.transaction('rw', db.members, db.planEntries, db.snackOverrides, async () => {
-    await db.members.delete(id);
-    await db.snackOverrides.filter((override) => override.memberId === id).delete();
-    await db.planEntries
-      .filter((entry) => entry.memberIds.includes(id))
-      .modify((entry) => {
-        entry.memberIds = entry.memberIds.filter((memberId) => memberId !== id);
-      });
-  });
+  await db.transaction(
+    'rw',
+    db.members,
+    db.planEntries,
+    db.snackOverrides,
+    db.measurements,
+    async () => {
+      await db.members.delete(id);
+      await db.measurements.where('memberId').equals(id).delete();
+      await db.snackOverrides.filter((override) => override.memberId === id).delete();
+      await db.planEntries
+        .filter((entry) => entry.memberIds.includes(id))
+        .modify((entry) => {
+          entry.memberIds = entry.memberIds.filter((memberId) => memberId !== id);
+        });
+    },
+  );
 }
 
 // Copy the fields explicitly so storage-only data never leaks into the app.
@@ -54,5 +62,6 @@ function toMember(record: MemberRecord): Member {
     activity: record.activity,
     goal: record.goal,
     snackKcal: record.snackKcal ?? 0,
+    ...(record.targetWeightKg === undefined ? {} : { targetWeightKg: record.targetWeightKg }),
   };
 }

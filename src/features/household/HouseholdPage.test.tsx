@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { UserEvent } from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../../data/db';
 import { addMember, listMembers } from '../../data/memberRepository';
@@ -22,6 +23,14 @@ beforeEach(async () => {
   await db.members.clear();
 });
 
+function renderPage() {
+  return render(
+    <MemoryRouter>
+      <HouseholdPage />
+    </MemoryRouter>,
+  );
+}
+
 async function fillBasics(
   user: UserEvent,
   values: { name: string; age: string; height: string; weight: string },
@@ -34,7 +43,7 @@ async function fillBasics(
 
 describe('HouseholdPage', () => {
   it('invites the user to add the first member', async () => {
-    render(<HouseholdPage />);
+    renderPage();
 
     expect(await screen.findByText(/Nie ma tu jeszcze nikogo/)).toBeVisible();
     expect(screen.getByRole('button', { name: 'Dodaj domownika' })).toBeVisible();
@@ -42,7 +51,7 @@ describe('HouseholdPage', () => {
 
   it('adds a member, stores it and shows the daily calorie target', async () => {
     const user = userEvent.setup();
-    render(<HouseholdPage />);
+    renderPage();
 
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
     await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '60' });
@@ -56,7 +65,7 @@ describe('HouseholdPage', () => {
 
   it('explains what is missing and does not save an incomplete form', async () => {
     const user = userEvent.setup();
-    render(<HouseholdPage />);
+    renderPage();
 
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
@@ -72,7 +81,7 @@ describe('HouseholdPage', () => {
 
   it('clears a field error as soon as the user starts fixing it', async () => {
     const user = userEvent.setup();
-    render(<HouseholdPage />);
+    renderPage();
 
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
@@ -85,7 +94,7 @@ describe('HouseholdPage', () => {
 
   it('saves how many calories go to snacks and shows it on the card', async () => {
     const user = userEvent.setup();
-    render(<HouseholdPage />);
+    renderPage();
 
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
     await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '60' });
@@ -101,7 +110,7 @@ describe('HouseholdPage', () => {
 
   it('does not mention snacks on the card when there are none', async () => {
     await addMember(anna);
-    render(<HouseholdPage />);
+    renderPage();
 
     await screen.findByRole('heading', { name: 'Anna' });
 
@@ -110,7 +119,7 @@ describe('HouseholdPage', () => {
 
   it('asks for a sensible snack amount', async () => {
     const user = userEvent.setup();
-    render(<HouseholdPage />);
+    renderPage();
 
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
     const snacks = screen.getByLabelText('Przekąski (kcal dziennie)');
@@ -123,9 +132,100 @@ describe('HouseholdPage', () => {
     expect(screen.getByText('Podaj kalorie w pełnych liczbach, od 0 do 1000.')).toBeVisible();
   });
 
+  it('asks for a target weight only when losing or gaining weight', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    await user.type(screen.getByLabelText('Wiek (lata)'), '30');
+
+    expect(screen.queryByLabelText('Docelowa waga (kg)')).not.toBeInTheDocument();
+
+    await user.selectOptions(screen.getByLabelText('Cel'), 'Schudnąć');
+    expect(screen.getByLabelText('Docelowa waga (kg)')).toBeVisible();
+
+    await user.selectOptions(screen.getByLabelText('Cel'), 'Przytyć');
+    expect(screen.getByLabelText('Docelowa waga (kg)')).toBeVisible();
+
+    await user.selectOptions(screen.getByLabelText('Cel'), 'Utrzymać wagę');
+    expect(screen.queryByLabelText('Docelowa waga (kg)')).not.toBeInTheDocument();
+  });
+
+  it('saves a target weight and shows it on the card', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '70' });
+    await user.selectOptions(screen.getByLabelText('Cel'), 'Schudnąć');
+    await user.type(screen.getByLabelText('Docelowa waga (kg)'), '62.5');
+
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+
+    expect(await screen.findByText('Docelowa waga: 62,5 kg.')).toBeVisible();
+    expect((await listMembers())[0]?.targetWeightKg).toBe(62.5);
+  });
+
+  it('allows leaving the target weight empty', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '70' });
+    await user.selectOptions(screen.getByLabelText('Cel'), 'Przytyć');
+
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+
+    expect(await screen.findByRole('heading', { name: 'Anna' })).toBeVisible();
+    expect((await listMembers())[0]?.targetWeightKg).toBeUndefined();
+  });
+
+  it('rejects a target on the wrong side of the current weight', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '70' });
+    await user.selectOptions(screen.getByLabelText('Cel'), 'Schudnąć');
+    await user.type(screen.getByLabelText('Docelowa waga (kg)'), '75');
+
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+
+    expect(screen.getByText(/Podaj docelową wagę w kilogramach/)).toBeVisible();
+    expect(screen.getByLabelText('Docelowa waga (kg)')).toHaveFocus();
+    expect(await listMembers()).toEqual([]);
+  });
+
+  it('forgets the target weight when the goal becomes keeping weight', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '70' });
+    await user.selectOptions(screen.getByLabelText('Cel'), 'Schudnąć');
+    await user.type(screen.getByLabelText('Docelowa waga (kg)'), '62');
+    await user.selectOptions(screen.getByLabelText('Cel'), 'Utrzymać wagę');
+
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+
+    expect(await screen.findByRole('heading', { name: 'Anna' })).toBeVisible();
+    expect((await listMembers())[0]?.targetWeightKg).toBeUndefined();
+  });
+
+  it('writes a fractional weight with a decimal comma', async () => {
+    await addMember({ ...anna, weightKg: 68.5 });
+    renderPage();
+
+    expect(await screen.findByText(/165 cm, 68,5 kg/)).toBeVisible();
+  });
+
+  it('links each member to their measurements', async () => {
+    const saved = await addMember(anna);
+    renderPage();
+
+    const link = await screen.findByRole('link', { name: 'Pomiary i postępy: Anna' });
+
+    expect(link).toHaveAttribute('href', `/domownicy/${saved.id}/pomiary`);
+  });
+
   it('locks the goal to keeping weight for children', async () => {
     const user = userEvent.setup();
-    render(<HouseholdPage />);
+    renderPage();
 
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
     await user.type(screen.getByLabelText('Wiek (lata)'), '10');
@@ -138,7 +238,7 @@ describe('HouseholdPage', () => {
 
   it('returns to the list when the user cancels', async () => {
     const user = userEvent.setup();
-    render(<HouseholdPage />);
+    renderPage();
 
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
     await user.click(screen.getByRole('button', { name: 'Anuluj' }));
@@ -149,7 +249,7 @@ describe('HouseholdPage', () => {
   it('edits an existing member and recalculates the target', async () => {
     const user = userEvent.setup();
     await addMember(anna);
-    render(<HouseholdPage />);
+    renderPage();
 
     await user.click(await screen.findByRole('button', { name: 'Edytuj: Anna' }));
     expect(screen.getByLabelText('Imię')).toHaveValue('Anna');
@@ -167,7 +267,7 @@ describe('HouseholdPage', () => {
   it('removes a member only after confirmation', async () => {
     const user = userEvent.setup();
     await addMember(anna);
-    render(<HouseholdPage />);
+    renderPage();
 
     await user.click(await screen.findByRole('button', { name: 'Usuń: Anna' }));
     await user.click(screen.getByRole('button', { name: 'Anuluj' }));

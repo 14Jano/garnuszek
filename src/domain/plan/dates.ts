@@ -121,6 +121,33 @@ export function formatWeekRange(key: DateKey): string {
   return `${first.getDate()}–${last.getDate()} ${lastMonth}`;
 }
 
+/** Whole calendar days from `from` to `to`, negative when `to` comes first. */
+export function daysBetween(from: DateKey, to: DateKey): number {
+  const start = requireDate(from);
+  const end = requireDate(to);
+  // Comparing UTC midnights keeps a clock change from making a day 23 or 25 hours long.
+  const startMs = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+  const endMs = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+  return Math.round((endMs - startMs) / 86_400_000);
+}
+
+/** "21.10" */
+export function formatShortDate(key: DateKey): string {
+  const date = requireDate(key);
+  return `${date.getDate()}.${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/** "21.10.2026" */
+export function formatFullDate(key: DateKey): string {
+  return `${formatShortDate(key)}.${requireDate(key).getFullYear()}`;
+}
+
+/** "21 października 2026" */
+export function formatLongDate(key: DateKey): string {
+  const date = requireDate(key);
+  return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
+}
+
 function requireDate(key: DateKey): Date {
   const date = parseDateKey(key);
   if (!date) {

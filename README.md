@@ -7,12 +7,12 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
-> **Status: wczesny etap (v0.7).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
+> **Status: wczesny etap (v0.8).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
 > domowników z dziennym zapotrzebowaniem kalorycznym i budżetem na przekąski, przepisy (32 dania,
 > filtry, wyszukiwanie po składnikach z lodówki, ulubione i własne przepisy), kalendarz posiłków
 > z porcjami liczonymi dla każdego domownika i gotowaniem na zapas, lista zakupów z odhaczaniem
-> i udostępnianiem oraz kopia zapasowa danych. Zostały waga i pomiary. Zobacz
-> [plan prac](#plan-prac).
+> i udostępnianiem, kopia zapasowa danych oraz waga i pomiary z wykresem postępu. Zostało
+> dopracowanie przed wersją 1.0. Zobacz [plan prac](#plan-prac).
 
 ## Dlaczego Garnuszek
 
@@ -23,26 +23,27 @@ wszystkich.
 
 ## Funkcje
 
-| Funkcja                                                       | Status    |
-| ------------------------------------------------------------- | --------- |
-| Szkielet aplikacji, nawigacja, instalacja jako PWA            | Gotowe    |
-| Kalkulator dziennego zapotrzebowania kalorycznego (logika)    | Gotowe    |
-| Domownicy: profil, cel, dzienne zapotrzebowanie               | Gotowe    |
-| Lokalny zapis danych w przeglądarce (IndexedDB)               | Gotowe    |
-| Przepisy: 32 dania z kaloriami i makroskładnikami             | Gotowe    |
-| Filtry po posiłku i diecie, wyszukiwanie, ulubione            | Gotowe    |
-| Własne przepisy z automatycznym liczeniem kalorii             | Gotowe    |
-| Kalendarz posiłków: widok tygodnia i dnia                     | Gotowe    |
-| Porcje liczone osobno dla każdego domownika                   | Gotowe    |
-| Wymiana dania, wybór osób jedzących, podsumowanie dnia        | Gotowe    |
-| Lista zakupów na tydzień, zsumowana i podzielona na działy    | Gotowe    |
-| Odhaczanie w sklepie, kopiowanie i wysyłka listy              | Gotowe    |
-| „Co ugotować z tego, co mam”: dania ze wszystkimi składnikami | Gotowe    |
-| Gotowanie na zapas: jedno danie na 2–4 dni, z cofnięciem      | Gotowe    |
-| Budżet kalorii na przekąski, także zmieniany na jeden dzień   | Gotowe    |
-| Kopia zapasowa: eksport i import do pliku                     | Gotowe    |
-| Usuwanie wszystkich danych, informacje o aplikacji            | Gotowe    |
-| Waga i pomiary z wykresem postępu                             | Planowane |
+| Funkcja                                                       | Status |
+| ------------------------------------------------------------- | ------ |
+| Szkielet aplikacji, nawigacja, instalacja jako PWA            | Gotowe |
+| Kalkulator dziennego zapotrzebowania kalorycznego (logika)    | Gotowe |
+| Domownicy: profil, cel, dzienne zapotrzebowanie               | Gotowe |
+| Lokalny zapis danych w przeglądarce (IndexedDB)               | Gotowe |
+| Przepisy: 32 dania z kaloriami i makroskładnikami             | Gotowe |
+| Filtry po posiłku i diecie, wyszukiwanie, ulubione            | Gotowe |
+| Własne przepisy z automatycznym liczeniem kalorii             | Gotowe |
+| Kalendarz posiłków: widok tygodnia i dnia                     | Gotowe |
+| Porcje liczone osobno dla każdego domownika                   | Gotowe |
+| Wymiana dania, wybór osób jedzących, podsumowanie dnia        | Gotowe |
+| Lista zakupów na tydzień, zsumowana i podzielona na działy    | Gotowe |
+| Odhaczanie w sklepie, kopiowanie i wysyłka listy              | Gotowe |
+| „Co ugotować z tego, co mam”: dania ze wszystkimi składnikami | Gotowe |
+| Gotowanie na zapas: jedno danie na 2–4 dni, z cofnięciem      | Gotowe |
+| Budżet kalorii na przekąski, także zmieniany na jeden dzień   | Gotowe |
+| Kopia zapasowa: eksport i import do pliku                     | Gotowe |
+| Usuwanie wszystkich danych, informacje o aplikacji            | Gotowe |
+| Waga, talia, biodra i klatka piersiowa z wykresem postępu     | Gotowe |
+| Docelowa waga, postęp do celu i prognoza jego osiągnięcia     | Gotowe |
 
 ## Technologie
 
@@ -106,10 +107,9 @@ zapasowej opisuje [docs/BACKUP.md](docs/BACKUP.md).
 ## Dane i prywatność
 
 Garnuszek nie wysyła nic na żaden serwer i nie wymaga konta. Domownicy, własne przepisy, ulubione
-i plan posiłków, a także budżet na przekąski i to, co odhaczyłeś na liście zakupów (docelowo także
-pomiary), są
-zapisywane w bazie IndexedDB w przeglądarce na Twoim urządzeniu. Lista zakupów wychodzi poza
-urządzenie tylko wtedy, gdy sam ją skopiujesz albo klikniesz „Udostępnij listę” lub
+i plan posiłków, a także budżet na przekąski, to, co odhaczyłeś na liście zakupów, oraz pomiary
+wagi i obwodów są zapisywane w bazie IndexedDB w przeglądarce na Twoim urządzeniu. Lista zakupów
+wychodzi poza urządzenie tylko wtedy, gdy sam ją skopiujesz albo klikniesz „Udostępnij listę” lub
 „Wyślij przez WhatsApp”. Wbudowane przepisy są częścią aplikacji i nie są zapisywane osobno.
 
 Wada tego podejścia jest taka, że wyczyszczenie danych przeglądarki albo zmiana telefonu oznacza
@@ -123,10 +123,10 @@ Wczytanie kopii zastępuje dane na urządzeniu, więc aplikacja pyta o potwierdz
 
 ## Zastrzeżenie zdrowotne
 
-Wyliczenia kalorii są orientacyjne i dotyczą zdrowych osób. Garnuszek nie zastępuje porady lekarza
-ani dietetyka i nie jest przeznaczony dla kobiet w ciąży ani karmiących piersią. Przy chorobach
-(np. cukrzycy, insulinooporności) plan żywieniowy skonsultuj ze specjalistą. Dla osób poniżej 18.
-roku życia aplikacja dopuszcza wyłącznie cel „utrzymać wagę”.
+Wyliczenia kalorii i prognoza osiągnięcia wagi są orientacyjne i dotyczą zdrowych osób. Garnuszek
+nie zastępuje porady lekarza ani dietetyka i nie jest przeznaczony dla kobiet w ciąży ani
+karmiących piersią. Przy chorobach (np. cukrzycy, insulinooporności) plan żywieniowy skonsultuj
+ze specjalistą. Dla osób poniżej 18. roku życia aplikacja dopuszcza wyłącznie cel „utrzymać wagę”.
 
 ## Wdrożenie na GitHub Pages
 
@@ -148,7 +148,7 @@ Repozytorium zawiera gotowy workflow `.github/workflows/deploy.yml`. Po wypchni�
 - [x] **0.5** Lista zakupów
 - [x] **0.6** Wyszukiwanie po składnikach, gotowanie na zapas, budżet na przekąski
 - [x] **0.7** Kopia zapasowa (eksport i import)
-- [ ] **0.8** Waga i pomiary
+- [x] **0.8** Waga i pomiary z wykresem postępu
 - [ ] **1.0** Dostępność, dopracowanie i stabilizacja
 
 Historię zmian znajdziesz w [CHANGELOG.md](CHANGELOG.md).

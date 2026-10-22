@@ -4,6 +4,7 @@ import type { Member } from '../domain/household/member';
 import type { DateKey } from '../domain/plan/dates';
 import type { PlanEntry } from '../domain/plan/planEntry';
 import type { SnackOverride } from '../domain/plan/snacks';
+import type { Measurement } from '../domain/progress/measurement';
 import type { Recipe } from '../domain/recipes/recipe';
 
 /**
@@ -39,6 +40,12 @@ export interface ShoppingCheckRecord {
   ingredientId: string;
 }
 
+/** A weight or circumference reading. */
+export interface MeasurementRecord extends Measurement {
+  /** `memberId_kind_date`, so a person has at most one reading per kind and day. */
+  key: string;
+}
+
 /** The snack amount one person set for one particular day. */
 export interface SnackOverrideRecord extends SnackOverride {
   /** `date_memberId`, so a person has at most one amount per day. */
@@ -58,6 +65,7 @@ class GarnuszekDatabase extends Dexie {
   planEntries!: EntityTable<PlanEntryRecord, 'key'>;
   shoppingChecks!: EntityTable<ShoppingCheckRecord, 'key'>;
   snackOverrides!: EntityTable<SnackOverrideRecord, 'key'>;
+  measurements!: EntityTable<MeasurementRecord, 'key'>;
 
   constructor() {
     super('garnuszek');
@@ -99,6 +107,17 @@ class GarnuszekDatabase extends Dexie {
       planEntries: 'key, date, batchId',
       shoppingChecks: 'key, weekStart',
       snackOverrides: 'key, date',
+    });
+
+    // Adds weight and circumference readings, found by person.
+    this.version(6).stores({
+      members: 'id, createdAt',
+      customRecipes: 'id, createdAt',
+      favorites: 'recipeId',
+      planEntries: 'key, date, batchId',
+      shoppingChecks: 'key, weekStart',
+      snackOverrides: 'key, date',
+      measurements: 'key, memberId',
     });
   }
 }

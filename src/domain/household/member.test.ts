@@ -86,3 +86,50 @@ describe('validateMember', () => {
     expect(validateMember({ ...validDraft, weightKg: 72.5 })).toEqual({});
   });
 });
+
+describe('validateMember: target weight', () => {
+  it('is optional', () => {
+    expect(validateMember({ ...validDraft, goal: 'lose' })).toEqual({});
+    expect(validateMember({ ...validDraft, goal: 'gain' })).toEqual({});
+  });
+
+  it('must be below the current weight to lose weight', () => {
+    expect(validateMember({ ...validDraft, goal: 'lose', targetWeightKg: 55 })).toEqual({});
+    expect(validateMember({ ...validDraft, goal: 'lose', targetWeightKg: 60 })).toEqual({
+      targetWeightKg: 'invalid',
+    });
+    expect(validateMember({ ...validDraft, goal: 'lose', targetWeightKg: 65 })).toEqual({
+      targetWeightKg: 'invalid',
+    });
+  });
+
+  it('must be above the current weight to gain weight', () => {
+    expect(validateMember({ ...validDraft, goal: 'gain', targetWeightKg: 65 })).toEqual({});
+    expect(validateMember({ ...validDraft, goal: 'gain', targetWeightKg: 60 })).toEqual({
+      targetWeightKg: 'invalid',
+    });
+    expect(validateMember({ ...validDraft, goal: 'gain', targetWeightKg: 50 })).toEqual({
+      targetWeightKg: 'invalid',
+    });
+  });
+
+  it('means nothing when keeping weight, whatever it says', () => {
+    expect(validateMember({ ...validDraft, goal: 'maintain', targetWeightKg: 500 })).toEqual({});
+    expect(validateMember({ ...validDraft, targetWeightKg: 500 })).toEqual({});
+  });
+
+  it('must be a possible weight', () => {
+    expect(
+      validateMember({ ...validDraft, weightKg: 100, goal: 'lose', targetWeightKg: 9 }),
+    ).toEqual({ targetWeightKg: 'invalid' });
+    expect(
+      validateMember({ ...validDraft, weightKg: 100, goal: 'lose', targetWeightKg: Number.NaN }),
+    ).toEqual({ targetWeightKg: 'invalid' });
+  });
+
+  it('is not compared with a current weight that is not readable yet', () => {
+    expect(
+      validateMember({ ...validDraft, weightKg: Number.NaN, goal: 'lose', targetWeightKg: 55 }),
+    ).toEqual({ weightKg: 'required' });
+  });
+});

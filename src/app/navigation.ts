@@ -15,6 +15,10 @@ export const recipePath = {
   create: `${ROUTES.recipes}/nowy`,
 } as const;
 
+export const householdPath = {
+  measurements: (memberId: string) => `${ROUTES.household}/${encodeURIComponent(memberId)}/pomiary`,
+} as const;
+
 export const calendarPath = {
   day: (date: string) => `${ROUTES.calendar}/${date}`,
   pickRecipe: (date: string, mealType: string) => `${ROUTES.calendar}/${date}/${mealType}/wybierz`,

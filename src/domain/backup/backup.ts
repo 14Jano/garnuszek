@@ -6,18 +6,25 @@ import type { DateKey } from '../plan/dates';
 import { planEntryKey } from '../plan/planEntry';
 import type { PlanEntry } from '../plan/planEntry';
 import type { SnackOverride } from '../plan/snacks';
+import { MEASUREMENT_KINDS, MEASUREMENT_LIMITS, measurementKey } from '../progress/measurement';
+import type { Measurement } from '../progress/measurement';
 import type { IngredientCatalog } from '../recipes/ingredient';
 import { MEAL_TYPES, hasRecipeErrors, validateRecipe } from '../recipes/recipe';
 import type { Recipe } from '../recipes/recipe';
+import { checkNumber } from '../validation';
 
 /** Identifies a file as a Garnuszek backup, whatever it is called. */
 export const BACKUP_FORMAT = 'garnuszek-backup';
 
 /**
  * Version of the file layout, not of the database. Raise it when the layout
- * changes in a way an older version of the app could not read.
+ * changes in a way an older version of the app could not read. A newer app keeps
+ * reading the older layouts.
+ *
+ * 1: members, custom recipes, favorites, plan, ticked-off shopping, snack amounts.
+ * 2: adds measurements and the target weight of a member.
  */
-export const BACKUP_VERSION = 1;
+export const BACKUP_VERSION = 2;
 
 /** An item of a week's shopping list that was ticked off. */
 export interface ShoppingCheck {
@@ -34,6 +41,7 @@ export interface BackupData {
   planEntries: PlanEntry[];
   shoppingChecks: ShoppingCheck[];
   snackOverrides: SnackOverride[];
+  measurements: Measurement[];
 }
 
 export interface Backup extends BackupData {
@@ -76,6 +84,7 @@ export interface DroppedItems {
   favorites: number;
   shoppingChecks: number;
   snackOverrides: number;
+  measurements: number;
 }
 
 export type BackupParseResult =
@@ -118,7 +127,7 @@ export function parseBackup(text: string, context: BackupContext): BackupParseRe
   }
 
   try {
-    return readBackup(parsed, context);
+    return readBackup(parsed, parsed.version, context);
   } catch (error) {
     if (error instanceof InvalidBackupData) {
       return { ok: false, problem: 'invalid-data', detail: error.path };
@@ -127,7 +136,11 @@ export function parseBackup(text: string, context: BackupContext): BackupParseRe
   }
 }
 
-function readBackup(root: Record<string, unknown>, context: BackupContext): BackupParseResult {
+function readBackup(
+  root: Record<string, unknown>,
+  version: number,
+  context: BackupContext,
+): BackupParseResult {
   const exportedAt = readText(root.exportedAt, 'exportedAt');
   if (Number.isNaN(Date.parse(exportedAt))) fail('exportedAt');
 
@@ -163,6 +176,11 @@ function readBackup(root: Record<string, unknown>, context: BackupContext): Back
   const snackOverrides = readList(root.snackOverrides, 'snackOverrides', (item, path) =>
     readSnackOverride(item, path),
   );
+  // Files from version 1 predate measurements, so they have none.
+  const measurements =
+    version >= 2
+      ? readList(root.measurements, 'measurements', (item, path) => readMeasurement(item, path))
+      : [];
 
   const keptFavorites = unique(favorites.filter((id) => recipeIds.has(id)));
   const keptPlan = lastWins(
@@ -184,6 +202,10 @@ function readBackup(root: Record<string, unknown>, context: BackupContext): Back
     snackOverrides.filter((override) => memberIds.has(override.memberId)),
     (override) => `${override.date}_${override.memberId}`,
   );
+  const keptMeasurements = lastWins(
+    measurements.filter((measurement) => memberIds.has(measurement.memberId)),
+    measurementKey,
+  );
 
   return {
     ok: true,
@@ -197,12 +219,14 @@ function readBackup(root: Record<string, unknown>, context: BackupContext): Back
       planEntries: keptPlan,
       shoppingChecks: keptChecks,
       snackOverrides: keptSnacks,
+      measurements: keptMeasurements,
     },
     dropped: {
       planEntries: planEntries.filter((entry) => !recipeIds.has(entry.recipeId)).length,
       favorites: favorites.length - keptFavorites.length,
       shoppingChecks: shoppingChecks.length - keptChecks.length,
       snackOverrides: snackOverrides.length - keptSnacks.length,
+      measurements: measurements.length - keptMeasurements.length,
     },
   };
 }
@@ -219,11 +243,23 @@ function readMember(raw: unknown, path: string): Member {
     activity: readOneOf(item.activity, ACTIVITY_LEVELS, `${path}.activity`),
     goal: readOneOf(item.goal, GOALS, `${path}.goal`),
     snackKcal: readNumber(item.snackKcal, `${path}.snackKcal`),
+    ...(item.targetWeightKg === undefined
+      ? {}
+      : { targetWeightKg: readNumber(item.targetWeightKg, `${path}.targetWeightKg`) }),
   };
 
   // The same rules as the form, so a restored member is one the form could have saved.
-  const problem = Object.keys(validateMember(member))[0];
+  // The goal is left out of the check on purpose: the form wants a target on the right
+  // side of the current weight, but weighings move the weight, so a person who has
+  // reached their target keeps it. A stored target only has to be a possible weight.
+  const problem = Object.keys(validateMember({ ...member, goal: undefined }))[0];
   if (problem) fail(`${path}.${problem}`);
+  if (
+    member.targetWeightKg !== undefined &&
+    checkNumber(member.targetWeightKg, MEMBER_LIMITS.weightKg)
+  ) {
+    fail(`${path}.targetWeightKg`);
+  }
   if (!allowedGoals(member.age).includes(member.goal)) fail(`${path}.goal`);
 
   return member;
@@ -289,6 +325,22 @@ function readSnackOverride(raw: unknown, path: string): SnackOverride {
     date: readDateKey(item.date, `${path}.date`),
     memberId: readId(item.memberId, `${path}.memberId`),
     kcal,
+  };
+}
+
+function readMeasurement(raw: unknown, path: string): Measurement {
+  const item = readRecord(raw, path);
+  const kind = readOneOf(item.kind, MEASUREMENT_KINDS, `${path}.kind`);
+  const value = readNumber(item.value, `${path}.value`);
+
+  const { min, max } = MEASUREMENT_LIMITS[kind];
+  if (value < min || value > max) fail(`${path}.value`);
+
+  return {
+    memberId: readId(item.memberId, `${path}.memberId`),
+    kind,
+    date: readDateKey(item.date, `${path}.date`),
+    value,
   };
 }
 

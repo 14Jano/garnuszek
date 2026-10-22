@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { householdPath } from '../../app/navigation';
 import type { Member } from '../../domain/household/member';
 import { dailyCalorieTarget } from '../../domain/nutrition/calorieTarget';
+import { formatDecimal } from '../../format/numbers';
 import { formatAge } from './format';
 import { GOAL_LABELS, SEX_LABELS } from './labels';
 import './MemberCard.css';
@@ -18,12 +21,17 @@ export function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
     <li className="member-card">
       <h2 className="member-card__name">{member.name}</h2>
       <p className="member-card__details">
-        {SEX_LABELS[member.sex]}, {formatAge(member.age)}, {member.heightCm} cm, {member.weightKg}{' '}
-        kg
+        {SEX_LABELS[member.sex]}, {formatAge(member.age)}, {member.heightCm} cm,{' '}
+        {formatDecimal(member.weightKg)} kg
       </p>
       <p className="member-card__target">
         <strong>{dailyCalorieTarget(member)} kcal</strong> dziennie. Cel: {GOAL_LABELS[member.goal]}
       </p>
+      {member.targetWeightKg !== undefined && member.goal !== 'maintain' && (
+        <p className="member-card__details">
+          Docelowa waga: {formatDecimal(member.targetWeightKg)} kg.
+        </p>
+      )}
       {member.snackKcal > 0 && (
         <p className="member-card__details">Na przekąski: {member.snackKcal} kcal dziennie.</p>
       )}
@@ -64,6 +72,13 @@ export function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
           >
             Usuń
           </button>
+          <Link
+            className="btn btn--small"
+            to={householdPath.measurements(member.id)}
+            aria-label={`Pomiary i postępy: ${member.name}`}
+          >
+            Pomiary i postępy
+          </Link>
         </div>
       )}
     </li>

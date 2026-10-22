@@ -1,0 +1,90 @@
+.measurements__empty {
+  margin: 1.5rem 0;
+  color: var(--color-text-muted);
+}
+
+.measurement-form__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0 1rem;
+  max-width: 32rem;
+}
+
+.measurement-form__saved {
+  margin: 0.75rem 0 0;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.progress-summary__figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem 1rem;
+  max-width: 40rem;
+  margin: 0 0 1rem;
+}
+
+.progress-summary__figures dt {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.progress-summary__figures dd {
+  display: grid;
+  margin: 0;
+}
+
+.progress-summary__figures strong {
+  font-size: 1.25rem;
+}
+
+.progress-summary__figures span,
+.progress-summary__note {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.progress-summary__target {
+  max-width: 40rem;
+  margin: 0 0 1rem;
+}
+
+.progress-summary__target p {
+  margin: 0 0 0.5rem;
+}
+
+.progress-summary__bar {
+  display: block;
+  width: 100%;
+  height: 0.75rem;
+  margin: 0 0 0.75rem;
+  accent-color: var(--color-primary);
+}
+
+.reading-list {
+  display: grid;
+  max-width: 40rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.reading-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.reading-list__date {
+  min-width: 7.5rem;
+  color: var(--color-text-muted);
+}
+
+.reading-list__actions {
+  display: inline-flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}

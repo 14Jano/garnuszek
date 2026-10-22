@@ -8,6 +8,8 @@ export interface Member extends BodyProfile {
   name: string;
   /** Calories per day the person keeps for snacks, so meals are sized for the rest. */
   snackKcal: number;
+  /** The weight the person wants to reach. Only meaningful when losing or gaining weight. */
+  targetWeightKg?: number;
 }
 
 /** What the user fills in; the id is assigned when the member is stored. */
@@ -33,7 +35,7 @@ export function allowedGoals(age: number): readonly Goal[] {
   return age < ADULT_AGE ? ['maintain'] : ['lose', 'maintain', 'gain'];
 }
 
-export type MemberField = 'name' | 'age' | 'heightCm' | 'weightKg' | 'snackKcal';
+export type MemberField = 'name' | 'age' | 'heightCm' | 'weightKg' | 'targetWeightKg' | 'snackKcal';
 
 export type MemberErrors = Partial<Record<MemberField, FieldProblem>>;
 
@@ -44,6 +46,10 @@ export interface MemberDraft {
   heightCm: number;
   weightKg: number;
   snackKcal: number;
+  /** The goal decides whether a target weight is checked: it only matters when losing or gaining. */
+  goal?: Goal;
+  /** Left out when the person has no target. NaN stands for an unreadable input. */
+  targetWeightKg?: number;
 }
 
 export function validateMember(draft: MemberDraft): MemberErrors {
@@ -68,5 +74,21 @@ export function validateMember(draft: MemberDraft): MemberErrors {
   const snackKcal = checkNumber(draft.snackKcal, MEMBER_LIMITS.snackKcal, { integer: true });
   if (snackKcal) errors.snackKcal = snackKcal;
 
+  if (isTargetWeightWrong(draft)) errors.targetWeightKg = 'invalid';
+
   return errors;
+}
+
+/**
+ * A target weight is optional. When there is one it must be a possible weight
+ * on the right side of the current one: below it to lose weight, above it to
+ * gain. For keeping weight a target means nothing and is ignored.
+ */
+function isTargetWeightWrong({ goal, targetWeightKg, weightKg }: MemberDraft): boolean {
+  if (targetWeightKg === undefined || goal === undefined || goal === 'maintain') return false;
+  if (checkNumber(targetWeightKg, MEMBER_LIMITS.weightKg)) return true;
+
+  // Without a readable current weight there is nothing to compare with yet.
+  if (Number.isNaN(weightKg)) return false;
+  return goal === 'lose' ? targetWeightKg >= weightKg : targetWeightKg <= weightKg;
 }

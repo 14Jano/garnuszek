@@ -99,8 +99,8 @@ export function BackupSection() {
       <h2 id="backup-title">Kopia zapasowa</h2>
       <p>
         Wszystko, co wpiszesz, zostaje tylko na tym urządzeniu. Kopia zapasowa to plik z Twoimi
-        domownikami, własnymi przepisami, planem i ulubionymi. Dzięki niemu przeniesiesz dane na
-        nowy telefon albo odzyskasz je po wyczyszczeniu przeglądarki.
+        domownikami, własnymi przepisami, planem, ulubionymi i pomiarami. Dzięki niemu przeniesiesz
+        dane na nowy telefon albo odzyskasz je po wyczyszczeniu przeglądarki.
       </p>
 
       <div className="backup__action">
@@ -133,7 +133,8 @@ export function BackupSection() {
             Kopia z {formatDate(importState.backup.exportedAt)}. Domownicy:{' '}
             {importState.backup.members.length}, własne przepisy:{' '}
             {importState.backup.customRecipes.length}, zaplanowane posiłki:{' '}
-            {importState.backup.planEntries.length}.
+            {importState.backup.planEntries.length}, pomiary:{' '}
+            {importState.backup.measurements.length}.
           </p>
           {describeDropped(importState.dropped) && (
             <p className="backup__dropped">{describeDropped(importState.dropped)}</p>
@@ -185,6 +186,7 @@ function describeDropped(dropped: DroppedItems): string {
     dropped.favorites > 0 && `ulubione: ${dropped.favorites}`,
     dropped.shoppingChecks > 0 && `odhaczone zakupy: ${dropped.shoppingChecks}`,
     dropped.snackOverrides > 0 && `przekąski na pojedyncze dni: ${dropped.snackOverrides}`,
+    dropped.measurements > 0 && `pomiary: ${dropped.measurements}`,
   ].filter(Boolean);
 
   return parts.length === 0

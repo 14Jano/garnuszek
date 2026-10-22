@@ -107,8 +107,37 @@ Przykład: Anna ma 1815 kcal dziennie i zostawia 300 kcal na przekąski. Na obia
 Danie ugotowane raz na kilka dni jest zjadane w kolejnych dniach w porcjach liczonych osobno dla
 każdego dnia i każdej osoby. Ilość do ugotowania i składniki to suma wszystkich dni.
 
+## 7. Waga w czasie i prognoza
+
+Dzienne zapotrzebowanie liczy się od aktualnej wagi (punkt 1), dlatego waga domownika jest zawsze
+wagą z jego ostatniego ważenia. Po wpisaniu nowego ważenia zapotrzebowanie i porcje przeliczają się
+od niego.
+
+Prognoza osiągnięcia docelowej wagi nie jest wzorem żywieniowym, tylko przedłużeniem tempa, w jakim
+waga zmienia się naprawdę:
+
+1. Bierzemy ważenia z ostatnich 8 tygodni (licząc od najnowszego).
+2. Dopasowujemy do nich prostą metodą najmniejszych kwadratów. Jej nachylenie to zmiana na dzień,
+   a razy 7 zmiana na tydzień.
+3. Dzielimy odległość od celu (liczoną od wartości na prostej, a nie od ostatniego pojedynczego
+   ważenia) przez to tempo i dodajemy wynik do daty ostatniego ważenia.
+
+Prognozy nie podajemy, gdy:
+
+- ważenia obejmują mniej niż 7 dni,
+- tempo jest mniejsze niż 0,05 kg na tydzień albo prowadzi od celu,
+- cel byłby oddalony o więcej niż 2 lata.
+
+Przykład: 14.10 waga 70 kg, 21.10 waga 69 kg, cel 62 kg. Tempo to −1 kg na tydzień, do celu zostało
+7 kg, więc prognoza to 7 tygodni po 21.10, czyli 9 grudnia.
+
+Pomiary obwodów (talia, biodra, klatka piersiowa) są tylko zapisywane i pokazywane na wykresie.
+Nie wpływają na żadne obliczenia.
+
 ## Ograniczenia
 
+- Prognoza zakłada, że tempo się nie zmieni, a tak zwykle nie bywa: waga waha się z dnia na dzień
+  i zwalnia, gdy zbliża się do celu. Traktuj datę jako orientacyjną.
 - Równanie powstało na podstawie badań dorosłych. Dla dzieci daje tylko przybliżenie, dlatego
   osobom poniżej 18. roku życia aplikacja dopuszcza wyłącznie cel „utrzymać wagę”.
 - Wzory nie uwzględniają ciąży, karmienia piersią, chorób przewlekłych ani leków.

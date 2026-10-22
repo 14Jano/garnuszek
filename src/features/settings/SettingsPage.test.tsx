@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../../data/db';
+import { listMeasurements } from '../../data/measurementRepository';
 import { addMember, listMembers } from '../../data/memberRepository';
 import { assignRecipe, listPlanEntries } from '../../data/planRepository';
 import { createBackup } from '../../domain/backup/backup';
@@ -30,6 +31,7 @@ const backupData: BackupData = {
   ],
   shoppingChecks: [],
   snackOverrides: [],
+  measurements: [],
 };
 
 function backupFile(data: BackupData = backupData, name = 'kopia.json'): File {
@@ -62,6 +64,7 @@ beforeEach(async () => {
     db.planEntries.clear(),
     db.shoppingChecks.clear(),
     db.snackOverrides.clear(),
+    db.measurements.clear(),
   ]);
 
   // jsdom cannot download files, so catch what the page would have saved.
@@ -100,7 +103,7 @@ describe('downloading a backup', () => {
     await vi.waitFor(() => expect(downloads).toHaveLength(1));
     expect(downloads[0]?.fileName).toMatch(/^garnuszek-kopia-\d{4}-\d{2}-\d{2}\.json$/);
     const saved = JSON.parse((await downloads[0]?.blob?.text()) ?? '');
-    expect(saved).toMatchObject({ format: 'garnuszek-backup', version: 1 });
+    expect(saved).toMatchObject({ format: 'garnuszek-backup', version: 2 });
     expect(saved.members.map((member: { name: string }) => member.name)).toEqual(['Anna']);
   });
 });
@@ -119,6 +122,31 @@ describe('restoring a backup', () => {
     // Nothing has changed yet.
     expect((await listMembers()).map((member) => member.name)).toEqual(['Anna']);
     expect(await listPlanEntries('2000-01-01', '2100-12-31')).toEqual([]);
+  });
+
+  it('counts the measurements in the file and restores them', async () => {
+    const user = userEvent.setup();
+    const data: BackupData = {
+      ...backupData,
+      measurements: [
+        { memberId: 'anna-id', kind: 'weight', date: '2026-10-14', value: 61 },
+        { memberId: 'anna-id', kind: 'waist', date: '2026-10-14', value: 78.5 },
+        { memberId: 'someone-gone', kind: 'weight', date: '2026-10-14', value: 80 },
+      ],
+    };
+    render(<SettingsPage />);
+
+    await user.upload(screen.getByLabelText('Wczytaj kopię zapasową'), backupFile(data));
+
+    const review = await screen.findByRole('group', { name: 'Wczytywanie kopii zapasowej' });
+    expect(review).toHaveTextContent('pomiary: 2.');
+    expect(review).toHaveTextContent('Pominiemy to, czego ta wersja aplikacji już nie zna');
+    expect(review).toHaveTextContent('pomiary: 1)');
+
+    await user.click(screen.getByRole('button', { name: 'Zastąp dane na tym urządzeniu' }));
+
+    expect(await screen.findByText('Wczytano kopię zapasową.')).toBeVisible();
+    expect(await listMeasurements('anna-id')).toHaveLength(2);
   });
 
   it('replaces the data on the device once the user confirms', async () => {

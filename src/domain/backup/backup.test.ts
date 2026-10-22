@@ -67,10 +67,20 @@ const data: BackupData = {
   ],
   shoppingChecks: [{ weekStart: '2026-10-19', ingredientId: 'potato' }],
   snackOverrides: [{ date: '2026-10-21', memberId: 'anna-id', kcal: 400 }],
+  measurements: [
+    { memberId: 'anna-id', kind: 'weight', date: '2026-10-14', value: 61 },
+    { memberId: 'anna-id', kind: 'waist', date: '2026-10-14', value: 78.5 },
+  ],
 };
 
 const NOW = new Date('2026-10-21T12:00:00.000Z');
-const NO_DROPPED = { planEntries: 0, favorites: 0, shoppingChecks: 0, snackOverrides: 0 };
+const NO_DROPPED = {
+  planEntries: 0,
+  favorites: 0,
+  shoppingChecks: 0,
+  snackOverrides: 0,
+  measurements: 0,
+};
 
 function parse(value: unknown) {
   return parseBackup(JSON.stringify(value), context);
@@ -135,11 +145,108 @@ describe('parseBackup: a good file', () => {
         planEntries: [],
         shoppingChecks: [],
         snackOverrides: [],
+        measurements: [],
       },
       NOW,
     );
 
     expect(parse(empty)).toMatchObject({ ok: true, dropped: NO_DROPPED });
+  });
+});
+
+describe('parseBackup: measurements and target weight', () => {
+  it('reads the measurements and the target weight of a member', () => {
+    const withTarget: BackupData = {
+      ...data,
+      members: [{ ...anna, weightKg: 70, goal: 'lose', targetWeightKg: 62.5 }],
+    };
+
+    const result = parse(createBackup(withTarget, NOW));
+
+    expect(result).toEqual({
+      ok: true,
+      backup: createBackup(withTarget, NOW),
+      dropped: NO_DROPPED,
+    });
+  });
+
+  it('still reads a version 1 file, which has no measurements', () => {
+    const file: Partial<Backup> = copyOfBackup();
+    delete file.measurements;
+
+    const result = parse({ ...file, version: 1 });
+
+    expect(result).toMatchObject({ ok: true, dropped: NO_DROPPED });
+    expect(result.ok && result.backup.measurements).toEqual([]);
+    expect(result.ok && result.backup.version).toBe(BACKUP_VERSION);
+  });
+
+  it('ignores measurements in a version 1 file, which cannot have them', () => {
+    const result = parse({ ...createBackup(data, NOW), version: 1 });
+
+    expect(result.ok && result.backup.measurements).toEqual([]);
+  });
+
+  it('requires the list of measurements in a version 2 file', () => {
+    const file: Partial<Backup> = copyOfBackup();
+    delete file.measurements;
+
+    expect(parse(file)).toEqual({ ok: false, problem: 'invalid-data', detail: 'measurements' });
+  });
+
+  it.each([
+    ['measurements[0].kind', 'wzrost', 'measurements[0].kind'],
+    ['measurements[0].date', '2026-13-01', 'measurements[0].date'],
+    ['measurements[0].value', 'dużo', 'measurements[0].value'],
+    ['measurements[0].value', 9, 'measurements[0].value'],
+    ['measurements[0].value', 301, 'measurements[0].value'],
+    ['measurements[1].value', 19, 'measurements[1].value'],
+    ['measurements[0].memberId', '', 'measurements[0].memberId'],
+    ['members[0].targetWeightKg', 'mało', 'members[0].targetWeightKg'],
+    ['members[0].targetWeightKg', 5, 'members[0].targetWeightKg'],
+  ])('damaging %s points at the problem', (path, value, detail) => {
+    const backup = copyOfBackup();
+    // The member has to be losing weight for the target to be looked at.
+    setPath(backup, 'members[0].goal', 'lose');
+    setPath(backup, 'members[0].targetWeightKg', 55);
+    setPath(backup, path, value);
+
+    expect(parse(backup)).toEqual({ ok: false, problem: 'invalid-data', detail });
+  });
+
+  it('keeps a target the person has already reached', () => {
+    // Weighings move the weight, so the member now weighs less than the target.
+    const reached: BackupData = {
+      ...data,
+      members: [{ ...anna, weightKg: 61, goal: 'lose', targetWeightKg: 62 }],
+    };
+
+    expect(parse(createBackup(reached, NOW))).toMatchObject({ ok: true });
+  });
+
+  it('drops the measurements of people who are not in the backup', () => {
+    const { backup, dropped } = parseChanged((b) => {
+      b.measurements.push({
+        memberId: 'someone-gone',
+        kind: 'weight',
+        date: '2026-10-15',
+        value: 80,
+      });
+    });
+
+    expect(backup.measurements).toHaveLength(2);
+    expect(dropped.measurements).toBe(1);
+  });
+
+  it('keeps one reading per person, kind and day, the later one winning', () => {
+    const { backup, dropped } = parseChanged((b) => {
+      b.measurements.push({ memberId: 'anna-id', kind: 'weight', date: '2026-10-14', value: 60.4 });
+    });
+
+    expect(backup.measurements.filter((m) => m.kind === 'weight')).toEqual([
+      { memberId: 'anna-id', kind: 'weight', date: '2026-10-14', value: 60.4 },
+    ]);
+    expect(dropped.measurements).toBe(1);
   });
 });
 

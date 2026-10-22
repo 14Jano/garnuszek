@@ -27,10 +27,16 @@ describe('database upgrade', () => {
     const { listPlanEntries } = await import('./planRepository');
     const { listCheckedIngredients } = await import('./shoppingRepository');
     const { listSnackOverrides } = await import('./snackRepository');
+    const { listMeasurements, saveMeasurement } = await import('./measurementRepository');
 
     expect((await listMembers()).map((member) => member.name)).toEqual(['Anna']);
-    // Saved before snacks existed, so it has none.
+    // Saved before snacks existed, so it has none, and before target weights existed.
     expect((await listMembers())[0]?.snackKcal).toBe(0);
+    expect((await listMembers())[0]?.targetWeightKg).toBeUndefined();
+    expect(await listMeasurements('anna-id')).toEqual([]);
+    // The new table works on a database that was upgraded.
+    await saveMeasurement({ memberId: 'anna-id', kind: 'weight', date: '2026-10-21', value: 59 });
+    expect(await listMeasurements('anna-id')).toHaveLength(1);
     expect(await listCustomRecipes()).toEqual([]);
     expect(await listFavoriteIds()).toEqual(new Set());
     expect(await listPlanEntries('2000-01-01', '2100-12-31')).toEqual([]);

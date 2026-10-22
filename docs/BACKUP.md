@@ -22,7 +22,7 @@ do nich przez identyfikatory.
 ```json
 {
   "format": "garnuszek-backup",
-  "version": 1,
+  "version": 2,
   "exportedAt": "2026-10-21T12:00:00.000Z",
   "members": [
     {
@@ -31,10 +31,11 @@ do nich przez identyfikatory.
       "sex": "female",
       "age": 30,
       "heightCm": 165,
-      "weightKg": 60,
+      "weightKg": 61,
       "activity": "light",
-      "goal": "maintain",
-      "snackKcal": 150
+      "goal": "lose",
+      "snackKcal": 150,
+      "targetWeightKg": 58
     }
   ],
   "customRecipes": [
@@ -53,16 +54,21 @@ do nich przez identyfikatory.
     { "date": "2026-10-21", "mealType": "lunch", "recipeId": "…", "memberIds": ["…"] }
   ],
   "shoppingChecks": [{ "weekStart": "2026-10-19", "ingredientId": "potato" }],
-  "snackOverrides": [{ "date": "2026-10-21", "memberId": "…", "kcal": 400 }]
+  "snackOverrides": [{ "date": "2026-10-21", "memberId": "…", "kcal": 400 }],
+  "measurements": [
+    { "memberId": "…", "kind": "weight", "date": "2026-10-14", "value": 61.5 },
+    { "memberId": "…", "kind": "waist", "date": "2026-10-14", "value": 78.5 }
+  ]
 }
 ```
 
 | Pole                | Znaczenie                                                                    |
 | ------------------- | ---------------------------------------------------------------------------- |
 | `format`            | Zawsze `garnuszek-backup`. Po tym aplikacja poznaje swój plik.               |
-| `version`           | Wersja układu pliku (nie bazy danych), obecnie `1`.                          |
+| `version`           | Wersja układu pliku (nie bazy danych), obecnie `2`.                          |
 | `exportedAt`        | Kiedy plik powstał (ISO 8601).                                               |
 | `members`           | Domownicy, od najstarszego. Kolejność jest zachowana przy wczytaniu.         |
+| `measurements`      | Pomiary: `kind` to `weight` (kg), `waist`, `hips` lub `chest` (cm).          |
 | `customRecipes`     | Własne przepisy. Składniki wskazują na katalog wbudowany.                    |
 | `favoriteRecipeIds` | Ulubione, wbudowane i własne.                                                |
 | `planEntries`       | Plan posiłków. Dania na kilka dni mają `batchId` i `cookedOn` (resztki).     |
@@ -70,6 +76,18 @@ do nich przez identyfikatory.
 | `snackOverrides`    | Ilość kalorii na przekąski zmieniona na pojedynczy dzień.                    |
 
 Daty to `RRRR-MM-DD` w czasie lokalnym użytkownika.
+
+`targetWeightKg` domownika jest opcjonalne i pojawia się tylko wtedy, gdy ktoś ma cel wagi.
+
+### Wersje pliku
+
+| Wersja | Co zawiera                                                                       |
+| ------ | -------------------------------------------------------------------------------- |
+| 1      | Domownicy, własne przepisy, ulubione, plan, odhaczone zakupy, przekąski.         |
+| 2      | Dodatkowo pomiary (`measurements`) i docelowa waga domownika (`targetWeightKg`). |
+
+Kopię w wersji 1 aplikacja nadal wczyta. Nie ma w niej pomiarów, więc po wczytaniu lista pomiarów
+jest pusta. Pole `measurements` w pliku w wersji 1 jest ignorowane, bo wersja 1 go nie znała.
 
 ## Jak aplikacja czyta plik
 
@@ -83,12 +101,17 @@ Plik jest niezaufany, bo można go edytować albo wybrać przez pomyłkę zły p
    posiłku, istniejące składniki, dziecko tylko z celem „utrzymać wagę”, unikalne identyfikatory,
    prawdziwe daty. **Pierwszy uszkodzony element odrzuca cały plik**, a aplikacja podaje miejsce
    problemu, np. `members[1].age`. Własny przepis nie może mieć identyfikatora wbudowanego.
+   Pomiar musi mieć znany rodzaj i wartość z zakresu tego rodzaju. Docelowa waga domownika musi być
+   możliwą wagą, ale nie musi leżeć po „właściwej” stronie obecnej wagi, bo kto osiągnął cel,
+   zachowuje go.
 3. **Pomijanie odwołań do nieistniejących rzeczy.** Wpis planu z przepisem, którego aplikacja już nie
-   zna, ulubione i odhaczone zakupy z nieznanym składnikiem oraz przekąski nieznanej osoby są
-   pomijane, a ekran przed wczytaniem pokazuje, ile. To zwykły skutek aktualizacji aplikacji, a nie
-   uszkodzenie pliku. Z wpisu planu znikają też osoby, których nie ma w kopii.
+   zna, ulubione i odhaczone zakupy z nieznanym składnikiem oraz przekąski i pomiary nieznanej osoby
+   są pomijane, a ekran przed wczytaniem pokazuje, ile. To zwykły skutek aktualizacji aplikacji
+   albo ręcznej edycji pliku, a nie uszkodzenie. Z wpisu planu znikają też osoby, których nie ma
+   w kopii.
 4. **Normalizacja.** Powtórzony wpis tego samego posiłku w tym samym dniu zostaje jeden (ostatni),
-   a data odhaczonych zakupów jest przesuwana na poniedziałek tygodnia.
+   to samo dotyczy pomiaru tego samego rodzaju w tym samym dniu, a data odhaczonych zakupów jest
+   przesuwana na poniedziałek tygodnia.
 
 Wczytanie (`importBackup`) odbywa się w jednej transakcji: najpierw usuwa obecne dane, potem zapisuje
 nowe. Jeśli cokolwiek się nie powiedzie, stan urządzenia pozostaje bez zmian.
