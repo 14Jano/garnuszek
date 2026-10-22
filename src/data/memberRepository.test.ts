@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { NewMember } from '../domain/household/member';
+import type { Member, NewMember } from '../domain/household/member';
 import { db } from './db';
 import { addMember, listMembers, removeMember, updateMember } from './memberRepository';
 
@@ -51,6 +51,50 @@ describe('memberRepository', () => {
     await updateMember({ ...saved, weightKg: 58.5, goal: 'lose' });
 
     expect(await listMembers()).toEqual([{ ...saved, weightKg: 58.5, goal: 'lose' }]);
+  });
+
+  it('keeps the place of a member in the list when updating', async () => {
+    const anna = await addMember(newMember({ name: 'Anna' }));
+    await addMember(newMember({ name: 'Bartek' }));
+
+    await updateMember({ ...anna, name: 'Anna Maria' });
+
+    const names = (await listMembers()).map((member) => member.name);
+    expect(names).toEqual(['Anna Maria', 'Bartek']);
+  });
+
+  it('forgets a field that is no longer given, instead of keeping the old value', async () => {
+    const saved = await addMember(
+      newMember({
+        goal: 'lose',
+        targetWeightKg: 55,
+        restrictions: { diet: 'vegan', allergens: ['soy'], avoidedIngredientIds: ['onion'] },
+      }),
+    );
+    const withoutThem: Member = { ...saved };
+    delete withoutThem.targetWeightKg;
+    delete withoutThem.restrictions;
+
+    await updateMember(withoutThem);
+
+    const [stored] = await listMembers();
+    expect(stored).toEqual(withoutThem);
+    expect(stored).not.toHaveProperty('targetWeightKg');
+    expect(stored).not.toHaveProperty('restrictions');
+  });
+
+  it('stores what a member avoids, and hands out a copy', async () => {
+    const restrictions = {
+      diet: 'vegetarian' as const,
+      allergens: ['milk' as const, 'gluten' as const],
+      avoidedIngredientIds: ['onion'],
+    };
+    const saved = await addMember(newMember({ restrictions }));
+
+    const [stored] = await listMembers();
+
+    expect(stored?.restrictions).toEqual(restrictions);
+    expect(stored?.restrictions).not.toBe(saved.restrictions);
   });
 
   it('refuses to update a member that does not exist', async () => {

@@ -1,4 +1,9 @@
-import type { Ingredient, IngredientCategory, Purchase } from '../domain/recipes/ingredient';
+import type {
+  Allergen,
+  Ingredient,
+  IngredientCategory,
+  Purchase,
+} from '../domain/recipes/ingredient';
 
 /** How the shopping list counts an ingredient. Leave it out to list the weight in grams. */
 type Packaging = Pick<Ingredient, 'purchase' | 'gramsPerMl'>;
@@ -36,7 +41,7 @@ function food(
  * everyday estimates in line with USDA FoodData Central: raw or dry as bought,
  * canned goods drained. See docs/DATA.md for how they were chosen and checked.
  */
-export const INGREDIENTS: readonly Ingredient[] = [
+const ROWS: readonly Ingredient[] = [
   // Grains and bread
   food('oats', 'Płatki owsiane', 'grains', 379, 13.2, 6.5, 67.7),
   food('rice', 'Ryż biały (suchy)', 'grains', 365, 7.1, 0.7, 80),
@@ -141,3 +146,55 @@ export const INGREDIENTS: readonly Ingredient[] = [
   food('soy-milk', 'Napój sojowy niesłodzony', 'other', 33, 2.9, 1.6, 1.7, liquid(1.03)),
   food('soy-sauce', 'Sos sojowy', 'other', 53, 8.1, 0.6, 4.9, liquid(1.2)),
 ];
+
+/**
+ * The allergens each ingredient contains. This is the one place to audit, because
+ * a mistake here can put an allergen on someone's plate: when in doubt, add it.
+ * Oats count as gluten, as on EU labels, because they are usually grown and milled
+ * with wheat. Buckwheat, millet and rice are gluten-free. Soy sauce is brewed with
+ * wheat. Hummus is made with tahini, so it contains sesame.
+ */
+const ALLERGENS_BY_INGREDIENT: Readonly<Record<string, readonly Allergen[]>> = {
+  oats: ['gluten'],
+  pasta: ['gluten'],
+  'wholegrain-pasta': ['gluten'],
+  'wholegrain-bread': ['gluten'],
+  tortilla: ['gluten'],
+  flour: ['gluten'],
+  'soy-sauce': ['gluten', 'soy'],
+
+  milk: ['milk'],
+  yogurt: ['milk'],
+  'greek-yogurt': ['milk'],
+  quark: ['milk'],
+  feta: ['milk'],
+  cheese: ['milk'],
+  mozzarella: ['milk'],
+  parmesan: ['milk'],
+  butter: ['milk'],
+  cream: ['milk'],
+
+  egg: ['eggs'],
+
+  salmon: ['fish'],
+  cod: ['fish'],
+  tuna: ['fish'],
+
+  'peanut-butter': ['peanuts'],
+  walnuts: ['tree-nuts'],
+  almonds: ['tree-nuts'],
+
+  tofu: ['soy'],
+  'soy-milk': ['soy'],
+
+  tahini: ['sesame'],
+  hummus: ['sesame'],
+};
+
+export const INGREDIENTS: readonly Ingredient[] = ROWS.map((ingredient) => {
+  const allergens = ALLERGENS_BY_INGREDIENT[ingredient.id];
+  return allergens ? { ...ingredient, allergens } : ingredient;
+});
+
+/** The ids that `ALLERGENS_BY_INGREDIENT` lists, so a test can catch one that is misspelled. */
+export const ALLERGEN_TABLE_IDS: readonly string[] = Object.keys(ALLERGENS_BY_INGREDIENT);

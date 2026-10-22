@@ -22,7 +22,7 @@ do nich przez identyfikatory.
 ```json
 {
   "format": "garnuszek-backup",
-  "version": 2,
+  "version": 3,
   "exportedAt": "2026-10-21T12:00:00.000Z",
   "members": [
     {
@@ -35,7 +35,12 @@ do nich przez identyfikatory.
       "activity": "light",
       "goal": "lose",
       "snackKcal": 150,
-      "targetWeightKg": 58
+      "targetWeightKg": 58,
+      "restrictions": {
+        "diet": "vegetarian",
+        "allergens": ["milk", "gluten"],
+        "avoidedIngredientIds": ["onion"]
+      }
     }
   ],
   "customRecipes": [
@@ -65,7 +70,7 @@ do nich przez identyfikatory.
 | Pole                | Znaczenie                                                                    |
 | ------------------- | ---------------------------------------------------------------------------- |
 | `format`            | Zawsze `garnuszek-backup`. Po tym aplikacja poznaje swój plik.               |
-| `version`           | Wersja układu pliku (nie bazy danych), obecnie `2`.                          |
+| `version`           | Wersja układu pliku (nie bazy danych), obecnie `3`.                          |
 | `exportedAt`        | Kiedy plik powstał (ISO 8601).                                               |
 | `members`           | Domownicy, od najstarszego. Kolejność jest zachowana przy wczytaniu.         |
 | `measurements`      | Pomiary: `kind` to `weight` (kg), `waist`, `hips` lub `chest` (cm).          |
@@ -79,15 +84,24 @@ Daty to `RRRR-MM-DD` w czasie lokalnym użytkownika.
 
 `targetWeightKg` domownika jest opcjonalne i pojawia się tylko wtedy, gdy ktoś ma cel wagi.
 
+`restrictions` domownika jest opcjonalne i pojawia się tylko wtedy, gdy ktoś czegoś unika. Ma trzy
+pola: `diet` (`pescatarian`, `vegetarian` lub `vegan`, pomijane dla kogoś, kto je wszystko),
+`allergens` (`gluten`, `milk`, `eggs`, `fish`, `peanuts`, `tree-nuts`, `soy`, `sesame`) i
+`avoidedIngredientIds` (identyfikatory składników z katalogu).
+
 ### Wersje pliku
 
-| Wersja | Co zawiera                                                                       |
-| ------ | -------------------------------------------------------------------------------- |
-| 1      | Domownicy, własne przepisy, ulubione, plan, odhaczone zakupy, przekąski.         |
-| 2      | Dodatkowo pomiary (`measurements`) i docelowa waga domownika (`targetWeightKg`). |
+| Wersja | Co zawiera                                                                        |
+| ------ | --------------------------------------------------------------------------------- |
+| 1      | Domownicy, własne przepisy, ulubione, plan, odhaczone zakupy, przekąski.          |
+| 2      | Dodatkowo pomiary (`measurements`) i docelowa waga domownika (`targetWeightKg`).  |
+| 3      | Dodatkowo to, czego domownik unika (`restrictions`): dieta, alergeny i składniki. |
 
-Kopię w wersji 1 aplikacja nadal wczyta. Nie ma w niej pomiarów, więc po wczytaniu lista pomiarów
-jest pusta. Pole `measurements` w pliku w wersji 1 jest ignorowane, bo wersja 1 go nie znała.
+Kopie w starszych wersjach aplikacja nadal wczyta. Brakujące dane są po prostu puste: kopia w wersji
+1 nie ma pomiarów, a kopia w wersji 1 lub 2 nie ma wykluczeń. Pole, którego starsza wersja pliku nie
+znała (`measurements` w wersji 1, `restrictions` w wersji 1 lub 2), jest ignorowane. Starsza
+aplikacja, która dostanie plik w wersji 3, odmówi jego wczytania z prośbą o aktualizację, zamiast
+po cichu zgubić wykluczenia.
 
 ## Jak aplikacja czyta plik
 
@@ -103,15 +117,16 @@ Plik jest niezaufany, bo można go edytować albo wybrać przez pomyłkę zły p
    problemu, np. `members[1].age`. Własny przepis nie może mieć identyfikatora wbudowanego.
    Pomiar musi mieć znany rodzaj i wartość z zakresu tego rodzaju. Docelowa waga domownika musi być
    możliwą wagą, ale nie musi leżeć po „właściwej” stronie obecnej wagi, bo kto osiągnął cel,
-   zachowuje go.
+   zachowuje go. Dieta i alergeny w `restrictions` muszą być znane aplikacji.
 3. **Pomijanie odwołań do nieistniejących rzeczy.** Wpis planu z przepisem, którego aplikacja już nie
-   zna, ulubione i odhaczone zakupy z nieznanym składnikiem oraz przekąski i pomiary nieznanej osoby
-   są pomijane, a ekran przed wczytaniem pokazuje, ile. To zwykły skutek aktualizacji aplikacji
-   albo ręcznej edycji pliku, a nie uszkodzenie. Z wpisu planu znikają też osoby, których nie ma
-   w kopii.
+   zna, ulubione i odhaczone zakupy z nieznanym składnikiem, przekąski i pomiary nieznanej osoby oraz
+   składniki, których unika domownik, a których katalog już nie ma, są pomijane, a ekran przed
+   wczytaniem pokazuje, ile. To zwykły skutek aktualizacji aplikacji albo ręcznej edycji pliku, a
+   nie uszkodzenie. Z wpisu planu znikają też osoby, których nie ma w kopii.
 4. **Normalizacja.** Powtórzony wpis tego samego posiłku w tym samym dniu zostaje jeden (ostatni),
    to samo dotyczy pomiaru tego samego rodzaju w tym samym dniu, a data odhaczonych zakupów jest
-   przesuwana na poniedziałek tygodnia.
+   przesuwana na poniedziałek tygodnia. Powtórzony alergen lub składnik w wykluczeniach zostaje
+   jeden raz, a puste wykluczenia są pomijane.
 
 Wczytanie (`importBackup`) odbywa się w jednej transakcji: najpierw usuwa obecne dane, potem zapisuje
 nowe. Jeśli cokolwiek się nie powiedzie, stan urządzenia pozostaje bez zmian.

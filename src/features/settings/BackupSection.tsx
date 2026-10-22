@@ -196,6 +196,8 @@ function describeDropped(dropped: DroppedItems): string {
     dropped.shoppingChecks > 0 && `odhaczone zakupy: ${dropped.shoppingChecks}`,
     dropped.snackOverrides > 0 && `przekąski na pojedyncze dni: ${dropped.snackOverrides}`,
     dropped.measurements > 0 && `pomiary: ${dropped.measurements}`,
+    dropped.avoidedIngredients > 0 &&
+      `składniki, których ktoś unika: ${dropped.avoidedIngredients}`,
   ].filter(Boolean);
 
   return parts.length === 0

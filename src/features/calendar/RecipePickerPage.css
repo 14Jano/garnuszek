@@ -33,8 +33,20 @@
 }
 
 .picker-item__name,
-.picker-item__meta {
+.picker-item__meta,
+.picker-item__warning {
   margin: 0;
+}
+
+.picker-item__warning {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-accent-strong);
+}
+
+.picker-note {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-muted);
 }
 
 .picker-item__name {

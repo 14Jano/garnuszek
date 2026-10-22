@@ -1,4 +1,5 @@
 import type { Member, NewMember } from '../domain/household/member';
+import { copyRestrictions } from '../domain/household/restrictions';
 import { db, nextCreatedAt } from './db';
 import type { MemberRecord } from './db';
 
@@ -19,11 +20,19 @@ export async function addMember(input: NewMember): Promise<Member> {
   return member;
 }
 
+/**
+ * Replaces everything stored about the member. The whole record is written, not
+ * just the fields that are given, so a field the person has cleared (a target
+ * weight, a restriction) is gone afterwards instead of lingering.
+ */
 export async function updateMember(member: Member): Promise<void> {
-  const updatedCount = await db.members.update(member.id, member);
-  if (updatedCount === 0) {
-    throw new Error(`Cannot update member ${member.id}: it does not exist`);
-  }
+  await db.transaction('rw', db.members, async () => {
+    const existing = await db.members.get(member.id);
+    if (!existing) {
+      throw new Error(`Cannot update member ${member.id}: it does not exist`);
+    }
+    await db.members.put({ ...member, createdAt: existing.createdAt });
+  });
 }
 
 /**
@@ -63,5 +72,8 @@ function toMember(record: MemberRecord): Member {
     goal: record.goal,
     snackKcal: record.snackKcal ?? 0,
     ...(record.targetWeightKg === undefined ? {} : { targetWeightKg: record.targetWeightKg }),
+    ...(record.restrictions === undefined
+      ? {}
+      : { restrictions: copyRestrictions(record.restrictions) }),
   };
 }

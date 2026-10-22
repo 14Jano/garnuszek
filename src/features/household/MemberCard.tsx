@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { householdPath } from '../../app/navigation';
+import { describeRestrictions } from '../../content/conflictText';
 import type { Member } from '../../domain/household/member';
+import { hasRestrictions } from '../../domain/household/restrictions';
 import { dailyCalorieTarget } from '../../domain/nutrition/calorieTarget';
 import { formatDecimal } from '../../format/numbers';
 import { useConfirmFocus } from '../../hooks/useConfirmFocus';
@@ -36,6 +38,9 @@ export function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
       )}
       {member.snackKcal > 0 && (
         <p className="member-card__details">Na przekąski: {member.snackKcal} kcal dziennie.</p>
+      )}
+      {member.restrictions && hasRestrictions(member.restrictions) && (
+        <p className="member-card__details">Unika: {describeRestrictions(member.restrictions)}.</p>
       )}
 
       {confirmingDelete ? (

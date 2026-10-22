@@ -1,5 +1,6 @@
 import { createBackup } from '../domain/backup/backup';
 import type { Backup } from '../domain/backup/backup';
+import { copyRestrictions, hasRestrictions } from '../domain/household/restrictions';
 import { measurementKey } from '../domain/progress/measurement';
 import { db } from './db';
 
@@ -49,6 +50,9 @@ export async function exportBackup(now: Date = new Date()): Promise<Backup> {
           goal: member.goal,
           snackKcal: member.snackKcal ?? 0,
           ...(member.targetWeightKg === undefined ? {} : { targetWeightKg: member.targetWeightKg }),
+          ...(hasRestrictions(member.restrictions) && member.restrictions
+            ? { restrictions: copyRestrictions(member.restrictions) }
+            : {}),
         })),
         customRecipes: customRecipes.map((recipe) => ({
           id: recipe.id,

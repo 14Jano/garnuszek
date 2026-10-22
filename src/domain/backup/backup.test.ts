@@ -80,6 +80,7 @@ const NO_DROPPED = {
   shoppingChecks: 0,
   snackOverrides: 0,
   measurements: 0,
+  avoidedIngredients: 0,
 };
 
 function parse(value: unknown) {
@@ -247,6 +248,115 @@ describe('parseBackup: measurements and target weight', () => {
       { memberId: 'anna-id', kind: 'weight', date: '2026-10-14', value: 60.4 },
     ]);
     expect(dropped.measurements).toBe(1);
+  });
+});
+
+describe('parseBackup: what a member avoids', () => {
+  const avoiding = {
+    diet: 'vegetarian',
+    allergens: ['milk', 'gluten'],
+    avoidedIngredientIds: ['potato'],
+  } as const;
+
+  function withRestrictions(restrictions: unknown): Backup {
+    const backup = copyOfBackup();
+    setPath(backup, 'members[0].restrictions', restrictions);
+    return backup;
+  }
+
+  it('reads the diet, the allergens and the ingredients of a member', () => {
+    const result = parse(withRestrictions(avoiding));
+
+    expect(result).toMatchObject({ ok: true, dropped: NO_DROPPED });
+    expect(result.ok && result.backup.members[0]?.restrictions).toEqual(avoiding);
+  });
+
+  it('gives back exactly what was written', () => {
+    const member: Member = {
+      ...anna,
+      restrictions: { allergens: ['eggs'], avoidedIngredientIds: [] },
+    };
+    const written = createBackup({ ...data, members: [member] }, NOW);
+
+    expect(parse(written)).toEqual({ ok: true, backup: written, dropped: NO_DROPPED });
+  });
+
+  it('leaves out restrictions that say nothing', () => {
+    const result = parse(withRestrictions({ allergens: [], avoidedIngredientIds: [] }));
+
+    expect(result.ok && result.backup.members[0]).not.toHaveProperty('restrictions');
+  });
+
+  it('accepts restrictions with only some of the fields', () => {
+    const result = parse(withRestrictions({ diet: 'vegan' }));
+
+    expect(result.ok && result.backup.members[0]?.restrictions).toEqual({
+      diet: 'vegan',
+      allergens: [],
+      avoidedIngredientIds: [],
+    });
+  });
+
+  it('drops ingredients the app no longer has, and counts them', () => {
+    const result = parse(
+      withRestrictions({ allergens: [], avoidedIngredientIds: ['potato', 'unicorn', 'quark'] }),
+    );
+
+    expect(result.ok && result.backup.members[0]?.restrictions?.avoidedIngredientIds).toEqual([
+      'potato',
+      'quark',
+    ]);
+    expect(result.ok && result.dropped.avoidedIngredients).toBe(1);
+  });
+
+  it('keeps each allergen and ingredient once', () => {
+    const result = parse(
+      withRestrictions({
+        allergens: ['milk', 'milk'],
+        avoidedIngredientIds: ['potato', 'potato'],
+      }),
+    );
+
+    expect(result.ok && result.backup.members[0]?.restrictions).toEqual({
+      allergens: ['milk'],
+      avoidedIngredientIds: ['potato'],
+    });
+  });
+
+  it('ignores restrictions in a file that is older than they are', () => {
+    const backup = withRestrictions(avoiding);
+
+    const result = parse({ ...backup, version: 2 });
+
+    expect(result.ok && result.backup.members[0]).not.toHaveProperty('restrictions');
+    expect(result.ok && result.backup.version).toBe(BACKUP_VERSION);
+  });
+
+  it.each([
+    ['members[0].restrictions', 'wegetarianin', 'members[0].restrictions'],
+    ['members[0].restrictions.diet', 'wegetariańska', 'members[0].restrictions.diet'],
+    ['members[0].restrictions.diet', 5, 'members[0].restrictions.diet'],
+    ['members[0].restrictions.allergens', 'milk', 'members[0].restrictions.allergens'],
+    ['members[0].restrictions.allergens[0]', 'pyłki', 'members[0].restrictions.allergens[0]'],
+    [
+      'members[0].restrictions.avoidedIngredientIds',
+      'potato',
+      'members[0].restrictions.avoidedIngredientIds',
+    ],
+    [
+      'members[0].restrictions.avoidedIngredientIds[0]',
+      '',
+      'members[0].restrictions.avoidedIngredientIds[0]',
+    ],
+  ])('damaging %s points at the problem', (path, value, detail) => {
+    const backup = withRestrictions({
+      diet: 'vegan',
+      allergens: ['milk'],
+      avoidedIngredientIds: ['potato'],
+    });
+    setPath(backup, path, value);
+
+    expect(parse(backup)).toEqual({ ok: false, problem: 'invalid-data', detail });
   });
 });
 

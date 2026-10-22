@@ -1,6 +1,7 @@
 import type { BodyProfile, Goal } from '../nutrition/calorieTarget';
 import { checkNumber } from '../validation';
 import type { FieldProblem } from '../validation';
+import type { Restrictions } from './restrictions';
 
 /** A person who eats from the shared meal plan. */
 export interface Member extends BodyProfile {
@@ -10,6 +11,8 @@ export interface Member extends BodyProfile {
   snackKcal: number;
   /** The weight the person wants to reach. Only meaningful when losing or gaining weight. */
   targetWeightKg?: number;
+  /** What the person does not eat. Left out when there is nothing. */
+  restrictions?: Restrictions;
 }
 
 /** What the user fills in; the id is assigned when the member is stored. */

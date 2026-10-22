@@ -46,6 +46,8 @@ async function seedEverything() {
     goal: 'lose',
     snackKcal: 150,
     targetWeightKg: 62,
+    // The Greek salad has feta in it, so the calendar and the picker show their warnings.
+    restrictions: { allergens: ['milk'], avoidedIngredientIds: ['onion'] },
   });
   const bartek = await addMember({
     name: 'Bartek',
@@ -167,6 +169,25 @@ describe('accessibility: forms and confirmations', () => {
     await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
     expect(screen.getByText('Podaj wiek.')).toBeVisible();
 
+    expect(await accessibilityProblems()).toEqual([]);
+  });
+
+  it('the form of a member who avoids things has no accessibility problems', async () => {
+    const user = userEvent.setup();
+    await seedEverything();
+    await openScreen('/domownicy');
+
+    await user.click(await screen.findByRole('button', { name: 'Edytuj: Anna' }));
+
+    expect(screen.getByRole('list', { name: 'Składniki, których unika' })).toBeVisible();
+    expect(await accessibilityProblems()).toEqual([]);
+  });
+
+  it('shows the warning about a dish that someone avoids', async () => {
+    await seedEverything();
+    await openScreen(`/kalendarz/${DAY}`);
+
+    expect((await screen.findAllByText(/czego unikają/)).length).toBeGreaterThan(0);
     expect(await accessibilityProblems()).toEqual([]);
   });
 

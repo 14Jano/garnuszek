@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ROUTES, calendarPath } from '../../app/navigation';
 import { INGREDIENT_CATALOG } from '../../content/catalog';
+import { describeConflicts } from '../../content/conflictText';
 import { assignRecipe } from '../../data/planRepository';
+import { conflictsForMembers, hasRestrictions } from '../../domain/household/restrictions';
 import { formatDayHeading, isDateKey } from '../../domain/plan/dates';
 import { NO_FILTER, filterRecipes } from '../../domain/recipes/filterRecipes';
 import { MEAL_TYPES, nutritionPerServing } from '../../domain/recipes/recipe';
@@ -21,6 +23,8 @@ export function RecipePickerPage() {
   const dayEntries = usePlanEntries(date ?? '', date ?? '');
   const [query, setQuery] = useState('');
   const [favoritesOnly, setFavoritesOnly] = useState(false);
+  // On by default, so a dish someone avoids is not proposed unless the user asks to see it.
+  const [hideClashing, setHideClashing] = useState(true);
   const [saveFailed, setSaveFailed] = useState(false);
 
   const mealType = MEAL_TYPES.find((type) => type === mealParam);
@@ -71,12 +75,25 @@ export function RecipePickerPage() {
   }
 
   const memberIds = members.map((member) => member.id);
+  // Whoever will eat the dish: those already set for this slot, or everyone for an empty one.
+  const eaters = current
+    ? members.filter((member) => current.memberIds.includes(member.id))
+    : members;
+  const hasRestrictedEaters = eaters.some((member) => hasRestrictions(member.restrictions));
+
   // Favorites first; the sort is stable, so the original order is kept within each group.
-  const choices = filterRecipes(
+  const found = filterRecipes(
     recipes,
     { ...NO_FILTER, query, mealType, favoritesOnly },
     INGREDIENT_CATALOG,
-  ).sort((a, b) => Number(b.favorite) - Number(a.favorite));
+  )
+    .sort((a, b) => Number(b.favorite) - Number(a.favorite))
+    .map((entry) => ({
+      ...entry,
+      clashes: conflictsForMembers(entry.recipe, eaters, INGREDIENT_CATALOG),
+    }));
+  const choices = hideClashing ? found.filter(({ clashes }) => clashes.length === 0) : found;
+  const hiddenCount = found.length - choices.length;
 
   async function choose(recipeId: string) {
     if (!date || !mealType) return;
@@ -131,13 +148,35 @@ export function RecipePickerPage() {
           />
           Tylko ulubione
         </label>
+        {hasRestrictedEaters && (
+          <label className="choice">
+            <input
+              type="checkbox"
+              checked={hideClashing}
+              onChange={(event) => setHideClashing(event.target.checked)}
+            />
+            Ukryj dania, których ktoś unika
+          </label>
+        )}
       </form>
 
+      {hiddenCount > 0 && (
+        <p className="picker-note" role="status">
+          {hiddenCount === 1
+            ? 'Ukryto 1 danie, którego ktoś unika.'
+            : `Ukryto dań, których ktoś unika: ${hiddenCount}.`}
+        </p>
+      )}
+
       {choices.length === 0 ? (
-        <p>Nic nie pasuje do wyszukiwania.</p>
+        <p>
+          {hiddenCount > 0
+            ? 'Każde pasujące danie zawiera coś, czego ktoś unika, więc wszystkie są ukryte. Odznacz „Ukryj dania, których ktoś unika”, żeby je zobaczyć.'
+            : 'Nic nie pasuje do wyszukiwania.'}
+        </p>
       ) : (
         <ul className="picker-list">
-          {choices.map(({ recipe, favorite }) => {
+          {choices.map(({ recipe, favorite, clashes }) => {
             const kcal = Math.round(nutritionPerServing(recipe, INGREDIENT_CATALOG).kcal);
 
             return (
@@ -149,6 +188,11 @@ export function RecipePickerPage() {
                     {favorite && ', ulubione'}
                     {recipe.id === currentRecipeId && ', obecnie wybrane'}
                   </p>
+                  {clashes.map(({ member, conflicts }) => (
+                    <p key={member.id} className="picker-item__warning">
+                      Uwaga, {member.name}: {describeConflicts(conflicts)}
+                    </p>
+                  ))}
                 </div>
                 <button
                   type="button"

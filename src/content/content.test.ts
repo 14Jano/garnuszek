@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MEAL_TYPES, compatibleDiets, nutritionPerServing } from '../domain/recipes/recipe';
 import { INGREDIENT_CATALOG } from './catalog';
-import { INGREDIENTS } from './ingredients';
+import { ALLERGEN_TABLE_IDS, INGREDIENTS } from './ingredients';
 import { BUILTIN_RECIPES } from './recipes';
 
 function recipeById(id: string) {
@@ -73,6 +73,61 @@ describe('ingredient units for the shopping list', () => {
     expect(scrambled.ingredients.find(({ ingredientId }) => ingredientId === 'egg')?.grams).toBe(
       4 * (egg?.purchase?.grams ?? 0),
     );
+  });
+});
+
+describe('allergens of the ingredients', () => {
+  const allergensOf = (id: string) => INGREDIENT_CATALOG.get(id)?.allergens ?? [];
+
+  it('are only listed for ingredients that exist', () => {
+    for (const id of ALLERGEN_TABLE_IDS) {
+      expect(INGREDIENT_CATALOG.has(id), id).toBe(true);
+    }
+  });
+
+  it('list each allergen once per ingredient', () => {
+    for (const { id, allergens = [] } of INGREDIENTS) {
+      expect(new Set(allergens).size, id).toBe(allergens.length);
+    }
+  });
+
+  it('mark everything made from milk, eggs or fish by its food group', () => {
+    for (const { id, category } of INGREDIENTS) {
+      if (category === 'dairy') expect(allergensOf(id), id).toContain('milk');
+      if (category === 'eggs') expect(allergensOf(id), id).toContain('eggs');
+      if (category === 'fish') expect(allergensOf(id), id).toContain('fish');
+    }
+  });
+
+  it('mark every grain product that has gluten, and none of the gluten-free ones', () => {
+    const glutenFree = ['rice', 'buckwheat', 'millet'];
+
+    for (const { id, category } of INGREDIENTS) {
+      if (category !== 'grains') continue;
+      expect(allergensOf(id).includes('gluten'), id).toBe(!glutenFree.includes(id));
+    }
+  });
+
+  it.each([
+    ['peanut-butter', 'peanuts'],
+    ['walnuts', 'tree-nuts'],
+    ['almonds', 'tree-nuts'],
+    ['tofu', 'soy'],
+    ['soy-milk', 'soy'],
+    ['soy-sauce', 'soy'],
+    ['soy-sauce', 'gluten'],
+    ['tahini', 'sesame'],
+    ['hummus', 'sesame'],
+  ] as const)('knows that %s contains %s', (id, allergen) => {
+    expect(allergensOf(id)).toContain(allergen);
+  });
+
+  it('leave plain vegetables, fruit and meat free of allergens', () => {
+    for (const { id, category } of INGREDIENTS) {
+      if (['vegetables', 'fruit', 'meat'].includes(category)) {
+        expect(allergensOf(id), id).toEqual([]);
+      }
+    }
   });
 });
 

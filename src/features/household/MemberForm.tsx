@@ -2,10 +2,16 @@ import { useId, useState } from 'react';
 import type { FormEvent } from 'react';
 import { MEMBER_LIMITS, allowedGoals, validateMember } from '../../domain/household/member';
 import type { MemberErrors, MemberField, NewMember } from '../../domain/household/member';
+import {
+  NO_RESTRICTIONS,
+  copyRestrictions,
+  hasRestrictions,
+} from '../../domain/household/restrictions';
 import type { FieldProblem } from '../../domain/validation';
 import { ACTIVITY_LEVELS, SEXES } from '../../domain/nutrition/calorieTarget';
 import type { ActivityLevel, Goal, Sex } from '../../domain/nutrition/calorieTarget';
 import { ACTIVITY_LABELS, GOAL_LABELS, SEX_LABELS } from './labels';
+import { RestrictionsFields } from './RestrictionsFields';
 import './MemberForm.css';
 
 interface FormValues {
@@ -81,6 +87,7 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
   const [values, setValues] = useState<FormValues>(
     initialValues ? toFormValues(initialValues) : EMPTY_VALUES,
   );
+  const [restrictions, setRestrictions] = useState(initialValues?.restrictions ?? NO_RESTRICTIONS);
   const [errors, setErrors] = useState<MemberErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const formId = useId();
@@ -145,6 +152,7 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
         goal,
         snackKcal: draft.snackKcal,
         ...(draft.targetWeightKg === undefined ? {} : { targetWeightKg: draft.targetWeightKg }),
+        ...(hasRestrictions(restrictions) ? { restrictions: copyRestrictions(restrictions) } : {}),
       });
     } finally {
       setSubmitting(false);
@@ -313,6 +321,8 @@ export function MemberForm({ initialValues, submitLabel, onSubmit, onCancel }: M
         onChange={(value) => setField('snackKcal', value)}
         error={errorMessage('snackKcal')}
       />
+
+      <RestrictionsFields value={restrictions} onChange={setRestrictions} />
 
       <div className="member-form__actions">
         <button type="submit" className="btn btn--primary" disabled={submitting}>

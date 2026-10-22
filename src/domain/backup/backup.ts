@@ -1,5 +1,7 @@
 import { MEMBER_LIMITS, allowedGoals, validateMember } from '../household/member';
 import type { Member } from '../household/member';
+import { hasRestrictions } from '../household/restrictions';
+import type { Restrictions } from '../household/restrictions';
 import { ACTIVITY_LEVELS, GOALS, SEXES } from '../nutrition/calorieTarget';
 import { isDateKey, startOfWeek } from '../plan/dates';
 import type { DateKey } from '../plan/dates';
@@ -8,8 +10,9 @@ import type { PlanEntry } from '../plan/planEntry';
 import type { SnackOverride } from '../plan/snacks';
 import { MEASUREMENT_KINDS, MEASUREMENT_LIMITS, measurementKey } from '../progress/measurement';
 import type { Measurement } from '../progress/measurement';
+import { ALLERGENS } from '../recipes/ingredient';
 import type { IngredientCatalog } from '../recipes/ingredient';
-import { MEAL_TYPES, hasRecipeErrors, validateRecipe } from '../recipes/recipe';
+import { DIETS, MEAL_TYPES, hasRecipeErrors, validateRecipe } from '../recipes/recipe';
 import type { Recipe } from '../recipes/recipe';
 import { checkNumber } from '../validation';
 
@@ -23,8 +26,9 @@ export const BACKUP_FORMAT = 'garnuszek-backup';
  *
  * 1: members, custom recipes, favorites, plan, ticked-off shopping, snack amounts.
  * 2: adds measurements and the target weight of a member.
+ * 3: adds what a member avoids (diet, allergens, single ingredients).
  */
-export const BACKUP_VERSION = 2;
+export const BACKUP_VERSION = 3;
 
 /** An item of a week's shopping list that was ticked off. */
 export interface ShoppingCheck {
@@ -85,6 +89,8 @@ export interface DroppedItems {
   shoppingChecks: number;
   snackOverrides: number;
   measurements: number;
+  /** Ingredients a member avoids that the app no longer has. */
+  avoidedIngredients: number;
 }
 
 export type BackupParseResult =
@@ -144,7 +150,11 @@ function readBackup(
   const exportedAt = readText(root.exportedAt, 'exportedAt');
   if (Number.isNaN(Date.parse(exportedAt))) fail('exportedAt');
 
-  const members = readList(root.members, 'members', (item, path) => readMember(item, path));
+  // Counts what is left out while the members are read.
+  const unknownAvoided = { count: 0 };
+  const members = readList(root.members, 'members', (item, path) =>
+    readMember(item, path, version >= 3 ? context.catalog : undefined, unknownAvoided),
+  );
   assertUnique(
     members.map((member) => member.id),
     'members',
@@ -227,11 +237,22 @@ function readBackup(
       shoppingChecks: shoppingChecks.length - keptChecks.length,
       snackOverrides: snackOverrides.length - keptSnacks.length,
       measurements: measurements.length - keptMeasurements.length,
+      avoidedIngredients: unknownAvoided.count,
     },
   };
 }
 
-function readMember(raw: unknown, path: string): Member {
+/**
+ * `catalog` is given for files that can hold restrictions (version 3 and newer); an older
+ * file has none. Ingredients a member avoids that the catalog no longer has are dropped
+ * and counted in `unknownAvoided`.
+ */
+function readMember(
+  raw: unknown,
+  path: string,
+  catalog: IngredientCatalog | undefined,
+  unknownAvoided: { count: number },
+): Member {
   const item = readRecord(raw, path);
   const member: Member = {
     id: readId(item.id, `${path}.id`),
@@ -248,6 +269,16 @@ function readMember(raw: unknown, path: string): Member {
       : { targetWeightKg: readNumber(item.targetWeightKg, `${path}.targetWeightKg`) }),
   };
 
+  if (catalog && item.restrictions !== undefined) {
+    const restrictions = readRestrictions(
+      item.restrictions,
+      `${path}.restrictions`,
+      catalog,
+      unknownAvoided,
+    );
+    if (hasRestrictions(restrictions)) member.restrictions = restrictions;
+  }
+
   // The same rules as the form, so a restored member is one the form could have saved.
   // The goal is left out of the check on purpose: the form wants a target on the right
   // side of the current weight, but weighings move the weight, so a person who has
@@ -263,6 +294,35 @@ function readMember(raw: unknown, path: string): Member {
   if (!allowedGoals(member.age).includes(member.goal)) fail(`${path}.goal`);
 
   return member;
+}
+
+function readRestrictions(
+  raw: unknown,
+  path: string,
+  catalog: IngredientCatalog,
+  unknownAvoided: { count: number },
+): Restrictions {
+  const item = readRecord(raw, path);
+
+  const allergens = unique(
+    readList(item.allergens ?? [], `${path}.allergens`, (allergen, allergenPath) =>
+      readOneOf(allergen, ALLERGENS, allergenPath),
+    ),
+  );
+
+  const listed = readList(
+    item.avoidedIngredientIds ?? [],
+    `${path}.avoidedIngredientIds`,
+    (id, idPath) => readId(id, idPath),
+  );
+  const avoidedIngredientIds = unique(listed.filter((id) => catalog.has(id)));
+  unknownAvoided.count += listed.length - avoidedIngredientIds.length;
+
+  return {
+    ...(item.diet === undefined ? {} : { diet: readOneOf(item.diet, DIETS, `${path}.diet`) }),
+    allergens,
+    avoidedIngredientIds,
+  };
 }
 
 function readRecipe(raw: unknown, path: string, catalog: IngredientCatalog): Recipe {

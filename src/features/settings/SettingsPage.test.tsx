@@ -103,7 +103,7 @@ describe('downloading a backup', () => {
     await vi.waitFor(() => expect(downloads).toHaveLength(1));
     expect(downloads[0]?.fileName).toMatch(/^garnuszek-kopia-\d{4}-\d{2}-\d{2}\.json$/);
     const saved = JSON.parse((await downloads[0]?.blob?.text()) ?? '');
-    expect(saved).toMatchObject({ format: 'garnuszek-backup', version: 2 });
+    expect(saved).toMatchObject({ format: 'garnuszek-backup', version: 3 });
     expect(saved.members.map((member: { name: string }) => member.name)).toEqual(['Anna']);
   });
 });
@@ -147,6 +147,27 @@ describe('restoring a backup', () => {
 
     expect(await screen.findByText('Wczytano kopię zapasową.')).toBeVisible();
     expect(await listMeasurements('anna-id')).toHaveLength(2);
+  });
+
+  it('says what it leaves out when a member avoids an ingredient the app no longer has', async () => {
+    const user = userEvent.setup();
+    const data: BackupData = {
+      ...backupData,
+      members: [
+        {
+          ...anna,
+          restrictions: { allergens: [], avoidedIngredientIds: ['onion', 'removed-from-the-app'] },
+        },
+      ],
+    };
+    render(<SettingsPage />);
+
+    await user.upload(screen.getByLabelText('Wczytaj kopię zapasową'), backupFile(data));
+
+    expect(await screen.findByText(/składniki, których ktoś unika: 1\)/)).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Zastąp dane na tym urządzeniu' }));
+    expect(await screen.findByText('Wczytano kopię zapasową.')).toBeVisible();
+    expect((await listMembers())[0]?.restrictions?.avoidedIngredientIds).toEqual(['onion']);
   });
 
   it('replaces the data on the device once the user confirms', async () => {

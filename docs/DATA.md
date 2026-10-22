@@ -57,9 +57,29 @@ a plan skonsultować ze specjalistą. Zobacz też zastrzeżenie w [README](../RE
    sklepów. Czego nie jesteś pewien (jogurty, ryż, makaron), zostaw w gramach, bo to też jest
    czytelne.
 
-4. Uruchom `npm test`. Testy sprawdzą m.in., że kalorie zgadzają się z makroskładnikami
-   (białko i węglowodany po 4 kcal/g, tłuszcz 9 kcal/g, z tolerancją 20% lub 10 kcal) i że wagi
-   sztuk oraz gęstości płynów są wiarygodne.
+4. Wpisz alergeny składnika w tabeli `ALLERGENS_BY_INGREDIENT` na końcu `src/content/ingredients.ts`
+   (osobno od wiersza, żeby całą tabelę dało się przejrzeć naraz). To ważne: domownik, który unika
+   mleka czy glutenu, polega na tej tabeli, więc **w razie wątpliwości dopisz alergen**. Katalog
+   zna osiem alergenów, wzorowanych na liście z etykiet UE:
+
+   | Alergen     | Co obejmuje                                                         |
+   | ----------- | ------------------------------------------------------------------- |
+   | `gluten`    | pszenica i inne zboża z glutenem, owies, makaron, chleb, sos sojowy |
+   | `milk`      | wszystko z mleka (też masło, sery, jogurty), więc także laktoza     |
+   | `eggs`      | jajka                                                               |
+   | `fish`      | ryby                                                                |
+   | `peanuts`   | orzeszki ziemne i masło orzechowe                                   |
+   | `tree-nuts` | orzechy włoskie, migdały i inne orzechy                             |
+   | `soy`       | soja: tofu, napój sojowy, sos sojowy                                |
+   | `sesame`    | sezam: tahini i hummus (jest zrobiony z tahini)                     |
+
+   Owies oznaczamy jako gluten, tak jak na etykietach, bo zwykle miele się go razem z pszenicą.
+   Kasza gryczana, jaglana i ryż są bez glutenu.
+
+5. Uruchom `npm test`. Testy sprawdzą m.in., że kalorie zgadzają się z makroskładnikami
+   (białko i węglowodany po 4 kcal/g, tłuszcz 9 kcal/g, z tolerancją 20% lub 10 kcal), że wagi
+   sztuk oraz gęstości płynów są wiarygodne i że alergeny zgadzają się z grupą żywności (każdy
+   nabiał ma `milk`, każde jajko `eggs`, każda ryba `fish`, a pieczywo i makarony `gluten`).
 
 ## Jak dodać przepis
 

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { UserEvent } from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -212,6 +212,116 @@ describe('HouseholdPage', () => {
     renderPage();
 
     expect(await screen.findByText(/165 cm, 68,5 kg/)).toBeVisible();
+  });
+
+  it('saves what a member avoids and says so on the card', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '60' });
+
+    await user.selectOptions(
+      screen.getByLabelText('Dieta'),
+      'Wegańska (bez mięsa, ryb, nabiału i jajek)',
+    );
+    await user.click(screen.getByRole('checkbox', { name: 'Gluten' }));
+    await user.selectOptions(screen.getByLabelText('Inne składniki, których unika'), 'Cebula');
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+
+    expect(await screen.findByText('Unika: dieta wegańska, gluten, cebula.')).toBeVisible();
+    expect((await listMembers())[0]?.restrictions).toEqual({
+      diet: 'vegan',
+      allergens: ['gluten'],
+      avoidedIngredientIds: ['onion'],
+    });
+  });
+
+  it('stores nothing about restrictions for someone who avoids nothing', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '60' });
+
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+
+    expect(await screen.findByRole('heading', { name: 'Anna' })).toBeVisible();
+    expect(screen.queryByText(/Unika:/)).not.toBeInTheDocument();
+    expect((await listMembers())[0]).not.toHaveProperty('restrictions');
+  });
+
+  it('keeps the allergens in the order of the list, whatever order they are ticked in', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    await fillBasics(user, { name: 'Anna', age: '30', height: '165', weight: '60' });
+
+    await user.click(screen.getByRole('checkbox', { name: 'Sezam' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Jajka' }));
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+
+    await screen.findByRole('heading', { name: 'Anna' });
+    expect((await listMembers())[0]?.restrictions?.allergens).toEqual(['eggs', 'sesame']);
+  });
+
+  it('removes an ingredient from the list and keeps focus in the form', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    const add = screen.getByLabelText('Inne składniki, których unika');
+
+    await user.selectOptions(add, 'Cebula');
+    await user.selectOptions(add, 'Czosnek');
+    const list = screen.getByRole('list', { name: 'Składniki, których unika' });
+    expect(within(list).getAllByRole('listitem')).toHaveLength(2);
+
+    await user.click(screen.getByRole('button', { name: 'Nie unika już: Cebula' }));
+
+    expect(within(list).getAllByRole('listitem')).toHaveLength(1);
+    expect(within(list).queryByText('Cebula')).not.toBeInTheDocument();
+    expect(add).toHaveFocus();
+  });
+
+  it('offers an ingredient only once', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+    const add = screen.getByLabelText('Inne składniki, których unika');
+
+    await user.selectOptions(add, 'Cebula');
+
+    expect(within(add).queryByRole('option', { name: 'Cebula' })).not.toBeInTheDocument();
+  });
+
+  it('shows what a member avoids when editing, and lets the user clear it', async () => {
+    const user = userEvent.setup();
+    await addMember({
+      ...anna,
+      restrictions: { diet: 'vegetarian', allergens: ['milk'], avoidedIngredientIds: ['onion'] },
+    });
+    renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Edytuj: Anna' }));
+    expect(screen.getByLabelText('Dieta')).toHaveValue('vegetarian');
+    expect(screen.getByRole('checkbox', { name: 'Mleko i nabiał' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Gluten' })).not.toBeChecked();
+
+    await user.selectOptions(screen.getByLabelText('Dieta'), 'Je wszystko');
+    await user.click(screen.getByRole('checkbox', { name: 'Mleko i nabiał' }));
+    await user.click(screen.getByRole('button', { name: 'Nie unika już: Cebula' }));
+    await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'Anna' })).toBeVisible();
+    expect(screen.queryByText(/Unika:/)).not.toBeInTheDocument();
+    expect((await listMembers())[0]).not.toHaveProperty('restrictions');
+  });
+
+  it('reminds the user that this is help with planning, not a guarantee', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(screen.getByRole('button', { name: 'Dodaj domownika' }));
+
+    expect(screen.getByText(/przy alergii zawsze czytaj etykiety/)).toBeVisible();
   });
 
   it('links each member to their measurements', async () => {

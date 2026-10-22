@@ -5,6 +5,30 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-22
+
+### Dodano
+
+- Wykluczenia domowników: w formularzu sekcja „Czego unika” z dietą (wegetariańska, wegańska,
+  peskatariańska), alergenami i nietolerancjami (gluten, mleko i nabiał, jajka, ryby, orzeszki
+  ziemne, orzechy, soja, sezam) oraz dowolnymi składnikami z katalogu. Karta domownika wypisuje, czego
+  unika.
+- Kalendarz ostrzega przy posiłku, w którym jest coś, czego unika ktoś z jedzących, i mówi co: „Anna:
+  mleko i nabiał (masło, ser żółty)”. Ostrzeżenie znika, gdy tę osobę wykreślisz z „Kto je”.
+- Wybór dania domyślnie ukrywa dania, których ktoś z jedzących unika, mówi, ile ukrył, i pozwala je
+  pokazać razem z ostrzeżeniem.
+- Alergeny w katalogu składników (jedna tabela do przeglądu) i testy, które pilnują, żeby zgadzały się
+  z grupą żywności: każdy nabiał ma mleko, każde pieczywo i makaron gluten itd.
+- Kopia zapasowa w wersji 3 zawiera wykluczenia. Pliki w wersji 1 i 2 nadal się wczytują, a składniki,
+  których aplikacja już nie zna, są pomijane i policzone na ekranie wczytywania.
+- Opis w [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DATA.md](docs/DATA.md) i
+  [docs/BACKUP.md](docs/BACKUP.md).
+
+### Naprawiono
+
+- Edycja domownika zapisuje cały rekord. Wcześniej pole, które użytkownik wyczyścił (np. docelowa
+  waga po zmianie celu na „utrzymać wagę”), zostawało w bazie ze starą wartością.
+
 ## [1.1.0] - 2026-10-22
 
 ### Dodano

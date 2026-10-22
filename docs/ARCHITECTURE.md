@@ -243,6 +243,32 @@ Skąd pochodzą dane i jak je dodawać, opisuje [DATA.md](DATA.md).
   gdzie istnieje, kopiowanie do schowka oraz link `wa.me`. Tekst zawiera wyłącznie to, co zostało do
   kupienia. Aplikacja nic nie wysyła sama, dane opuszczają urządzenie dopiero po kliknięciu.
 
+## Wykluczenia domowników
+
+Domownik może czegoś unikać (`Member.restrictions`): diety (wegetariańska, wegańska,
+peskatariańska), alergenów i pojedynczych składników. To pomoc w planowaniu, a nie gwarancja, i tak
+jest to powiedziane w formularzu.
+
+- **Model.** `Restrictions` ma `diet`, `allergens` i `avoidedIngredientIds`. Pole jest opcjonalne i
+  brakuje go u kogoś, kto je wszystko (`hasRestrictions`), więc istniejące dane nie wymagają migracji
+  bazy: nie ma nowego indeksu ani tabeli. Alergeny są danymi składników (`Ingredient.allergens`)
+  z jednej tabeli w `src/content/ingredients.ts`, a testy pilnują, żeby zgadzały się z grupą żywności.
+- **Logika.** Czysta funkcja `recipeConflicts` mówi, co w przepisie koliduje z wykluczeniami jednej
+  osoby: dieta (z `compatibleDiets`), alergen razem ze składnikami, które go niosą, albo pojedynczy
+  składnik. Składnik jest zgłaszany raz: jako część alergenu, gdy ten alergen jest unikany, inaczej
+  jako składnik. `conflictsForMembers` robi to dla wielu osób. Polski tekst („mleko i nabiał (masło,
+  ser żółty)”) składa `describeConflicts` w `src/content`.
+- **Gdzie widać.** Karta domownika wypisuje wykluczenia. Kalendarz ostrzega przy posiłku, w którym
+  jest coś, czego unika ktoś z jedzących (ostrzeżenie znika, gdy tę osobę się wykreśli z „Kto je”).
+  Wybór dania domyślnie ukrywa dania, których ktoś z jedzących unika, mówi, ile ukrył, i pozwala je
+  pokazać z ostrzeżeniem. Pusty posiłek liczy wszystkich domowników, a już zaplanowany tylko tych,
+  którzy go jedzą.
+- **Zapis zmian domownika.** `updateMember` zapisuje cały rekord (`put`), a nie tylko podane pola.
+  Wcześniej `update` zostawiał pole, które użytkownik wyczyścił (np. docelową wagę), więc wykluczenia,
+  które da się usunąć, wymusiły naprawę.
+- **Kopia zapasowa** w wersji 3 zawiera `restrictions`. Starszy plik wczytuje się bez nich, a składniki,
+  których katalog już nie ma, są pomijane i policzone ([BACKUP.md](BACKUP.md)).
+
 ## Pomiary i postępy
 
 - Pomiar (`Measurement`) to jedna wartość jednego rodzaju (`weight`, `waist`, `hips`, `chest`)

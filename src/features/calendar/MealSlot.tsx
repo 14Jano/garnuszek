@@ -2,8 +2,10 @@ import { useId } from 'react';
 import { Link } from 'react-router-dom';
 import { calendarPath, recipePath } from '../../app/navigation';
 import { INGREDIENT_CATALOG } from '../../content/catalog';
+import { describeConflicts } from '../../content/conflictText';
 import { MEAL_TYPE_LABELS } from '../../content/labels';
 import type { Member } from '../../domain/household/member';
+import { conflictsForMembers } from '../../domain/household/restrictions';
 import { MAX_BATCH_DAYS } from '../../domain/plan/batches';
 import type { BatchSummary } from '../../domain/plan/batches';
 import { formatDayHeading } from '../../domain/plan/dates';
@@ -46,6 +48,16 @@ export function MealSlot({
   const headingId = useId();
   const batchSelectId = useId();
   const label = MEAL_TYPE_LABELS[mealType];
+
+  // Whoever eats the dish and avoids something in it, e.g. after the eaters were changed.
+  const clashes =
+    entry && meal
+      ? conflictsForMembers(
+          meal.recipe,
+          household.filter((member) => entry.memberIds.includes(member.id)),
+          INGREDIENT_CATALOG,
+        )
+      : [];
 
   return (
     <section className="meal-slot" aria-labelledby={headingId}>
@@ -91,6 +103,21 @@ export function MealSlot({
           <p className="meal-slot__recipe">
             <Link to={recipePath.details(meal.recipe.id)}>{meal.recipe.name}</Link>
           </p>
+
+          {clashes.length > 0 && (
+            <div className="meal-slot__warning" role="note">
+              <p>
+                <strong>Uwaga:</strong> w tym daniu jest coś, czego unikają:
+              </p>
+              <ul>
+                {clashes.map(({ member, conflicts }) => (
+                  <li key={member.id}>
+                    {member.name}: {describeConflicts(conflicts)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {entry.cookedOn !== undefined && (
             <p className="meal-slot__leftover">

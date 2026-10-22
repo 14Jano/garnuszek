@@ -7,7 +7,7 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
-> **Status: stabilna wersja (v1.1).** Działają: domownicy z dziennym zapotrzebowaniem
+> **Status: stabilna wersja (v1.2).** Działają: domownicy z dziennym zapotrzebowaniem
 > kalorycznym i budżetem na przekąski, przepisy (32 dania, filtry, wyszukiwanie po składnikach
 > z lodówki, ulubione i własne przepisy), kalendarz posiłków z porcjami liczonymi dla każdego
 > domownika i gotowaniem na zapas, lista zakupów z odhaczaniem i udostępnianiem, waga i pomiary
@@ -51,6 +51,7 @@ systemu.
 | Lista zakupów na tydzień, zsumowana i podzielona na działy    | Gotowe |
 | Odhaczanie w sklepie, kopiowanie i wysyłka listy              | Gotowe |
 | Lista zakupów w sztukach, puszkach, opakowaniach i litrach    | Gotowe |
+| Wykluczenia: dieta, alergeny i składniki, których ktoś unika  | Gotowe |
 | „Co ugotować z tego, co mam”: dania ze wszystkimi składnikami | Gotowe |
 | Gotowanie na zapas: jedno danie na 2–4 dni, z cofnięciem      | Gotowe |
 | Budżet kalorii na przekąski, także zmieniany na jeden dzień   | Gotowe |

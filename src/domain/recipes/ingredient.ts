@@ -44,12 +44,33 @@ export interface Purchase {
   grams: number;
 }
 
+/**
+ * The allergens a person is most often asked to avoid, following the EU list of
+ * allergens that food labels have to name, as far as the catalog contains them.
+ * "milk" covers everything made from milk, so it also serves lactose intolerance.
+ */
+export type Allergen =
+  'gluten' | 'milk' | 'eggs' | 'fish' | 'peanuts' | 'tree-nuts' | 'soy' | 'sesame';
+
+export const ALLERGENS: readonly Allergen[] = [
+  'gluten',
+  'milk',
+  'eggs',
+  'fish',
+  'peanuts',
+  'tree-nuts',
+  'soy',
+  'sesame',
+];
+
 export interface Ingredient {
   id: string;
   name: string;
   category: IngredientCategory;
   /** Nutrition of 100 g of the ingredient as it is weighed in the recipe. */
   per100g: Nutrients;
+  /** The allergens the ingredient contains. Left out when it contains none of them. */
+  allergens?: readonly Allergen[];
   /** Set when the shopping list should count the ingredient in whole units instead of grams. */
   purchase?: Purchase;
   /** Set for liquids, which are bought by volume: grams in one millilitre. */

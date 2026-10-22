@@ -139,6 +139,40 @@ describe('exportBackup', () => {
 
     expect((await exportBackup(NOW)).members[0]?.snackKcal).toBe(0);
   });
+
+  it('writes what a member avoids, but nothing for a member who avoids nothing', async () => {
+    await addMember({
+      name: 'Anna',
+      sex: 'female',
+      age: 30,
+      heightCm: 165,
+      weightKg: 60,
+      activity: 'light',
+      goal: 'maintain',
+      snackKcal: 0,
+      restrictions: { diet: 'vegan', allergens: ['gluten'], avoidedIngredientIds: ['onion'] },
+    });
+    await addMember({
+      name: 'Bartek',
+      sex: 'male',
+      age: 32,
+      heightCm: 180,
+      weightKg: 80,
+      activity: 'light',
+      goal: 'maintain',
+      snackKcal: 0,
+      restrictions: { allergens: [], avoidedIngredientIds: [] },
+    });
+
+    const { members } = await exportBackup(NOW);
+
+    expect(members[0]?.restrictions).toEqual({
+      diet: 'vegan',
+      allergens: ['gluten'],
+      avoidedIngredientIds: ['onion'],
+    });
+    expect(members[1]).not.toHaveProperty('restrictions');
+  });
 });
 
 describe('importBackup', () => {
@@ -156,6 +190,30 @@ describe('importBackup', () => {
     expect(restored.planEntries).toEqual(original.planEntries);
     expect(restored.shoppingChecks).toEqual(original.shoppingChecks);
     expect(restored.snackOverrides).toEqual(original.snackOverrides);
+  });
+
+  it('restores what a member avoids', async () => {
+    await addMember({
+      name: 'Anna',
+      sex: 'female',
+      age: 30,
+      heightCm: 165,
+      weightKg: 60,
+      activity: 'light',
+      goal: 'maintain',
+      snackKcal: 0,
+      restrictions: { diet: 'pescatarian', allergens: ['eggs'], avoidedIngredientIds: ['onion'] },
+    });
+    const original = await exportBackup(NOW);
+    await clearEverything();
+
+    await importBackup(original);
+
+    expect((await listMembers())[0]?.restrictions).toEqual({
+      diet: 'pescatarian',
+      allergens: ['eggs'],
+      avoidedIngredientIds: ['onion'],
+    });
   });
 
   it('keeps members and recipes in the order of the file', async () => {
