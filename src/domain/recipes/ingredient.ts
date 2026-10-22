@@ -32,12 +32,28 @@ export const INGREDIENT_CATEGORIES: readonly IngredientCategory[] = [
   'other',
 ];
 
+/**
+ * What an ingredient is counted in at the shop when grams are not the natural
+ * way: single items (an egg, an avocado), a head of garlic, a can, a pack, a loaf.
+ */
+export type PurchaseUnit = 'piece' | 'head' | 'can' | 'pack' | 'loaf';
+
+export interface Purchase {
+  unit: PurchaseUnit;
+  /** What one unit weighs, counted the way the recipes weigh the ingredient. */
+  grams: number;
+}
+
 export interface Ingredient {
   id: string;
   name: string;
   category: IngredientCategory;
   /** Nutrition of 100 g of the ingredient as it is weighed in the recipe. */
   per100g: Nutrients;
+  /** Set when the shopping list should count the ingredient in whole units instead of grams. */
+  purchase?: Purchase;
+  /** Set for liquids, which are bought by volume: grams in one millilitre. */
+  gramsPerMl?: number;
 }
 
 export type IngredientCatalog = ReadonlyMap<string, Ingredient>;

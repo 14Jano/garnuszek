@@ -55,8 +55,19 @@
 }
 
 .shopping-item__amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   color: var(--color-text-muted);
   white-space: nowrap;
+}
+
+/* The weight behind a pack, in a smaller size under the number of packs. It may wrap, so with
+   large text it does not push the row wider than the screen. */
+.shopping-item__detail {
+  font-size: 0.8125rem;
+  text-align: right;
+  white-space: normal;
 }
 
 .shopping-item:has(input:checked) .shopping-item__name {

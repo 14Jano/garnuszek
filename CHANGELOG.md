@@ -5,10 +5,27 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-22
+
 ### Dodano
 
+- Lista zakupów podaje ilości tak, jak kupuje się je w sklepie: jajka, banany, papryki i awokado
+  w sztukach, czosnek i sałatę w główkach, ciecierzycę, pomidory i tuńczyka w puszkach, masło,
+  twaróg i tofu w opakowaniach, chleb w bochenkach, a mleko, oliwę i olej w litrach i mililitrach.
+  Całe sztuki są zaokrąglane w górę, bo sklep nie sprzeda pół jajka.
+- Przy puszkach, opakowaniach i bochenkach lista dopisuje, ile jest naprawdę potrzebne („2 puszki,
+  potrzeba ok. 435 g”), bo rozmiary w sklepach bywają różne. To samo trafia do skopiowanej i
+  wysłanej listy.
+- Odmiana po polsku (1 puszka, 3 puszki, 5 puszek, 22 puszki).
+- Składniki mogą mieć `purchase` (waga sztuki, puszki, opakowania) lub `gramsPerMl` (płyny). Opis
+  w [docs/DATA.md](docs/DATA.md), a testy pilnują, żeby wagi i gęstości były wiarygodne.
 - Zrzuty ekranu w README (w `docs/screenshots`).
-- Tagi wersji `v0.1.0` do `v1.0.0` na odpowiednich commitach.
+
+### Zmieniono
+
+- Przepisy, kalendarz i dane użytkownika nadal liczą w gramach. Zmieniła się tylko lista zakupów,
+  więc baza i kopia zapasowa pozostały bez zmian.
+- Przy dużym tekście ilość na liście zakupów zawija się zamiast wypychać wiersz poza ekran.
 
 ### Naprawiono
 

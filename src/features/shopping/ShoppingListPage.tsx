@@ -11,7 +11,7 @@ import { planMeals } from '../../domain/plan/portions';
 import { buildShoppingList, entriesToBuyFor } from '../../domain/plan/shoppingList';
 import type { ShoppingSection } from '../../domain/plan/shoppingList';
 import { snackAllowance } from '../../domain/plan/snacks';
-import { formatGrams } from '../../format/amounts';
+import { formatBuyingAmount } from '../../format/purchase';
 import { useCheckedIngredients } from '../../hooks/useCheckedIngredients';
 import { useMembers } from '../../hooks/useMembers';
 import { usePlanEntries } from '../../hooks/usePlanEntries';
@@ -166,19 +166,31 @@ function ShoppingSectionView({ section, checked, onToggle }: ShoppingSectionView
     <section className="shopping-section" aria-labelledby={headingId}>
       <h2 id={headingId}>{CATEGORY_LABELS[section.category]}</h2>
       <ul className="shopping-items">
-        {section.items.map((item) => (
-          <li key={item.ingredientId}>
-            <label className="shopping-item">
-              <input
-                type="checkbox"
-                checked={checked.has(item.ingredientId)}
-                onChange={(event) => onToggle(item.ingredientId, event.target.checked)}
-              />
-              <span className="shopping-item__name">{item.name}</span>{' '}
-              <span className="shopping-item__amount">{formatGrams(item.grams)}</span>
-            </label>
-          </li>
-        ))}
+        {section.items.map((item) => {
+          const { text, detail } = formatBuyingAmount(item.amount);
+
+          return (
+            <li key={item.ingredientId}>
+              <label className="shopping-item">
+                <input
+                  type="checkbox"
+                  checked={checked.has(item.ingredientId)}
+                  onChange={(event) => onToggle(item.ingredientId, event.target.checked)}
+                />
+                <span className="shopping-item__name">{item.name}</span>{' '}
+                <span className="shopping-item__amount">
+                  {text}
+                  {detail && (
+                    <>
+                      {/* The space keeps the two parts apart for assistive technology. */}{' '}
+                      <small className="shopping-item__detail">{detail}</small>
+                    </>
+                  )}
+                </span>
+              </label>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

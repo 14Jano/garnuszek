@@ -109,17 +109,20 @@ describe('the week list', () => {
     expect(await screen.findByRole('heading', { level: 2, name: 'Warzywa' })).toBeVisible();
     expect(screen.getByText('19–25 października')).toBeVisible();
 
-    // Shared by the chili (163 g) and the salad (222.5 g)
+    // Shared by the chili (163 g) and the salad (222.5 g): 385 g of peppers of 150 g each
     expect(
-      section('Warzywa').getByRole('checkbox', { name: 'Papryka czerwona 385 g' }),
+      section('Warzywa').getByRole('checkbox', { name: 'Papryka czerwona 3 szt.' }),
     ).toBeVisible();
+    // Weighed, not counted
     expect(section('Warzywa').getByRole('checkbox', { name: 'Cebula 200 g' })).toBeVisible();
+    // A liquid, bought by volume
     expect(
-      section('Tłuszcze').getByRole('checkbox', { name: 'Oliwa z oliwek 50 g' }),
+      section('Tłuszcze').getByRole('checkbox', { name: 'Oliwa z oliwek 50 ml' }),
     ).toBeVisible();
+    // Cans, with the weight that is really needed
     expect(
       section('Rośliny strączkowe').getByRole('checkbox', {
-        name: 'Fasola czerwona z puszki (odsączona) 435 g',
+        name: 'Fasola czerwona z puszki (odsączona) 2 puszki potrzeba ok. 435 g',
       }),
     ).toBeVisible();
   });
@@ -130,7 +133,9 @@ describe('the week list', () => {
     renderAt(`/zakupy/${WEDNESDAY}`);
 
     expect(
-      await screen.findByRole('checkbox', { name: 'Fasola czerwona z puszki (odsączona) 400 g' }),
+      await screen.findByRole('checkbox', {
+        name: 'Fasola czerwona z puszki (odsączona) 2 puszki potrzeba ok. 400 g',
+      }),
     ).toBeVisible();
   });
 
@@ -160,7 +165,7 @@ describe('the week list', () => {
     renderAt(`/zakupy/${WEDNESDAY}`);
 
     await user.click(await screen.findByRole('checkbox', { name: 'Cebula 200 g' }));
-    await user.click(screen.getByRole('checkbox', { name: 'Oliwa z oliwek 50 g' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Oliwa z oliwek 50 ml' }));
     await user.click(await screen.findByRole('button', { name: 'Odznacz wszystko' }));
 
     expect(await screen.findByText('Kupione: 0 z 11')).toBeVisible();
@@ -219,9 +224,12 @@ describe('dishes cooked for several days', () => {
     await seedSundayBatch();
     renderAt(`/zakupy/${WEDNESDAY}`);
 
-    // Two days of 4.35 servings: 400 g of beans shared by 4 servings, times 8.7
+    // Two days of 4.35 servings: 400 g of beans shared by 4 servings, times 8.7, which is
+    // 870 g, or four cans of 240 g
     expect(
-      await screen.findByRole('checkbox', { name: 'Fasola czerwona z puszki (odsączona) 870 g' }),
+      await screen.findByRole('checkbox', {
+        name: 'Fasola czerwona z puszki (odsączona) 4 puszki potrzeba ok. 870 g',
+      }),
     ).toBeVisible();
   });
 
@@ -245,7 +253,10 @@ describe('passing the list on', () => {
     expect(await screen.findByText('Skopiowano listę do schowka.')).toBeVisible();
     const copied = await navigator.clipboard.readText();
     expect(copied).toContain('Lista zakupów, 19–25 października');
-    expect(copied).toContain('- Papryka czerwona: 385 g');
+    expect(copied).toContain('- Papryka czerwona: 3 szt.');
+    expect(copied).toContain(
+      '- Fasola czerwona z puszki (odsączona): 2 puszki (potrzeba ok. 435 g)',
+    );
     expect(copied).not.toContain('Cebula');
   });
 

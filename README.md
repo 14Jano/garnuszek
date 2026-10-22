@@ -7,7 +7,7 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
-> **Status: pierwsza stabilna wersja (v1.0).** Działają: domownicy z dziennym zapotrzebowaniem
+> **Status: stabilna wersja (v1.1).** Działają: domownicy z dziennym zapotrzebowaniem
 > kalorycznym i budżetem na przekąski, przepisy (32 dania, filtry, wyszukiwanie po składnikach
 > z lodówki, ulubione i własne przepisy), kalendarz posiłków z porcjami liczonymi dla każdego
 > domownika i gotowaniem na zapas, lista zakupów z odhaczaniem i udostępnianiem, waga i pomiary
@@ -18,7 +18,7 @@ wszystkich.
 
 <p align="center">
   <img src="docs/screenshots/kalendarz.jpg" alt="Kalendarz posiłków: pasek dni tygodnia i śniadanie z porcjami dla trzech osób" width="170">
-  <img src="docs/screenshots/zakupy.jpg" alt="Lista zakupów podzielona na działy, część pozycji odhaczona" width="170">
+  <img src="docs/screenshots/zakupy.jpg" alt="Lista zakupów z ilościami w sztukach, opakowaniach i litrach, część pozycji odhaczona" width="170">
   <img src="docs/screenshots/przepisy.jpg" alt="Lista przepisów z kaloriami na porcję i oznaczeniami diety" width="170">
   <img src="docs/screenshots/pomiary.jpg" alt="Wykres wagi z linią celu i prognozą jego osiągnięcia" width="170">
   <img src="docs/screenshots/domownicy.jpg" alt="Karty domowników z dziennym zapotrzebowaniem kalorycznym" width="170">
@@ -50,6 +50,7 @@ systemu.
 | Wymiana dania, wybór osób jedzących, podsumowanie dnia        | Gotowe |
 | Lista zakupów na tydzień, zsumowana i podzielona na działy    | Gotowe |
 | Odhaczanie w sklepie, kopiowanie i wysyłka listy              | Gotowe |
+| Lista zakupów w sztukach, puszkach, opakowaniach i litrach    | Gotowe |
 | „Co ugotować z tego, co mam”: dania ze wszystkimi składnikami | Gotowe |
 | Gotowanie na zapas: jedno danie na 2–4 dni, z cofnięciem      | Gotowe |
 | Budżet kalorii na przekąski, także zmieniany na jeden dzień   | Gotowe |

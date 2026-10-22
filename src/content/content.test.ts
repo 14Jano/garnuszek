@@ -38,6 +38,44 @@ describe('ingredient catalog', () => {
   );
 });
 
+describe('ingredient units for the shopping list', () => {
+  const counted = INGREDIENTS.filter(({ purchase }) => purchase);
+  const liquids = INGREDIENTS.filter(({ gramsPerMl }) => gramsPerMl);
+
+  it('are given to some ingredients, and only some', () => {
+    expect(counted.length).toBeGreaterThan(10);
+    expect(liquids.length).toBeGreaterThan(2);
+    expect(counted.length + liquids.length).toBeLessThan(INGREDIENTS.length);
+  });
+
+  it.each(counted)('gives a believable weight of one unit of $name', ({ purchase }) => {
+    expect(purchase?.grams).toBeGreaterThanOrEqual(30);
+    expect(purchase?.grams).toBeLessThanOrEqual(600);
+  });
+
+  it.each(liquids)('gives a believable density of $name', ({ gramsPerMl }) => {
+    // Everything from alcohol-free drinks to oil sits between 0.9 and 1.3 g per millilitre.
+    expect(gramsPerMl).toBeGreaterThanOrEqual(0.9);
+    expect(gramsPerMl).toBeLessThanOrEqual(1.3);
+  });
+
+  it('never counts an ingredient in units and by volume at once', () => {
+    for (const ingredient of INGREDIENTS) {
+      expect(Boolean(ingredient.purchase && ingredient.gramsPerMl), ingredient.id).toBe(false);
+    }
+  });
+
+  it('weigh an egg the way the recipes do', () => {
+    // The scrambled eggs use 220 g, which has to come out as the 4 eggs it is.
+    const egg = INGREDIENT_CATALOG.get('egg');
+    const scrambled = recipeById('jajecznica-ze-szpinakiem-i-pomidorem');
+
+    expect(scrambled.ingredients.find(({ ingredientId }) => ingredientId === 'egg')?.grams).toBe(
+      4 * (egg?.purchase?.grams ?? 0),
+    );
+  });
+});
+
 describe('built-in recipes', () => {
   it('have unique ids', () => {
     const ids = BUILTIN_RECIPES.map((recipe) => recipe.id);

@@ -1,6 +1,6 @@
 import { CATEGORY_LABELS } from '../../content/labels';
 import type { ShoppingSection } from '../../domain/plan/shoppingList';
-import { formatGrams } from '../../format/amounts';
+import { formatBuyingAmount } from '../../format/purchase';
 
 /**
  * Plain text of the shopping list for sending to someone, e.g. over WhatsApp.
@@ -22,7 +22,10 @@ export function formatShoppingText(
     lines.push(
       '',
       CATEGORY_LABELS[category],
-      ...toBuy.map((item) => `- ${item.name}: ${formatGrams(item.grams)}`),
+      ...toBuy.map((item) => {
+        const { text, detail } = formatBuyingAmount(item.amount);
+        return `- ${item.name}: ${text}${detail ? ` (${detail})` : ''}`;
+      }),
     );
   }
 

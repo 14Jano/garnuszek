@@ -230,6 +230,13 @@ Skąd pochodzą dane i jak je dodawać, opisuje [DATA.md](DATA.md).
   (`roundGrams`), żeby błędy zaokrągleń nie nakładały się z posiłku na posiłek.
 - Działy to grupy żywności składników (`INGREDIENT_CATEGORIES`) w kolejności przechodzenia przez
   sklep, a produkty w dziale są posortowane alfabetycznie po polsku.
+- Przepisy ważą wszystko w gramach, a lista zakupów mówi to, co kupuje się w sklepie. Składnik może
+  mieć `purchase` (waga jednej sztuki, puszki, opakowania) albo `gramsPerMl` (płyn). Czysta funkcja
+  `buyingAmount` zamienia sumę gramów na `BuyingAmount`: całe sztuki zaokrąglone w górę, mililitry
+  albo gramy. Dopiero `formatBuyingAmount` w `src/format` składa z tego polski tekst, razem z
+  odmianą rzeczownika (`pluralPl`: 1 puszka, 3 puszki, 5 puszek). Liczymy sztuki z sumy całego
+  tygodnia, a nie z każdego posiłku osobno, żeby nie kupować po jednym jajku za dużo. Przepisy, kalendarz
+  i dane użytkownika zostają w gramach, więc nic w bazie ani w kopii zapasowej się nie zmieniło.
 - Zapisujemy tylko to, co użytkownik odhaczył: tabela `shoppingChecks` z kluczem
   `poniedziałek_składnik`. Odhaczenia są osobne dla każdego tygodnia i przetrwają zmianę planu.
 - Udostępnianie zależy od przeglądarki: arkusz udostępniania (`navigator.share`) tylko tam,

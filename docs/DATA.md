@@ -38,8 +38,28 @@ a plan skonsultować ze specjalistą. Zobacz też zastrzeżenie w [README](../RE
    | `dairy`, `eggs` | wegańskiej                                    |
    | pozostałe grupy | żadnej                                        |
 
-3. Uruchom `npm test`. Testy sprawdzą m.in., że kalorie zgadzają się z makroskładnikami
-   (białko i węglowodany po 4 kcal/g, tłuszcz 9 kcal/g, z tolerancją 20% lub 10 kcal).
+3. Zdecyduj, jak lista zakupów ma liczyć składnik. Domyślnie w gramach i kilogramach, ale gdy
+   w sklepie kupuje się go inaczej, dodaj ostatni argument `food(...)`:
+
+   | Zapis          | Lista zakupów pokaże | Przykład               |
+   | -------------- | -------------------- | ---------------------- |
+   | `piece(55)`    | `6 szt.`             | jajko, banan, papryka  |
+   | `head(40)`     | `2 główki`           | czosnek, sałata        |
+   | `can(240)`     | `2 puszki`           | ciecierzyca, pomidory  |
+   | `pack(200)`    | `1 opakowanie`       | masło, twaróg, tofu    |
+   | `loaf(500)`    | `2 bochenki`         | chleb                  |
+   | `liquid(1.03)` | `1,5 l`, `250 ml`    | mleko, oliwa (g na ml) |
+
+   Liczba w nawiasie to waga jednej sztuki, puszki czy opakowania **liczona tak, jak waży ją
+   przepis** (puszka to waga po odsączeniu, bo tak ją podają przepisy). Lista zaokrągla w górę do
+   całych sztuk, bo sklep nie sprzeda pół jajka. Przy puszkach, opakowaniach i bochenkach dopisuje
+   „potrzeba ok. 400 g”, bo rozmiary w sklepach bywają różne. Podawaj typowe rozmiary z polskich
+   sklepów. Czego nie jesteś pewien (jogurty, ryż, makaron), zostaw w gramach, bo to też jest
+   czytelne.
+
+4. Uruchom `npm test`. Testy sprawdzą m.in., że kalorie zgadzają się z makroskładnikami
+   (białko i węglowodany po 4 kcal/g, tłuszcz 9 kcal/g, z tolerancją 20% lub 10 kcal) i że wagi
+   sztuk oraz gęstości płynów są wiarygodne.
 
 ## Jak dodać przepis
 
