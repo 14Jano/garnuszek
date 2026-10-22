@@ -191,7 +191,9 @@ describe('MeasurementsPage', () => {
 
     // Once in the summary and once on the chart.
     expect(await screen.findAllByText('Cel: 62 kg')).toHaveLength(2);
-    expect(screen.getByText(/Do celu zostało 7 kg\./)).toBeVisible();
+    expect(screen.getByText(/Do celu zostało 7 kg\./)).toHaveTextContent(
+      'Cel: 62 kg. Do celu zostało 7 kg.',
+    );
     expect(screen.getByRole('progressbar', { name: 'Postęp do celu' })).toHaveAttribute('max', '8');
     expect(
       screen.getByText(

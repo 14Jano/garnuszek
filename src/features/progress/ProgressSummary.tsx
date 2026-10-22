@@ -67,7 +67,7 @@ function TargetSection({ points, target }: { points: readonly SeriesPoint[]; tar
   return (
     <div className="progress-summary__target">
       <p>
-        <strong>Cel: {formatValue(target, 'weight')}</strong>
+        <strong>Cel: {formatValue(target, 'weight')}</strong>.
         {!progress.reached && <> Do celu zostało {formatValue(progress.remaining, 'weight')}.</>}
       </p>
       {!progress.reached && total > 0 && (
