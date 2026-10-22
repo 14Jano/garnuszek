@@ -5,6 +5,7 @@ import { addMember, removeMember, updateMember } from '../../data/memberReposito
 import type { Member, NewMember } from '../../domain/household/member';
 import { MemberCard } from './MemberCard';
 import { MemberForm } from './MemberForm';
+import { useFocusWhenChanged } from '../../hooks/useFocusWhenChanged';
 import { useMembers } from '../../hooks/useMembers';
 import './HouseholdPage.css';
 
@@ -16,6 +17,8 @@ export function HouseholdPage() {
   const members = useMembers();
   const [view, setView] = useState<View>(LIST_VIEW);
   const [saveFailed, setSaveFailed] = useState(false);
+  // The list and the form replace each other, so focus follows to the new heading.
+  const heading = useFocusWhenChanged<HTMLHeadingElement>(view.kind);
 
   /** Runs a storage write and reports whether it worked. */
   async function attempt(write: () => Promise<unknown>): Promise<boolean> {
@@ -45,7 +48,8 @@ export function HouseholdPage() {
   }
 
   async function handleDelete(member: Member) {
-    await attempt(() => removeMember(member.id));
+    // The card that had focus is going away.
+    if (await attempt(() => removeMember(member.id))) heading.current?.focus();
   }
 
   function showList() {
@@ -58,7 +62,9 @@ export function HouseholdPage() {
 
     return (
       <section>
-        <h1>{editing ? 'Edycja domownika' : 'Nowy domownik'}</h1>
+        <h1 ref={heading} tabIndex={-1}>
+          {editing ? 'Edycja domownika' : 'Nowy domownik'}
+        </h1>
         {saveFailed && <SaveError />}
         <MemberForm
           key={editing?.id ?? 'new'}
@@ -73,7 +79,9 @@ export function HouseholdPage() {
 
   return (
     <section>
-      <h1>Domownicy</h1>
+      <h1 ref={heading} tabIndex={-1}>
+        Domownicy
+      </h1>
       <p className="lead">Wpisujesz domowników raz, a Garnuszek liczy, ile kto powinien zjeść.</p>
 
       {saveFailed && <SaveError />}

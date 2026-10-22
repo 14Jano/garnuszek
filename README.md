@@ -7,12 +7,12 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
-> **Status: wczesny etap (v0.8).** Gotowe są szkielet aplikacji, nawigacja, konfiguracja PWA, ekran
-> domowników z dziennym zapotrzebowaniem kalorycznym i budżetem na przekąski, przepisy (32 dania,
-> filtry, wyszukiwanie po składnikach z lodówki, ulubione i własne przepisy), kalendarz posiłków
-> z porcjami liczonymi dla każdego domownika i gotowaniem na zapas, lista zakupów z odhaczaniem
-> i udostępnianiem, kopia zapasowa danych oraz waga i pomiary z wykresem postępu. Zostało
-> dopracowanie przed wersją 1.0. Zobacz [plan prac](#plan-prac).
+> **Status: pierwsza stabilna wersja (v1.0).** Działają: domownicy z dziennym zapotrzebowaniem
+> kalorycznym i budżetem na przekąski, przepisy (32 dania, filtry, wyszukiwanie po składnikach
+> z lodówki, ulubione i własne przepisy), kalendarz posiłków z porcjami liczonymi dla każdego
+> domownika i gotowaniem na zapas, lista zakupów z odhaczaniem i udostępnianiem, waga i pomiary
+> z wykresem postępu oraz kopia zapasowa danych. Aplikacja jest dopracowana pod kątem dostępności
+> ([szczegóły i ograniczenia](docs/ACCESSIBILITY.md)). Zobacz [plan prac](#plan-prac).
 
 ## Dlaczego Garnuszek
 
@@ -44,6 +44,8 @@ wszystkich.
 | Usuwanie wszystkich danych, informacje o aplikacji            | Gotowe |
 | Waga, talia, biodra i klatka piersiowa z wykresem postępu     | Gotowe |
 | Docelowa waga, postęp do celu i prognoza jego osiągnięcia     | Gotowe |
+| Dostępność: klawiatura, czytniki ekranu, duży tekst, kontrast | Gotowe |
+| Czytelny komunikat zamiast pustej strony przy awarii          | Gotowe |
 
 ## Technologie
 
@@ -52,7 +54,8 @@ wszystkich.
 - [React Router](https://reactrouter.com) (`HashRouter`, dzięki temu działa na statycznym hostingu)
 - [Dexie](https://dexie.org) jako opakowanie IndexedDB (lokalny zapis danych)
 - [vite-plugin-pwa](https://vite-pwa-org.netlify.app) do manifestu i trybu offline
-- [Vitest](https://vitest.dev) i [Testing Library](https://testing-library.com) do testów
+- [Vitest](https://vitest.dev) i [Testing Library](https://testing-library.com) do testów,
+  [axe-core](https://github.com/dequelabs/axe-core) do automatycznej kontroli dostępności
 - ESLint i Prettier do pilnowania jakości i stylu kodu
 
 ## Szybki start
@@ -102,7 +105,8 @@ public/         Ikony i pliki statyczne
 Szczegóły i uzasadnienie decyzji znajdziesz w [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 Wzory użyte do obliczania kalorii opisuje [docs/NUTRITION.md](docs/NUTRITION.md), a pochodzenie
 składników i przepisów oraz sposób ich dodawania [docs/DATA.md](docs/DATA.md). Format pliku kopii
-zapasowej opisuje [docs/BACKUP.md](docs/BACKUP.md).
+zapasowej opisuje [docs/BACKUP.md](docs/BACKUP.md), a to, co zrobiono dla dostępności i jak to jest
+sprawdzane, [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 
 ## Dane i prywatność
 
@@ -149,7 +153,7 @@ Repozytorium zawiera gotowy workflow `.github/workflows/deploy.yml`. Po wypchni�
 - [x] **0.6** Wyszukiwanie po składnikach, gotowanie na zapas, budżet na przekąski
 - [x] **0.7** Kopia zapasowa (eksport i import)
 - [x] **0.8** Waga i pomiary z wykresem postępu
-- [ ] **1.0** Dostępność, dopracowanie i stabilizacja
+- [x] **1.0** Dostępność, dopracowanie i stabilizacja
 
 Historię zmian znajdziesz w [CHANGELOG.md](CHANGELOG.md).
 

@@ -32,7 +32,9 @@ Do formatowania użyj `npm run format`.
 - **Logika domenowa** trafia do `src/domain` jako czyste funkcje (bez Reacta) i musi mieć testy.
 - **Komentarze** piszemy tam, gdzie wyjaśniają _dlaczego_. Nie opisujemy tego, co widać w kodzie.
 - **Testy interfejsu** sprawdzają to, co widzi użytkownik, a nie szczegóły implementacji.
-- **Dostępność:** semantyczny HTML, widoczny fokus, kontrast zgodny z WCAG AA.
+- **Dostępność:** semantyczny HTML, widoczny fokus, kontrast zgodny z WCAG AA. Nowy ekran dodaj do
+  `src/app/accessibility.test.tsx`, a listę rzeczy do sprawdzenia znajdziesz w
+  [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 - **Dane użytkownika** zostają na jego urządzeniu. Nie dodajemy analityki, śledzenia ani
   zewnętrznych zapytań bez wcześniejszej dyskusji.
 - **Nowe dane użytkownika** (nowa tabela, nowe pole) trzeba dopisać do kopii zapasowej: do

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { deleteAllData } from '../../data/backupRepository';
+import { useConfirmFocus } from '../../hooks/useConfirmFocus';
 
 /** Wipes everything the user entered from this device, after a confirmation. */
 export function DeleteDataSection() {
   const [confirming, setConfirming] = useState(false);
   const [result, setResult] = useState<'none' | 'deleted' | 'failed'>('none');
+  const { trigger, cancel } = useConfirmFocus(confirming);
 
   async function handleDelete() {
     try {
@@ -31,12 +33,17 @@ export function DeleteDataSection() {
           <button type="button" className="btn btn--danger" onClick={() => void handleDelete()}>
             Tak, usuń wszystko
           </button>
-          <button type="button" className="btn" onClick={() => setConfirming(false)}>
+          <button type="button" className="btn" ref={cancel} onClick={() => setConfirming(false)}>
             Anuluj
           </button>
         </div>
       ) : (
-        <button type="button" className="btn btn--danger" onClick={() => setConfirming(true)}>
+        <button
+          type="button"
+          className="btn btn--danger"
+          ref={trigger}
+          onClick={() => setConfirming(true)}
+        >
           Usuń wszystkie dane
         </button>
       )}

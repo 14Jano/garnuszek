@@ -4,6 +4,7 @@ import { householdPath } from '../../app/navigation';
 import type { Member } from '../../domain/household/member';
 import { dailyCalorieTarget } from '../../domain/nutrition/calorieTarget';
 import { formatDecimal } from '../../format/numbers';
+import { useConfirmFocus } from '../../hooks/useConfirmFocus';
 import { formatAge } from './format';
 import { GOAL_LABELS, SEX_LABELS } from './labels';
 import './MemberCard.css';
@@ -16,6 +17,7 @@ interface MemberCardProps {
 
 export function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const { trigger, cancel } = useConfirmFocus(confirmingDelete);
 
   return (
     <li className="member-card">
@@ -49,6 +51,7 @@ export function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
           <button
             type="button"
             className="btn btn--small"
+            ref={cancel}
             onClick={() => setConfirmingDelete(false)}
           >
             Anuluj
@@ -67,6 +70,7 @@ export function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
           <button
             type="button"
             className="btn btn--small"
+            ref={trigger}
             aria-label={`Usuń: ${member.name}`}
             onClick={() => setConfirmingDelete(true)}
           >

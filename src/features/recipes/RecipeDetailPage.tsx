@@ -8,6 +8,7 @@ import { compatibleDiets, nutritionPerServing } from '../../domain/recipes/recip
 import { FavoriteButton } from './FavoriteButton';
 import { DIET_LABELS, MEAL_TYPE_LABELS } from '../../content/labels';
 import { NutritionSummary } from './NutritionSummary';
+import { useConfirmFocus } from '../../hooks/useConfirmFocus';
 import { useRecipeEntries } from '../../hooks/useRecipeEntries';
 import './RecipeDetailPage.css';
 
@@ -17,6 +18,7 @@ export function RecipeDetailPage() {
   const navigate = useNavigate();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleteFailed, setDeleteFailed] = useState(false);
+  const { trigger, cancel } = useConfirmFocus(confirmingDelete);
 
   if (entries === undefined) return <p>Wczytywanie…</p>;
 
@@ -100,7 +102,12 @@ export function RecipeDetailPage() {
               <button type="button" className="btn btn--danger" onClick={handleDelete}>
                 Tak, usuń
               </button>
-              <button type="button" className="btn" onClick={() => setConfirmingDelete(false)}>
+              <button
+                type="button"
+                className="btn"
+                ref={cancel}
+                onClick={() => setConfirmingDelete(false)}
+              >
                 Anuluj
               </button>
             </div>
@@ -109,7 +116,12 @@ export function RecipeDetailPage() {
               <Link className="btn recipe-details__link-button" to={recipePath.edit(recipe.id)}>
                 Edytuj przepis
               </Link>
-              <button type="button" className="btn" onClick={() => setConfirmingDelete(true)}>
+              <button
+                type="button"
+                className="btn"
+                ref={trigger}
+                onClick={() => setConfirmingDelete(true)}
+              >
                 Usuń przepis
               </button>
             </>

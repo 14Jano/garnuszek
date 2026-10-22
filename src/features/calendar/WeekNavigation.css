@@ -4,11 +4,14 @@
 
 .week-nav__days {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  /* Seven equal days; with large text they stop shrinking and the strip scrolls instead. */
+  grid-template-columns: repeat(7, minmax(min-content, 1fr));
   gap: 0.25rem;
   margin: 0;
-  padding: 0;
+  /* Room for the focus ring, which the scrolling would otherwise cut off. */
+  padding: 3px;
   list-style: none;
+  overflow-x: auto;
 }
 
 .week-nav__day {

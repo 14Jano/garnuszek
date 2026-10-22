@@ -61,6 +61,28 @@ Pomiary domownika mają adres `/domownicy/:id/pomiary`, budowany przez `househol
 niego przycisk na karcie domownika. Nieznany identyfikator pokazuje komunikat z odnośnikiem do
 listy domowników.
 
+## Powłoka: tytuł, fokus i błędy
+
+Układ strony (`AppLayout`) zajmuje się tym, czego aplikacja jednostronicowa nie dostaje od
+przeglądarki za darmo. Opis dla użytkownika jest w [ACCESSIBILITY.md](ACCESSIBILITY.md), tu wersja
+techniczna.
+
+- **Tytuł i fokus.** Hook `usePageHeading` obserwuje `<main>` (`MutationObserver`) i bierze tytuł
+  karty z `<h1>` aktualnego ekranu. Obserwuje, a nie czyta raz, bo ekran pokazuje nagłówek dopiero po
+  wczytaniu danych. Gdy zmienia się ekran, przenosi fokus na jego `<h1>`. „Ekran” to ścieżka bez dat
+  (`viewOf`), więc zmiana dnia w kalendarzu albo tygodnia na liście zakupów fokusu nie rusza. Dzięki
+  temu żaden ekran nie musi o tym pamiętać, a tytuł zawsze zgadza się z nagłówkiem.
+- **Fokus wewnątrz ekranu** załatwiają dwa małe hooki z `src/hooks`: `useConfirmFocus` (potwierdzenie
+  dwuetapowe: fokus na „Anuluj”, a po anulowaniu z powrotem na przycisku wyjściowym) i
+  `useFocusWhenChanged` (część ekranu podmieniana w miejscu, np. formularz zamiast listy).
+- **Błędy.** `ErrorBoundary` otacza treść ekranu (nie cały układ), więc nawigacja działa nawet po
+  awarii ekranu. Wraca do normy po przejściu na inną ścieżkę (`resetKey`), bez ponownego montowania
+  zdrowych ekranów. Zapytania na żywo z Dexie rzucają błąd podczas renderowania, więc odmowę
+  przeglądarki (tryb prywatny, zablokowane dane witryn, brak miejsca, baza zapisana przez nowszą
+  wersję) łapie ten sam mechanizm. `explainError` zamienia je na zdanie zrozumiałe dla człowieka,
+  a wszystko inne dostaje ogólny komunikat. Błąd trafia też do konsoli, żeby dało się go zgłosić.
+- **Gdy nie ma JavaScriptu**, `index.html` pokazuje krótką informację w `<noscript>`.
+
 ## PWA
 
 Manifest i service worker generuje `vite-plugin-pwa` (konfiguracja w `vite.config.ts`).
@@ -269,7 +291,13 @@ Szczegóły pliku opisuje [BACKUP.md](BACKUP.md). Od strony architektury:
   z ręcznie wyliczonymi wartościami oczekiwanymi.
 - **Interfejs:** testy `*.test.tsx` oparte na Testing Library. Sprawdzają to, co widzi
   użytkownik (role, nazwy, widoczność), a nie szczegóły implementacji.
+- **Dostępność:** `src/app/accessibility.test.tsx` renderuje każdy ekran (z danymi i bez) i puszcza
+  na nim reguły axe-core (`src/test/axe.ts`). Kontrast liczy `src/styles/contrast.test.ts` na zmiennych
+  projektowych, bo jsdom nie ma układu strony. Czego te testy nie obejmują, mówi
+  [ACCESSIBILITY.md](ACCESSIBILITY.md).
 - Vitest działa bez globalnych funkcji (`describe`, `it` importujemy jawnie).
+- Testy odwołujące się do plików (jak `contrast.test.ts`) czytają je z dysku względem katalogu
+  projektu, bo Vitest nie ładuje arkuszy stylów.
 
 ## Konwencje
 

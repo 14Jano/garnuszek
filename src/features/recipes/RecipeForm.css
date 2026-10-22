@@ -1,6 +1,7 @@
 .recipe-form__pair {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* Two fields side by side, one below the other once there is no room. */
+  grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
   gap: 0 0.75rem;
 }
 
@@ -8,11 +9,12 @@
   gap: 0.75rem;
 }
 
+/* The ingredient, its amount and the remove button; with large text they wrap onto more lines. */
 .ingredient-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 6.5rem auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  align-items: start;
+  align-items: flex-start;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--color-border);
 }
@@ -21,8 +23,18 @@
   margin: 0;
 }
 
+.ingredient-row > .field:first-child {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.ingredient-row > .field:nth-child(2) {
+  flex: 0 1 6.5rem;
+  min-width: 0;
+}
+
 .ingredient-row__remove {
-  align-self: end;
+  align-self: flex-end;
 }
 
 .recipe-form__actions {

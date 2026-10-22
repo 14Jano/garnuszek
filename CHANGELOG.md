@@ -5,6 +5,41 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-22
+
+Pierwsza stabilna wersja. Wszystkie funkcje z planu są gotowe, a ta wersja je dopracowuje: dostępność
+i zachowanie aplikacji, gdy coś pójdzie nie tak.
+
+### Dodano
+
+- Tytuł karty zgodny z nagłówkiem ekranu (np. „Pomiary: Anna – Garnuszek”), także w historii
+  przeglądarki i dla czytników ekranu.
+- Po przejściu na inny ekran fokus trafia na jego nagłówek, więc czytnik ekranu mówi, gdzie jesteśmy,
+  a użytkownik klawiatury zaczyna od góry nowego ekranu. Zmiana dnia lub tygodnia fokusu nie rusza.
+- Fokus nie ginie w potwierdzeniach usuwania (domownik, przepis, pomiar, wszystkie dane): trafia na
+  „Anuluj”, a po anulowaniu wraca na przycisk wyjściowy. Podobnie przy przełączaniu listy domowników
+  i formularza oraz przy podglądzie kopii zapasowej.
+- Czytelny komunikat zamiast pustej strony, gdy ekran się wywróci, także gdy przeglądarka nie pozwala
+  zapisywać danych (tryb prywatny, brak miejsca, baza zapisana przez nowszą wersję). Reszta aplikacji
+  działa dalej, a błąd trafia do konsoli.
+- Informacja dla przeglądarek z wyłączonym JavaScriptem.
+- Automatyczna kontrola dostępności: reguły axe-core na każdym ekranie (z danymi i bez), testy tytułów
+  i fokusu oraz test kontrastu kolorów dla jasnego i ciemnego motywu.
+- Dokument [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md): co jest zrobione, jak to sprawdzamy, czego
+  to nie obejmuje i lista kontrolna dla nowych ekranów.
+
+### Zmieniono
+
+- Ciemny motyw: jaśniejsze obramowanie pól i przycisków na kartach (kontrast 3:1 zamiast 2,8:1).
+- Układ przy szerokości 320 px i tekście powiększonym do 200% nie wychodzi poza ekran: dolna
+  nawigacja i pasek dni tygodnia przewijają się, a pozostałe elementy się zawijają (pasek tygodnia,
+  lista wyboru dania, karty przepisów, wiersze składników, formularz pomiaru, lista zakupów).
+- Adres repozytorium jest w jednym miejscu (`src/content/project.ts`).
+
+### Usunięto
+
+- Nieużywany komponent `PagePlaceholder`.
+
 ## [0.8.0] - 2026-10-21
 
 ### Dodano

@@ -36,6 +36,8 @@
 
 .field {
   display: grid;
+  /* A field never grows wider than its container, however wide its control would like to be. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.25rem;
   margin: 0 0 1rem;
   padding: 0;

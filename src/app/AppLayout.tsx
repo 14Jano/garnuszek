@@ -1,8 +1,15 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { useRef } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { ErrorBoundary } from './ErrorBoundary';
 import { NAV_ITEMS } from './navigation';
+import { usePageHeading, viewOf } from './usePageHeading';
 import './AppLayout.css';
 
 export function AppLayout() {
+  const { pathname } = useLocation();
+  const main = useRef<HTMLElement>(null);
+  usePageHeading(main, viewOf(pathname));
+
   return (
     <div className="app-layout">
       <a className="skip-link" href="#content">
@@ -20,8 +27,10 @@ export function AppLayout() {
         <span className="app-header__name">Garnuszek</span>
       </header>
 
-      <main id="content" className="app-main">
-        <Outlet />
+      <main id="content" ref={main} className="app-main">
+        <ErrorBoundary resetKey={pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
 
       <nav className="bottom-nav" aria-label="Główna nawigacja">

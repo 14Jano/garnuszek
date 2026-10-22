@@ -28,7 +28,7 @@
     --color-bg: #151a17;
     --color-surface: #1e2521;
     --color-border: #2d3731;
-    --color-border-strong: #5d6b63;
+    --color-border-strong: #6b796f;
     --color-text: #e8efe9;
     --color-text-muted: #a3b0a7;
     --color-primary: #6cc08a;
@@ -53,6 +53,8 @@ body {
   font-size: 1rem;
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
+  /* With large text a long word would otherwise run off the screen. */
+  overflow-wrap: break-word;
 }
 
 h1,

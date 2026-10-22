@@ -4,6 +4,7 @@ import { INGREDIENT_CATALOG } from '../../content/catalog';
 import { BUILTIN_RECIPES } from '../../content/recipes';
 import { exportBackup, importBackup } from '../../data/backupRepository';
 import { requestPersistentStorage } from '../../data/persistence';
+import { useFocusWhenChanged } from '../../hooks/useFocusWhenChanged';
 import { parseBackup } from '../../domain/backup/backup';
 import type { Backup, BackupProblem, DroppedItems } from '../../domain/backup/backup';
 import { toDateKey } from '../../domain/plan/dates';
@@ -34,6 +35,8 @@ export function BackupSection() {
   const fileInputId = useId();
   const [importState, setImportState] = useState<ImportState>({ kind: 'idle' });
   const [exportFailed, setExportFailed] = useState(false);
+  // The review appears below the file field once the file is read; move there so it is not missed.
+  const review = useFocusWhenChanged<HTMLDivElement>(importState.kind === 'review');
 
   async function handleExport() {
     setExportFailed(false);
@@ -128,7 +131,13 @@ export function BackupSection() {
       </div>
 
       {importState.kind === 'review' && (
-        <div className="backup__review" role="group" aria-label="Wczytywanie kopii zapasowej">
+        <div
+          className="backup__review"
+          role="group"
+          aria-label="Wczytywanie kopii zapasowej"
+          ref={review}
+          tabIndex={-1}
+        >
           <p>
             Kopia z {formatDate(importState.backup.exportedAt)}. Domownicy:{' '}
             {importState.backup.members.length}, własne przepisy:{' '}

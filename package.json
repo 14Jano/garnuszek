@@ -1,6 +1,6 @@
 {
   "name": "garnuszek",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "Darmowy planer posiłków dla całej rodziny. Działa w przeglądarce, bez konta, a dane zostają na Twoim urządzeniu.",
   "private": true,
   "license": "MIT",
@@ -38,6 +38,7 @@
     "@types/react-dom": "^19.3.0",
     "@vite-pwa/assets-generator": "^2.0.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "axe-core": "^4.14.0",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",

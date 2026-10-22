@@ -1,12 +1,14 @@
 .week-switcher {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
   margin-bottom: 0.5rem;
 }
 
 .week-switcher__range {
-  flex: 1;
+  flex: 1 1 8rem;
+  min-width: 0;
   margin: 0;
   font-weight: 600;
   text-align: center;

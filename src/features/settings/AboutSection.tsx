@@ -1,4 +1,5 @@
 import { HealthDisclaimer } from '../../components/HealthDisclaimer';
+import { REPOSITORY_URL } from '../../content/project';
 
 export function AboutSection() {
   return (
@@ -7,7 +8,7 @@ export function AboutSection() {
       <p>
         Garnuszek {__APP_VERSION__}. Darmowy planer posiłków na licencji MIT, bez kont i bez reklam.
         Kod źródłowy jest{' '}
-        <a href="https://github.com/14Jano/garnuszek" target="_blank" rel="noopener noreferrer">
+        <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer">
           na GitHubie
         </a>
         .
