@@ -40,9 +40,9 @@ export function RestrictionsFields({ value, onChange }: RestrictionsFieldsProps)
     <fieldset className="field restrictions">
       <legend className="field__label">Czego unika</legend>
       <p className="field__hint">
-        Garnuszek ostrzeże, gdy w zaplanowanym daniu jest coś z tej listy, i domyślnie ukryje takie
-        dania przy wyborze dania. To pomoc w planowaniu, a nie gwarancja: przy alergii zawsze czytaj
-        etykiety produktów.
+        Garnuszek ostrzeże, gdy w zaplanowanym daniu jest coś z tej listy, domyślnie ukryje takie
+        dania przy wyborze dania i nie zaproponuje ich w automatycznym planie tygodnia. To pomoc w
+        planowaniu, a nie gwarancja: przy alergii zawsze czytaj etykiety produktów.
       </p>
 
       <div className="field">

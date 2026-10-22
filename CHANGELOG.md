@@ -5,6 +5,22 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-22
+
+### Dodano
+
+- „Ułóż tydzień” w kalendarzu: Garnuszek proponuje dania do pustych miejsc w tygodniu, a użytkownik
+  ogląda propozycję, losuje ją od nowa („Wylosuj ponownie”) i dopiero wtedy zapisuje. Można wybrać,
+  które posiłki układać (śniadania, obiady, kolacje).
+- Propozycja nigdy nie nadpisuje tego, co już zaplanowano. Takie miejsca zostają bez zmian, są
+  oznaczone „już zaplanowane” i liczą się do różnorodności.
+- Dobór dań uwzględnia całe gospodarstwo: danie nie może kolidować z niczyimi wykluczeniami i musi
+  dawać każdemu sensowną porcję. Gdy nic nie pasuje wszystkim, miejsce zostaje puste, a ekran mówi,
+  ile ich jest i co z tym zrobić (dodać własne przepisy albo zmienić wykluczenia).
+- Dania nie powtarzają się, dopóki są inne do wyboru, nie trafiają na dzień po sobie, a ulubione są
+  wybierane nieco chętniej.
+- Opis w [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ## [1.2.0] - 2026-10-22
 
 ### Dodano

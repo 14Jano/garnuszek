@@ -1,3 +1,4 @@
+import type { Suggestion } from '../domain/plan/autoPlan';
 import { resizeBatch } from '../domain/plan/batches';
 import type { DateKey } from '../domain/plan/dates';
 import { isLeftover, planEntryKey } from '../domain/plan/planEntry';
@@ -53,6 +54,29 @@ export async function assignRecipe(
       recipeId,
       memberIds: [...(existing?.memberIds ?? defaultMemberIds)],
     });
+  });
+}
+
+/**
+ * Saves suggested dishes into meal slots for the given people, all in one go. A slot
+ * that has been filled in the meantime keeps what is in it, so nothing the user planned
+ * is ever overwritten. Returns how many dishes were saved.
+ */
+export async function applySuggestions(
+  suggestions: readonly Suggestion[],
+  memberIds: readonly string[],
+): Promise<number> {
+  return db.transaction('rw', db.planEntries, async () => {
+    let saved = 0;
+
+    for (const { date, mealType, recipeId } of suggestions) {
+      const key = planEntryKey(date, mealType);
+      if (await db.planEntries.get(key)) continue;
+
+      await db.planEntries.add({ key, date, mealType, recipeId, memberIds: [...memberIds] });
+      saved += 1;
+    }
+    return saved;
   });
 }
 

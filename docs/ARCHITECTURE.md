@@ -191,6 +191,33 @@ Skąd pochodzą dane i jak je dodawać, opisuje [DATA.md](DATA.md).
 - Gdyby wpis w planie wskazywał na nieistniejący przepis, ekran pokazuje komunikat i pozwala
   wybrać inne danie albo usunąć wpis, zamiast się zawiesić.
 
+### Automatyczny plan tygodnia
+
+Ekran „Ułóż tydzień” (`/kalendarz/:data/uloz`) proponuje dania do pustych miejsc w tygodniu.
+Wybiera je czysta funkcja `autoPlan` z `src/domain/plan/autoPlan.ts`, a ekran tylko pokazuje wynik i
+zapisuje go po kliknięciu.
+
+- **Zakres.** Plan dotyczy pustych miejsc. To, co użytkownik już zaplanował (także resztki z
+  gotowania na zapas), zostaje nietknięte i liczy się do różnorodności. Nic nie jest nadpisywane,
+  więc zapis (`applySuggestions`) nie wymaga potwierdzenia: wpisuje dania w jednej transakcji i
+  pomija miejsce, które w międzyczasie ktoś zajął. Jedzą wszyscy domownicy, jak przy ręcznym
+  dodaniu dania.
+- **Kogo uwzględnia.** Danie musi pasować **każdemu** domownikowi: nie może kolidować z niczyimi
+  wykluczeniami (`conflictsForMembers`) i musi dawać każdemu sensowną porcję. Gdy nic nie pasuje
+  wszystkim, miejsce zostaje puste i ekran mówi, ile takich jest. To świadomy wybór: lepiej puste
+  miejsce niż danie, którego ktoś nie może zjeść.
+- **Porcje.** `portionFit` ocenia, ile porcji dania potrzebuje osoba, żeby trafić w cel kaloryczny
+  posiłku: od 0,6 do 2,4 porcji to naturalny posiłek (ocena 1), a poza tym ocena szybko spada. Liczy
+  się najgorsza ocena w domu, a danie z oceną poniżej 0,1 nie jest proponowane wcale.
+- **Różnorodność.** Najpierw wybierane są dania użyte najmniej razy w danym posiłku, więc żadne nie
+  wraca, zanim nie zostaną wykorzystane pozostałe. Z nich odpada danie zaplanowane dzień przed lub
+  po, o ile jest jakiekolwiek inne. Danie zaplanowane w odstępie dwóch dni jest mniej prawdopodobne,
+  a ulubione bardziej (waga 1,6).
+- **Losowość.** Wybór spośród tego, co zostało, jest losowy, ale powtarzalny: zależy od ziarna
+  (generator mulberry32). Ten sam wynik daje to samo ziarno, a „Wylosuj ponownie” podnosi ziarno o
+  jeden. Dzięki temu funkcja jest czysta i da się ją testować, także statystycznie (np. jak często
+  trafia się ulubione danie).
+
 ### Przekąski
 
 - Domownik ma domyślną ilość kalorii na przekąski (`snackKcal`). Na pojedynczy dzień można ją

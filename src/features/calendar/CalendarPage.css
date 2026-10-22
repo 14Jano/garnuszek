@@ -3,7 +3,10 @@
   color: var(--color-text-muted);
 }
 
-.calendar-shopping-link {
+.calendar-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
   margin: 0 0 1rem;
 }
 

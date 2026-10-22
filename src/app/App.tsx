@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { AutoPlanPage } from '../features/calendar/AutoPlanPage';
 import { CalendarPage } from '../features/calendar/CalendarPage';
 import { RecipePickerPage } from '../features/calendar/RecipePickerPage';
 import { HouseholdPage } from '../features/household/HouseholdPage';
@@ -23,6 +24,7 @@ export function App() {
         <Route index element={<Navigate to={ROUTES.calendar} replace />} />
         <Route path={ROUTES.calendar} element={<CalendarPage />} />
         <Route path={`${ROUTES.calendar}/:date`} element={<CalendarPage />} />
+        <Route path={`${ROUTES.calendar}/:date/uloz`} element={<AutoPlanPage />} />
         <Route path={`${ROUTES.calendar}/:date/:mealType/wybierz`} element={<RecipePickerPage />} />
         <Route path={ROUTES.shopping} element={<ShoppingListPage />} />
         <Route path={`${ROUTES.shopping}/:date`} element={<ShoppingListPage />} />

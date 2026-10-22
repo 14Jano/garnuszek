@@ -112,6 +112,7 @@ describe('accessibility: every screen with data', () => {
     ['a built-in recipe', '/przepisy/szakszuka', 'Szakszuka'],
     ['the new recipe form', '/przepisy/nowy', 'Nowy przepis'],
     ['the household', '/domownicy', 'Domownicy'],
+    ['the proposal for a week', `/kalendarz/${DAY}/uloz`, 'Ułóż tydzień'],
     ['the settings', '/ustawienia', 'Ustawienia'],
     ['an address that does not exist', '/nie-ma-takiej-strony', 'Nie ma takiej strony'],
   ])('%s has no accessibility problems', async (_name, path, heading) => {
@@ -150,6 +151,8 @@ describe('accessibility: screens without data', () => {
     ['the calendar', `/kalendarz/${DAY}`],
     ['the shopping list', `/zakupy/${DAY}`],
     ['the household', '/domownicy'],
+    ['the proposal for a week without a household', `/kalendarz/${DAY}/uloz`],
+    ['a week that is not a day', '/kalendarz/nie-dzien/uloz'],
     ['the measurements of someone who is not there', '/domownicy/nikt/pomiary'],
     ['a recipe that is not there', '/przepisy/nie-ma'],
   ])('%s has no accessibility problems', async (_name, path) => {

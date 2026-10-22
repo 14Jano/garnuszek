@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { ROUTES, shoppingPath } from '../../app/navigation';
+import { ROUTES, calendarPath, shoppingPath } from '../../app/navigation';
 import { removePlanEntry, setBatchDays, setEaters } from '../../data/planRepository';
 import { setSnackOverride } from '../../data/snackRepository';
 import { MAX_BATCH_DAYS } from '../../domain/plan/batches';
@@ -95,9 +95,12 @@ export function CalendarPage() {
         }
       />
 
-      <p className="calendar-shopping-link">
+      <div className="calendar-links">
         <Link to={shoppingPath.week(selected)}>Lista zakupów na ten tydzień</Link>
-      </p>
+        {household !== undefined && household.length > 0 && (
+          <Link to={calendarPath.autoPlan(selected)}>Ułóż tydzień</Link>
+        )}
+      </div>
 
       <h2>{formatDayHeading(selected)}</h2>
 

@@ -21,6 +21,7 @@ export const householdPath = {
 
 export const calendarPath = {
   day: (date: string) => `${ROUTES.calendar}/${date}`,
+  autoPlan: (date: string) => `${ROUTES.calendar}/${date}/uloz`,
   pickRecipe: (date: string, mealType: string) => `${ROUTES.calendar}/${date}/${mealType}/wybierz`,
 } as const;
 

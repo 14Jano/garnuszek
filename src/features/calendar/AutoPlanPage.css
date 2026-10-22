@@ -1,0 +1,63 @@
+.auto-plan__summary {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.auto-plan__gaps {
+  margin: 0 0 1rem;
+  color: var(--color-text-muted);
+}
+
+.auto-plan__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+}
+
+.auto-plan__cancel {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.auto-plan__days {
+  display: grid;
+  /* The days never get wider than the screen; a long word breaks instead. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auto-plan__day {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+}
+
+.auto-plan__day h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.auto-plan__meals {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auto-plan__meal--kept,
+.auto-plan__tag {
+  color: var(--color-text-muted);
+}
+
+.auto-plan__meal--gap {
+  color: var(--color-accent-strong);
+}

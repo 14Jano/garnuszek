@@ -4,6 +4,7 @@ import type { NewRecipe } from '../domain/recipes/recipe';
 import { db } from './db';
 import { addMember, removeMember } from './memberRepository';
 import {
+  applySuggestions,
   assignRecipe,
   listPlanEntries,
   removePlanEntry,
@@ -112,6 +113,51 @@ describe('planRepository', () => {
     expect((await listPlanEntries('2026-10-21', '2026-10-21')).map((e) => e.mealType)).toEqual([
       'dinner',
     ]);
+  });
+});
+
+describe('saving suggestions', () => {
+  const suggestions = [
+    { date: '2026-10-20', mealType: 'breakfast' as const, recipeId: 'szakszuka' },
+    { date: '2026-10-20', mealType: 'lunch' as const, recipeId: 'chili-sin-carne' },
+    { date: '2026-10-21', mealType: 'dinner' as const, recipeId: 'salatka-grecka' },
+  ];
+
+  it('plans every suggestion for the given people', async () => {
+    const saved = await applySuggestions(suggestions, ['a', 'b']);
+
+    expect(saved).toBe(3);
+    expect(await listPlanEntries('2026-10-19', '2026-10-25')).toEqual([
+      { date: '2026-10-20', mealType: 'breakfast', recipeId: 'szakszuka', memberIds: ['a', 'b'] },
+      { date: '2026-10-20', mealType: 'lunch', recipeId: 'chili-sin-carne', memberIds: ['a', 'b'] },
+      { date: '2026-10-21', mealType: 'dinner', recipeId: 'salatka-grecka', memberIds: ['a', 'b'] },
+    ]);
+  });
+
+  it('never replaces a meal that is planned already', async () => {
+    await assignRecipe('2026-10-20', 'lunch', 'spaghetti-bolognese', ['a']);
+
+    const saved = await applySuggestions(suggestions, ['a', 'b']);
+
+    expect(saved).toBe(2);
+    const lunch = (await listPlanEntries('2026-10-20', '2026-10-20')).find(
+      ({ mealType }) => mealType === 'lunch',
+    );
+    expect(lunch).toMatchObject({ recipeId: 'spaghetti-bolognese', memberIds: ['a'] });
+  });
+
+  it('does nothing for no suggestions', async () => {
+    expect(await applySuggestions([], ['a'])).toBe(0);
+    expect(await listPlanEntries('2026-10-19', '2026-10-25')).toEqual([]);
+  });
+
+  it('gives each meal its own list of eaters', async () => {
+    const eaters = ['a'];
+    await applySuggestions(suggestions, eaters);
+    eaters.push('b');
+
+    const entries = await listPlanEntries('2026-10-19', '2026-10-25');
+    expect(entries.every(({ memberIds }) => memberIds.length === 1)).toBe(true);
   });
 });
 
