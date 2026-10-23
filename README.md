@@ -7,8 +7,8 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
-> **Status: stabilna wersja (v1.3).** Działają: domownicy z dziennym zapotrzebowaniem
-> kalorycznym i budżetem na przekąski, przepisy (32 dania, filtry, wyszukiwanie po składnikach
+> **Status: stabilna wersja (v1.4).** Działają: domownicy z dziennym zapotrzebowaniem
+> kalorycznym i budżetem na przekąski, przepisy (38 dań, filtry, wyszukiwanie po składnikach
 > z lodówki, ulubione i własne przepisy), kalendarz posiłków z porcjami liczonymi dla każdego
 > domownika i gotowaniem na zapas, lista zakupów z odhaczaniem i udostępnianiem, waga i pomiary
 > z wykresem postępu oraz kopia zapasowa danych. Aplikacja jest dopracowana pod kątem dostępności
@@ -42,7 +42,7 @@ systemu.
 | Kalkulator dziennego zapotrzebowania kalorycznego (logika)    | Gotowe |
 | Domownicy: profil, cel, dzienne zapotrzebowanie               | Gotowe |
 | Lokalny zapis danych w przeglądarce (IndexedDB)               | Gotowe |
-| Przepisy: 32 dania z kaloriami i makroskładnikami             | Gotowe |
+| Przepisy: 38 dań z kaloriami i makroskładnikami               | Gotowe |
 | Filtry po posiłku i diecie, wyszukiwanie, ulubione            | Gotowe |
 | Własne przepisy z automatycznym liczeniem kalorii             | Gotowe |
 | Kalendarz posiłków: widok tygodnia i dnia                     | Gotowe |
@@ -181,3 +181,7 @@ zostawiaj w zakładce **Issues**.
 ## Licencja
 
 [MIT](LICENSE). Możesz swobodnie używać, kopiować i modyfikować ten kod.
+
+Większość przepisów jest autorska. Sześć to adaptacje przepisów amerykańskiego instytutu NHLBI,
+opublikowanych w domenie publicznej na MedlinePlus, i w aplikacji mają podpis ze źródłem. Co
+sprawdzono i czego nie użyto, opisuje [docs/DATA.md](docs/DATA.md).

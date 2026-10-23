@@ -5,8 +5,10 @@ dane nie obejmują.
 
 ## Pochodzenie
 
-**Przepisy** (`src/content/recipes.ts`) są autorskie, napisane specjalnie dla Garnuszka. Nie
-pochodzą z innych aplikacji ani stron.
+**Przepisy** (`src/content/recipes.ts`) w większości są autorskie, napisane specjalnie dla
+Garnuszka, i nie pochodzą z innych aplikacji ani stron. Sześć to adaptacje przepisów amerykańskiego
+instytutu rządowego NHLBI, opisane w [następnej sekcji](#przepisy-zaadaptowane). Każdy z nich ma
+w aplikacji podpis ze źródłem (pole `origin`).
 
 **Wartości odżywcze składników** (`src/content/ingredients.ts`) to orientacyjne wartości na
 100 g, zaokrąglone i wpisane ręcznie. Odpowiadają typowym wpisom z bazy
@@ -17,6 +19,57 @@ przygotowania.
 
 Przed użyciem w celach medycznych (np. dieta w chorobie) wartości trzeba zweryfikować,
 a plan skonsultować ze specjalistą. Zobacz też zastrzeżenie w [README](../README.md).
+
+## Przepisy zaadaptowane
+
+Sześć przepisów jest przepisanych po polsku z przepisów **National Heart, Lung, and Blood
+Institute (NHLBI)**, czyli agencji rządu USA, opublikowanych na
+[MedlinePlus](https://medlineplus.gov/recipes/) (National Library of Medicine, NIH).
+
+**Dlaczego wolno.** Sprawdzono (23 października 2026, na stronach źródeł) oficjalny tekst
+[MedlinePlus o używaniu treści](https://medlineplus.gov/about/using/usingcontent/). Mówi, że prace
+rządu federalnego nie podlegają prawu autorskiemu w USA, wymienia „healthy recipes” wśród treści
+w domenie publicznej i prosi o podpis „Source: MedlinePlus, National Library of Medicine”. Ten podpis
+jest pod każdym zaadaptowanym przepisem. Strony tych przepisów mają też oznaczenie „A Heart-Healthy
+Recipe from the National Heart, Lung, and Blood Institute”. Zdjęć nie bierzemy: z MedlinePlus nie
+korzystamy z żadnych obrazów, bo te bywają chronione.
+
+| Przepis w Garnuszku                         | Oryginał (MedlinePlus)            |
+| ------------------------------------------- | --------------------------------- |
+| Placuszki owsiane z orzechami i owocami     | Oatmeal Pecan Waffles or Pancakes |
+| Kurczak z ryżem w jednym garnku             | Chicken and Rice                  |
+| Ryż z mielonym mięsem i warzywami z patelni | Quick Beef Casserole              |
+| Wołowina smażona z ziemniakami i cebulą     | Stir-Fried Beef and Potatoes      |
+| Zapiekany makaron z serem                   | Classic Macaroni and Cheese       |
+| Makaron razowy z pomidorami i mozzarellą    | Pasta Caprese                     |
+
+**Co zmieniono.** Przepisy przetłumaczono i opisano własnymi słowami, miary amerykańskie (szklanki,
+uncje, funty) przeliczono na gramy, a składniki dopasowano do katalogu: pekany to orzechy włoskie,
+jeżyny to maliny, mąka pełnoziarnista to zwykła mąka pszenna, kawałki kurczaka z kością to pierś,
+polędwica to polędwica wołowa, a odtłuszczone mleko skondensowane to zwykłe mleko. Cukier, sól,
+zioła i proszek do pieczenia zostają poza listą składników, jak w pozostałych przepisach. Pominięto
+seler. W trzech
+przepisach (mięso z ryżem, wołowina z ziemniakami, makaron z serem) zmieniono liczbę porcji na 4,
+żeby jedna porcja była pełnym posiłkiem, a nie dodatkiem. Ser w makaronie jest pełnotłusty, bo
+katalog nie ma sera o obniżonej zawartości tłuszczu, więc kalorie wychodzą wyższe niż w oryginale.
+Kalorie i makroskładniki liczy Garnuszek z własnego katalogu, a nie z oryginału.
+
+**Czego nie użyto i dlaczego.**
+
+- **Przepisy FoodHero.org**, choć MedlinePlus je pokazuje. Są z uniwersytetu stanowego (stopka
+  serwisu: „Copyright © Oregon State University”), a nie z agencji federalnej, więc nie ma pewności,
+  że wolno je przepisywać.
+- **Pozostałe 12 przepisów NHLBI z MedlinePlus.** To dodatki, desery i napoje albo wymagają
+  składników spoza katalogu (kuskus, mąka kukurydziana do pupusas, fasola mung z krewetkami).
+- **USDA (MyPlate, Team Nutrition).** Oficjalna strona [USDA](https://www.usda.gov/about-usda/policies-and-links)
+  mówi, że większość jej treści jest w domenie publicznej, ale serwisy z przepisami (fns.usda.gov,
+  myplate.gov) nie otwierały się z Polski, więc nie dało się przeczytać ich własnych warunków.
+  Niczego stamtąd nie wzięto.
+- **Przepisy z samego serwisu nhlbi.nih.gov.** Są to także prace federalne, ale nie znaleziono tam
+  własnego oświadczenia o prawach, więc wybrano te z wyraźnym oświadczeniem MedlinePlus.
+
+To ocena autorów projektu na podstawie tekstów źródeł, a nie porada prawna. Jeśli właściciel źródła
+poprosi o zmianę albo usunięcie, trzeba je wykonać.
 
 ## Jak dodać składnik
 

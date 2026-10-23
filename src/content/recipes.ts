@@ -1,4 +1,4 @@
-import type { MealType, Recipe } from '../domain/recipes/recipe';
+import type { MealType, Recipe, RecipeOrigin } from '../domain/recipes/recipe';
 
 /** Ingredient id and weight in grams. */
 type Line = readonly [ingredientId: string, grams: number];
@@ -11,6 +11,21 @@ interface RecipeSource {
   prepMinutes: number;
   ingredients: readonly Line[];
   steps: readonly string[];
+  origin?: RecipeOrigin;
+}
+
+/**
+ * The recipes of the National Heart, Lung, and Blood Institute that MedlinePlus
+ * publishes. They are works of the US government, and MedlinePlus lists its healthy
+ * recipes as public domain, asking only for this credit. See docs/DATA.md for what was
+ * checked and for the recipes that were left out.
+ */
+function nhlbi(slug: string): RecipeOrigin {
+  return {
+    author: 'National Heart, Lung, and Blood Institute (NHLBI)',
+    url: `https://medlineplus.gov/recipes/${slug}/`,
+    credit: 'Source: MedlinePlus, National Library of Medicine',
+  };
 }
 
 function recipe({ ingredients, ...rest }: RecipeSource): Recipe {
@@ -235,6 +250,33 @@ export const BUILTIN_RECIPES: readonly Recipe[] = [
       'Dorzuć szpinak i podsmaż minutę, aż zwiędnie.',
       'Podaj na grzankach z chleba.',
     ],
+  }),
+
+  recipe({
+    id: 'placuszki-owsiane-z-orzechami-i-owocami',
+    name: 'Placuszki owsiane z orzechami i owocami',
+    mealType: 'breakfast',
+    servings: 4,
+    prepMinutes: 40,
+    ingredients: [
+      ['flour', 120],
+      ['oats', 45],
+      ['walnuts', 30],
+      ['egg', 110],
+      ['milk', 375],
+      ['rapeseed-oil', 14],
+      ['strawberries', 300],
+      ['blueberries', 150],
+      ['raspberries', 145],
+    ],
+    steps: [
+      'Wymieszaj w misce mąkę (najlepiej pełnoziarnistą), płatki owsiane, 2 łyżeczki proszku do pieczenia i posiekane orzechy.',
+      'W drugiej misce roztrzep jajka z mlekiem i olejem.',
+      'Wlej mokre składniki do suchych i zamieszaj krótko, tylko do połączenia. Ciasto może być lekko grudkowate.',
+      'Smaż placuszki na rozgrzanej, lekko natłuszczonej patelni po 2–3 minuty z każdej strony, aż się zarumienią.',
+      'Truskawki pokrój na połówki i wymieszaj z malinami i jagodami. Podaj z placuszkami. Na gofry oddziel białka od żółtek, ubij białka na pianę i delikatnie dodaj do ciasta.',
+    ],
+    origin: nhlbi('oatmeal-pecan-waffles-or-pancakes'),
   }),
 
   // Obiady
@@ -494,6 +536,103 @@ export const BUILTIN_RECIPES: readonly Recipe[] = [
     ],
   }),
 
+  recipe({
+    id: 'kurczak-z-ryzem-w-jednym-garnku',
+    name: 'Kurczak z ryżem w jednym garnku',
+    mealType: 'lunch',
+    servings: 6,
+    prepMinutes: 90,
+    ingredients: [
+      ['chicken-breast', 700],
+      ['rapeseed-oil', 10],
+      ['tomato', 250],
+      ['bell-pepper', 115],
+      ['carrot', 60],
+      ['sweetcorn', 40],
+      ['onion', 80],
+      ['garlic', 6],
+      ['rice', 370],
+      ['green-peas', 70],
+      ['olives', 55],
+      ['raisins', 40],
+    ],
+    steps: [
+      'Pierś z kurczaka obsmaż na oleju w dużym garnku, aż się zarumieni.',
+      'Dodaj prawie litr wody, pokrojone pomidory, paprykę, startą marchewkę, kukurydzę, cebulę i czosnek. Dopraw solą i pieprzem, przykryj i gotuj na średnim ogniu 20–30 minut, aż kurczak będzie ugotowany.',
+      'Wyjmij kurczaka z garnka. Wsyp ryż, groszek i pokrojone oliwki, przykryj i gotuj na małym ogniu około 20 minut, aż ryż zmięknie.',
+      'Włóż kurczaka z powrotem, dodaj rodzynki i gotuj jeszcze 8 minut. Podawaj na gorąco.',
+    ],
+    origin: nhlbi('chicken-and-rice'),
+  }),
+  recipe({
+    id: 'ryz-z-mielonym-miesem-i-warzywami-z-patelni',
+    name: 'Ryż z mielonym mięsem i warzywami z patelni',
+    mealType: 'lunch',
+    servings: 4,
+    prepMinutes: 55,
+    ingredients: [
+      ['ground-beef', 225],
+      ['onion', 160],
+      ['bell-pepper', 150],
+      ['tomato', 630],
+      ['green-peas', 145],
+      ['carrot', 100],
+      ['rice', 185],
+    ],
+    steps: [
+      'Mięso mielone podsmaż na dużej patelni, aż się zrumieni, i odlej wytopiony tłuszcz.',
+      'Dodaj pokrojoną cebulę, paprykę, pomidory, marchewkę, groszek, ryż i około 350 ml wody. Dopraw solą, pieprzem i słodką papryką.',
+      'Przykryj i doprowadź do wrzenia, potem zmniejsz ogień i gotuj około 35 minut, aż ryż będzie miękki.',
+      'Podawaj na gorąco.',
+    ],
+    origin: nhlbi('quick-beef-casserole'),
+  }),
+  recipe({
+    id: 'wolowina-smazona-z-ziemniakami-i-cebula',
+    name: 'Wołowina smażona z ziemniakami i cebulą',
+    mealType: 'lunch',
+    servings: 4,
+    prepMinutes: 70,
+    ingredients: [
+      ['beef-sirloin', 680],
+      ['rapeseed-oil', 10],
+      ['garlic', 3],
+      ['onion', 300],
+      ['tomato', 180],
+      ['potato', 450],
+    ],
+    steps: [
+      'Obetnij tłuszcz z polędwicy i pokrój mięso w cienkie, drobne paski. Ziemniaki ugotuj w wodzie.',
+      'Na dużej patelni rozgrzej olej i zrumień na nim czosnek.',
+      'Dodaj mięso, łyżeczkę octu oraz szczyptę soli i pieprzu. Smaż około 6 minut, mieszając, aż mięso się zarumieni.',
+      'Dodaj cebulę pokrojoną w piórka i pomidora w plasterkach. Smaż, aż cebula się zeszkli.',
+      'Podawaj z gotowanymi ziemniakami.',
+    ],
+    origin: nhlbi('stir-fried-beef-and-potatoes'),
+  }),
+  recipe({
+    id: 'zapiekany-makaron-z-serem',
+    name: 'Zapiekany makaron z serem',
+    mealType: 'lunch',
+    servings: 4,
+    prepMinutes: 45,
+    ingredients: [
+      ['pasta', 200],
+      ['onion', 80],
+      ['milk', 125],
+      ['egg', 55],
+      ['cheese', 113],
+    ],
+    steps: [
+      'Makaron ugotuj według instrukcji na opakowaniu, bez soli w wodzie, i odcedź. Nagrzej piekarnik do 175 °C.',
+      'Cebulę posiekaj i zeszklij na lekko natłuszczonej patelni, około 3 minut.',
+      'W misce wymieszaj makaron, cebulę, mleko, roztrzepane jajko, pieprz i starty ser (najlepiej o obniżonej zawartości tłuszczu).',
+      'Przełóż do natłuszczonej formy i piecz około 25 minut, aż całość zacznie bulgotać. Odstaw na 10 minut przed podaniem.',
+      'Dobrze pasuje do brokułów gotowanych na parze i czosnku.',
+    ],
+    origin: nhlbi('classic-macaroni-and-cheese'),
+  }),
+
   // Kolacje
   recipe({
     id: 'salatka-grecka',
@@ -673,5 +812,27 @@ export const BUILTIN_RECIPES: readonly Recipe[] = [
       'Na wierzchu rozłóż pokrojoną mozzarellę.',
       'Piecz w 200 stopniach około 20 minut, aż ser się zarumieni.',
     ],
+  }),
+  recipe({
+    id: 'makaron-razowy-z-pomidorami-i-mozzarella',
+    name: 'Makaron razowy z pomidorami i mozzarellą',
+    mealType: 'dinner',
+    servings: 4,
+    prepMinutes: 20,
+    ingredients: [
+      ['wholegrain-pasta', 225],
+      ['olive-oil', 14],
+      ['tomato', 600],
+      ['mozzarella', 85],
+      ['olives', 25],
+    ],
+    steps: [
+      'Zagotuj dużo wody i ugotuj makaron najkrócej, jak podaje opakowanie (około 6 minut). Razowy makaron łatwo się rozgotowuje.',
+      'Odlej szklankę wody z gotowania, a makaron odcedź.',
+      'Włóż makaron z powrotem do garnka i wymieszaj z oliwą oraz taką ilością wody z gotowania, żeby go dobrze oblepiła.',
+      'Dodaj pomidory w kostkę, posiekaną bazylię, mozzarellę w kostkę i oliwki pokrojone w paski. Delikatnie wymieszaj.',
+      'Podaj od razu, najlepiej z zieloną sałatą.',
+    ],
+    origin: nhlbi('pasta-caprese'),
   }),
 ];

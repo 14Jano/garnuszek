@@ -89,6 +89,16 @@ export function RecipeDetailPage() {
         </ol>
       )}
 
+      {recipe.origin && (
+        <p className="recipe-details__origin">
+          Przepis na podstawie materiałów: {recipe.origin.author}. {recipe.origin.credit}.{' '}
+          <a href={recipe.origin.url} target="_blank" rel="noopener noreferrer">
+            Oryginał (po angielsku)
+          </a>
+          . Gramatury, liczbę porcji i składniki dopasowaliśmy do Garnuszka.
+        </p>
+      )}
+
       {custom && (
         <div className="recipe-details__actions">
           {deleteFailed && (

@@ -67,7 +67,11 @@ odpowiedni zrzut tak samo, żeby README nie pokazywało nieaktualnej aplikacji.
 
 ## Treści (przepisy)
 
-Przepisy w bazie muszą być autorskie albo pochodzić ze źródeł o zgodnej licencji. Nie kopiuj
+Przepisy w bazie muszą być autorskie albo pochodzić ze źródeł o zgodnej licencji. Przepis
+zaadaptowany z cudzego źródła wymaga trzech rzeczy: wyraźnego oświadczenia źródła, że wolno go użyć
+(domena publiczna albo zgodna licencja, przeczytanego na stronie źródła, a nie założonego), pola
+`origin` z podpisem, którego źródło sobie życzy, i wpisu w [docs/DATA.md](docs/DATA.md) z tym, co
+sprawdzono. Nie kopiuj
 przepisów, zdjęć ani opisów z innych aplikacji i stron. Wartości odżywcze składników pochodzą
 z otwartych baz (np. USDA FoodData Central, Open Food Facts), a źródło trzeba podać.
 

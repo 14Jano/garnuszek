@@ -15,6 +15,16 @@ export interface RecipeIngredient {
   grams: number;
 }
 
+/** Where a recipe that was adapted from someone else's work comes from. */
+export interface RecipeOrigin {
+  /** Who made the original, e.g. a government institute. */
+  author: string;
+  /** The page of the original. */
+  url: string;
+  /** The wording of the credit that the source asks for when its work is reused. */
+  credit: string;
+}
+
 export interface Recipe {
   id: string;
   name: string;
@@ -24,6 +34,8 @@ export interface Recipe {
   prepMinutes: number;
   ingredients: readonly RecipeIngredient[];
   steps: readonly string[];
+  /** Set only for built-in recipes that are adaptations. The rest are written for Garnuszek. */
+  origin?: RecipeOrigin;
 }
 
 /** What the user fills in; the id is assigned when the recipe is stored. */

@@ -160,6 +160,10 @@ Do bazy trafiają tylko rzeczy tworzone przez użytkownika.
   poprawia więc wszystkie przepisy naraz.
 - Diety (wegetariańska, wegańska, peskatariańska) są wyliczane z grup żywności składników
   (`compatibleDiets`), a nie wpisywane ręcznie, więc nie mogą się rozjechać z listą składników.
+- Przepis może mieć `origin` (autor, adres oryginału i podpis, o jaki prosi źródło). Mają go tylko
+  wbudowane przepisy zaadaptowane z cudzego źródła, a ekran przepisu pokazuje go pod krokami.
+  Pozostałe przepisy są napisane dla Garnuszka. Skąd pochodzą zaadaptowane i co sprawdzono,
+  opisuje [DATA.md](DATA.md).
 - Własne przepisy korzystają z tego samego katalogu składników. Ich identyfikatory to UUID,
   a wbudowanych to czytelne nazwy, więc kolizje są wykluczone.
 - Ekran przepisów łączy oba źródła w hooku `useRecipeEntries`: własne przepisy wchodzą na początek

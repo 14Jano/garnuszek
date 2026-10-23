@@ -131,6 +131,45 @@ describe('allergens of the ingredients', () => {
   });
 });
 
+describe('adapted recipes', () => {
+  const adapted = BUILTIN_RECIPES.filter(({ origin }) => origin);
+
+  it('are the six that come from the NHLBI recipes on MedlinePlus', () => {
+    expect(adapted.map(({ id }) => id).sort()).toEqual([
+      'kurczak-z-ryzem-w-jednym-garnku',
+      'makaron-razowy-z-pomidorami-i-mozzarella',
+      'placuszki-owsiane-z-orzechami-i-owocami',
+      'ryz-z-mielonym-miesem-i-warzywami-z-patelni',
+      'wolowina-smazona-z-ziemniakami-i-cebula',
+      'zapiekany-makaron-z-serem',
+    ]);
+  });
+
+  it.each(adapted)('$name names its source and says how to credit it', ({ origin }) => {
+    expect(origin?.author).toContain('National Heart, Lung, and Blood Institute');
+    expect(origin?.credit).toBe('Source: MedlinePlus, National Library of Medicine');
+    expect(origin?.url).toMatch(/^https:\/\/medlineplus\.gov\/recipes\/[a-z-]+\/$/);
+  });
+
+  it('point at different pages', () => {
+    const urls = adapted.map(({ origin }) => origin?.url);
+
+    expect(new Set(urls).size).toBe(urls.length);
+  });
+
+  it('never come from a source whose terms were not checked', () => {
+    // FoodHero recipes are shown on MedlinePlus too, but they are copyrighted by a university.
+    for (const { origin } of adapted) {
+      expect(origin?.url).not.toMatch(/foodhero/i);
+    }
+  });
+
+  it('leave the recipes that are written for Garnuszek without a source', () => {
+    expect(BUILTIN_RECIPES.length - adapted.length).toBeGreaterThanOrEqual(32);
+    expect(BUILTIN_RECIPES.find(({ id }) => id === 'szakszuka')?.origin).toBeUndefined();
+  });
+});
+
 describe('built-in recipes', () => {
   it('have unique ids', () => {
     const ids = BUILTIN_RECIPES.map((recipe) => recipe.id);

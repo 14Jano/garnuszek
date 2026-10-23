@@ -5,6 +5,22 @@ na [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-23
+
+### Dodano
+
+- Sześć nowych przepisów, zaadaptowanych z przepisów amerykańskiego instytutu NHLBI z MedlinePlus,
+  które są w domenie publicznej: placuszki owsiane z orzechami i owocami, kurczak z ryżem w jednym
+  garnku, ryż z mielonym mięsem i warzywami z patelni, wołowina smażona z ziemniakami i cebulą,
+  zapiekany makaron z serem oraz makaron razowy z pomidorami i mozzarellą. Trzy z nich są bez
+  nabiału i bez glutenu, czego wcześniej w katalogu brakowało. Razem jest 38 dań.
+- Podpis ze źródłem pod adaptowanym przepisem, z podziękowaniem, o które prosi MedlinePlus, i
+  odnośnikiem do oryginału. Przepisy napisane dla Garnuszka nie mają podpisu.
+- Dwa składniki w katalogu: oliwki i polędwica wołowa.
+- W [docs/DATA.md](docs/DATA.md) opis tego, co sprawdzono w oficjalnych warunkach źródeł, co
+  zmieniono w przepisach i czego nie użyto (przepisy FoodHero objęte prawami uniwersytetu, serwisy
+  USDA niedostępne z Polski). W CONTRIBUTING.md reguła, jak dodawać przepisy z cudzych źródeł.
+
 ## [1.3.0] - 2026-10-22
 
 ### Dodano

@@ -73,6 +73,7 @@ const ROWS: readonly Ingredient[] = [
   food('ground-beef', 'Mięso mielone wołowe', 'meat', 176, 20, 10, 0),
   food('ground-turkey', 'Mięso mielone z indyka', 'meat', 150, 18.7, 8.3, 0),
   food('pork-loin', 'Schab wieprzowy (surowy)', 'meat', 143, 21, 6, 0),
+  food('beef-sirloin', 'Polędwica wołowa (surowa)', 'meat', 143, 21.5, 5.8, 0),
 
   // Fish
   food('salmon', 'Łosoś (filet, surowy)', 'fish', 208, 20.4, 13.4, 0),
@@ -115,6 +116,7 @@ const ROWS: readonly Ingredient[] = [
   food('pumpkin', 'Dynia', 'vegetables', 26, 1, 0.1, 6.5),
   food('white-cabbage', 'Kapusta biała', 'vegetables', 25, 1.3, 0.1, 5.8),
   food('sweetcorn', 'Kukurydza z puszki', 'vegetables', 81, 2.3, 1, 18, can(285)),
+  food('olives', 'Oliwki (z zalewy, odsączone)', 'vegetables', 115, 0.8, 10.7, 6.3),
 
   // Fruit
   food('avocado', 'Awokado', 'fruit', 160, 2, 14.7, 8.5, piece(140)),
