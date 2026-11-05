@@ -21,7 +21,7 @@
     "generate-pwa-assets": "pwa-assets-generator"
   },
   "dependencies": {
-    "dexie": "^4.4.6",
+    "dexie": "^4.4.7",
     "dexie-react-hooks": "^4.4.0",
     "lucide-react": "^1.61.0",
     "react": "^19.3.1",
