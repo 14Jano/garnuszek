@@ -7,6 +7,8 @@ Garnuszek działa w przeglądarce jako aplikacja PWA, więc można go zainstalow
 sklepu z aplikacjami. Nie ma kont, serwera, reklam ani płatnych planów. Wszystkie funkcje są dla
 wszystkich.
 
+Wypróbuj: 14jano.github.io/garnuszek
+
 > **Status: stabilna wersja (v1.4).** Działają: domownicy z dziennym zapotrzebowaniem
 > kalorycznym i budżetem na przekąski, przepisy (38 dań, filtry, wyszukiwanie po składnikach
 > z lodówki, ulubione i własne przepisy), kalendarz posiłków z porcjami liczonymi dla każdego
